@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background"
+    android:orientation="vertical">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="@color/surface"
+        app:navigationIcon="@drawable/ic_back"
+        app:navigationIconTint="@color/primary"
+        app:title="@string/settings"
+        app:titleTextColor="@color/text_primary" />
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:fillViewport="true"
+        android:overScrollMode="never">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="16dp"
+            android:paddingBottom="32dp">
+
+            <TextView style="@style/CourseScheduleSettingsSection" android:text="@string/semester_management" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardSemester"
+                style="@style/CourseScheduleSettingsCard"
+                android:clickable="true"
+                android:focusable="true"
+                app:rippleColor="@color/primary_container">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="88dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="16dp">
+
+                    <FrameLayout
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:background="@drawable/bg_icon_tile">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_gravity="center"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_school"
+                            app:tint="@color/primary" />
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="14dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/tvCurrentSemester"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:maxLines="1"
+                            android:textColor="@color/text_primary"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            tools:text="2025-2026 第二学期" />
+
+                        <TextView
+                            android:id="@+id/tvSemesterStatus"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="12sp"
+                            tools:text="已结束 · 共20周" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_chevron_right_gray" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView style="@style/CourseScheduleSettingsSection" android:text="@string/schedule_display" />
+
+            <com.google.android.material.card.MaterialCardView style="@style/CourseScheduleSettingsCard">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <LinearLayout style="@style/CourseScheduleSettingsRow">
+                        <TextView style="@style/CourseScheduleSettingsLabel" android:text="@string/show_weekend" />
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switchShowWeekend"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:thumbTint="@color/switch_thumb_color"
+                            app:trackTint="@color/switch_track_color" />
+                    </LinearLayout>
+
+                    <View style="@style/CourseScheduleSettingsDivider" />
+
+                    <LinearLayout style="@style/CourseScheduleSettingsRow">
+                        <TextView style="@style/CourseScheduleSettingsLabel" android:text="@string/show_section_time" />
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switchShowTime"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:thumbTint="@color/switch_thumb_color"
+                            app:trackTint="@color/switch_track_color" />
+                    </LinearLayout>
+
+                    <View style="@style/CourseScheduleSettingsDivider" />
+
+                    <LinearLayout style="@style/CourseScheduleSettingsRow">
+                        <TextView style="@style/CourseScheduleSettingsLabel" android:text="@string/course_block_height" />
+                        <Spinner
+                            android:id="@+id/spinnerSectionHeight"
+                            android:layout_width="112dp"
+                            android:layout_height="44dp"
+                            android:gravity="end|center_vertical" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView style="@style/CourseScheduleSettingsSection" android:text="@string/course_reminders" />
+
+            <com.google.android.material.card.MaterialCardView style="@style/CourseScheduleSettingsCard">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <LinearLayout style="@style/CourseScheduleSettingsRow">
+                        <TextView style="@style/CourseScheduleSettingsLabel" android:text="@string/enable_reminders" />
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switchReminder"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:thumbTint="@color/switch_thumb_color"
+                            app:trackTint="@color/switch_track_color" />
+                    </LinearLayout>
+
+                    <View style="@style/CourseScheduleSettingsDivider" />
+
+                    <LinearLayout style="@style/CourseScheduleSettingsRow">
+                        <TextView style="@style/CourseScheduleSettingsLabel" android:text="@string/default_reminder_time" />
+                        <Spinner
+                            android:id="@+id/spinnerDefaultReminder"
+                            android:layout_width="132dp"
+                            android:layout_height="44dp"
+                            android:gravity="end|center_vertical" />
+                    </LinearLayout>
+
+                    <View style="@style/CourseScheduleSettingsDivider" />
+
+                    <LinearLayout
+                        android:id="@+id/cardSectionTimes"
+                        style="@style/CourseScheduleSettingsRow"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:foreground="?attr/selectableItemBackground">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+                            <TextView style="@style/CourseScheduleSettingsLabel" android:layout_width="match_parent" android:text="@string/section_time_settings" />
+                            <TextView
+                                android:id="@+id/tvSectionTimesSummary"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:textColor="@color/text_secondary"
+                                android:textSize="12sp"
+                                tools:text="第1节 08:00 · 第12节 21:45" />
+                        </LinearLayout>
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_chevron_right_gray" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView style="@style/CourseScheduleSettingsSection" android:text="@string/data_management" />
+
+            <com.google.android.material.card.MaterialCardView style="@style/CourseScheduleSettingsCard">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:id="@+id/cardExport"
+                        style="@style/CourseScheduleSettingsRow"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:foreground="?attr/selectableItemBackground">
+                        <TextView style="@style/CourseScheduleSettingsLabel" android:text="@string/export_full_backup" />
+                        <ImageView android:layout_width="20dp" android:layout_height="20dp" android:contentDescription="@null" android:src="@drawable/ic_chevron_right_gray" />
+                    </LinearLayout>
+
+                    <View style="@style/CourseScheduleSettingsDivider" />
+
+                    <LinearLayout
+                        android:id="@+id/cardBackup"
+                        style="@style/CourseScheduleSettingsRow"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:foreground="?attr/selectableItemBackground">
+                        <TextView style="@style/CourseScheduleSettingsLabel" android:text="@string/import_or_restore" />
+                        <ImageView android:layout_width="20dp" android:layout_height="20dp" android:contentDescription="@null" android:src="@drawable/ic_chevron_right_gray" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView style="@style/CourseScheduleSettingsSection" android:text="@string/about" />
+
+            <com.google.android.material.card.MaterialCardView style="@style/CourseScheduleSettingsCard">
+                <LinearLayout
+                    android:id="@+id/cardAbout"
+                    style="@style/CourseScheduleSettingsRow"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground">
+                    <TextView style="@style/CourseScheduleSettingsLabel" android:text="@string/about_app" />
+                    <ImageView android:layout_width="20dp" android:layout_height="20dp" android:contentDescription="@null" android:src="@drawable/ic_chevron_right_gray" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</LinearLayout>

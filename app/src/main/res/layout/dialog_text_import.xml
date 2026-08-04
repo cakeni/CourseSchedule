@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="每行一门课程，建议按“课程名｜教师｜教室｜星期｜节次｜周次”的顺序填写，也支持 JSON 数据。"
+        android:textSize="13sp"
+        android:textColor="@color/text_secondary"
+        android:lineSpacingExtra="4dp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="16dp" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="课程表文本"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etImportText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textMultiLine"
+            android:minLines="5"
+            android:maxLines="10"
+            android:gravity="top" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+</LinearLayout>

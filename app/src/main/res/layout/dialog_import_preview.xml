@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingHorizontal="24dp"
+    android:paddingBottom="8dp">
+
+    <TextView
+        android:id="@+id/tvImportSummary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_import_summary"
+        android:lineSpacingExtra="3dp"
+        android:padding="14dp"
+        android:textColor="@color/text_primary"
+        android:textSize="14sp" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="180dp"
+        android:layout_marginTop="12dp"
+        android:background="@color/surface_variant"
+        android:fillViewport="true">
+
+        <TextView
+            android:id="@+id/tvImportCourses"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:lineSpacingExtra="5dp"
+            android:padding="14dp"
+            android:textColor="@color/text_secondary"
+            android:textSize="13sp" />
+    </ScrollView>
+
+    <com.google.android.material.checkbox.MaterialCheckBox
+        android:id="@+id/checkIncludeConflicts"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/include_conflict_courses" />
+
+    <com.google.android.material.checkbox.MaterialCheckBox
+        android:id="@+id/checkRestoreMetadata"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/restore_backup_metadata" />
+
+    <com.google.android.material.checkbox.MaterialCheckBox
+        android:id="@+id/checkReplaceExisting"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/replace_current_semester_courses" />
+
+</LinearLayout>

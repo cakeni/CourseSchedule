@@ -1,0 +1,31 @@
+# Android Studio and local tooling
+.idea/
+*.iml
+.gradle/
+.kotlin/
+local.properties
+.externalNativeBuild/
+.cxx/
+captures/
+
+# Build outputs
+**/build/
+*.apk
+*.aab
+
+# Local runtimes and Codex working files
+.jdk*/
+.codex-tmp/
+
+# Signing credentials and environment files
+*.jks
+*.keystore
+keystore.properties
+signing.properties
+.env
+.env.*
+
+# Operating-system files
+.DS_Store
+Thumbs.db
+desktop.ini

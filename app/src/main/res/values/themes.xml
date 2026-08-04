@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.CourseSchedule.Base" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <!-- Primary color -->
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryVariant">@color/primary_variant</item>
+        <item name="colorOnPrimary">@color/on_primary</item>
+
+        <!-- Secondary color -->
+        <item name="colorSecondary">@color/secondary</item>
+        <item name="colorSecondaryVariant">@color/secondary_variant</item>
+        <item name="colorOnSecondary">@color/on_secondary</item>
+
+        <!-- Background -->
+        <item name="android:colorBackground">@color/background</item>
+        <item name="colorOnBackground">@color/on_background</item>
+
+        <!-- Surface -->
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorOnSurface">@color/on_surface</item>
+
+        <!-- Error -->
+        <item name="colorError">@color/error</item>
+        <item name="colorOnError">@color/on_primary</item>
+
+        <!-- Status bar -->
+        <item name="android:statusBarColor">@color/surface</item>
+        <item name="android:navigationBarColor">@color/surface</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:fontFamily">sans</item>
+    </style>
+
+    <style name="Theme.CourseSchedule" parent="Theme.CourseSchedule.Base" />
+
+    <style name="CourseScheduleDayLabel">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">50dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_marginHorizontal">1dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:lineSpacingExtra">1dp</item>
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:textSize">11sp</item>
+    </style>
+
+    <style name="CourseScheduleSectionTitle">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingBottom">10dp</item>
+        <item name="android:textColor">@color/primary</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="CourseScheduleFieldLabel">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="CourseScheduleChoiceChip" parent="Widget.MaterialComponents.Chip.Choice">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:minWidth">0dp</item>
+        <item name="ensureMinTouchTargetSize">false</item>
+        <item name="chipMinHeight">40dp</item>
+        <item name="chipCornerRadius">8dp</item>
+        <item name="chipStartPadding">8dp</item>
+        <item name="chipEndPadding">8dp</item>
+        <item name="textStartPadding">2dp</item>
+        <item name="textEndPadding">2dp</item>
+    </style>
+
+    <style name="CourseScheduleSettingsSection">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingTop">22dp</item>
+        <item name="android:paddingBottom">8dp</item>
+        <item name="android:textColor">@color/primary</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="CourseScheduleSettingsCard" parent="Widget.MaterialComponents.CardView">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="cardBackgroundColor">@color/surface</item>
+        <item name="cardCornerRadius">8dp</item>
+        <item name="cardElevation">0dp</item>
+        <item name="strokeColor">@color/divider</item>
+        <item name="strokeWidth">1dp</item>
+    </style>
+
+    <style name="CourseScheduleSettingsRow">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">64dp</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:paddingHorizontal">16dp</item>
+    </style>
+
+    <style name="CourseScheduleSettingsLabel">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">15sp</item>
+    </style>
+
+    <style name="CourseScheduleSettingsDivider">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:layout_marginStart">16dp</item>
+        <item name="android:background">@color/divider</item>
+    </style>
+
+    <!-- 课程卡片样式 -->
+    <style name="CourseCardStyle">
+        <item name="cardCornerRadius">4dp</item>
+        <item name="cardElevation">2dp</item>
+    </style>
+
+    <!-- 按钮样式 -->
+    <style name="PrimaryButton" parent="Widget.MaterialComponents.Button">
+        <item name="backgroundTint">@color/primary</item>
+    </style>
+
+    <style name="SecondaryButton" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="strokeColor">@color/primary</item>
+        <item name="android:textColor">@color/primary</item>
+    </style>
+</resources>

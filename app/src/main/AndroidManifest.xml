@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- 权限声明 -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+
+    <application
+        android:name=".CourseScheduleApp"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.CourseSchedule"
+        tools:targetApi="31">
+
+        <!-- 主界面 -->
+        <activity
+            android:name=".ui.MainActivity"
+            android:exported="true"
+            android:theme="@style/Theme.CourseSchedule">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- 添加/编辑课程 -->
+        <activity
+            android:name=".ui.addcourse.AddCourseActivity"
+            android:label="@string/add_course"
+            android:theme="@style/Theme.CourseSchedule" />
+
+        <!-- 导入课程 -->
+        <activity
+            android:name=".ui.importdata.ImportActivity"
+            android:label="@string/import_course"
+            android:theme="@style/Theme.CourseSchedule" />
+
+        <!-- 设置 -->
+        <activity
+            android:name=".ui.settings.SettingsActivity"
+            android:label="@string/settings"
+            android:theme="@style/Theme.CourseSchedule" />
+
+        <!-- 提醒广播接收器 -->
+        <receiver
+            android:name=".utils.AlarmReceiver"
+            android:enabled="true"
+            android:exported="false" />
+
+        <!-- 开机启动接收器 -->
+        <receiver
+            android:name=".utils.BootReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+    </application>
+</manifest>

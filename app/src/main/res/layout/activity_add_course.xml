@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
+        android:background="@color/surface"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:navigationIcon="@drawable/ic_back"
+        app:navigationIconTint="@color/primary"
+        app:titleTextColor="@color/text_primary" />
+
+    <View
+        android:id="@+id/toolbarDivider"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:background="@color/divider"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbar" />
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/formScroll"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:clipToPadding="false"
+        android:fillViewport="true"
+        android:overScrollMode="never"
+        app:layout_constraintBottom_toTopOf="@id/bottomActions"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbarDivider">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="16dp"
+            android:paddingTop="12dp"
+            android:paddingBottom="24dp">
+
+            <TextView
+                style="@style/CourseScheduleSectionTitle"
+                android:text="@string/basic_information" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilCourseName"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/course_name"
+                app:boxBackgroundColor="@color/surface">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etCourseName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:imeOptions="actionNext"
+                    android:inputType="textCapSentences"
+                    android:maxLines="1" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:hint="@string/teacher_name"
+                app:boxBackgroundColor="@color/surface">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etTeacher"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:imeOptions="actionNext"
+                    android:inputType="textPersonName"
+                    android:maxLines="1" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:hint="@string/classroom"
+                app:boxBackgroundColor="@color/surface">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etClassroom"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:imeOptions="actionDone"
+                    android:inputType="textCapSentences"
+                    android:maxLines="1" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView
+                style="@style/CourseScheduleSectionTitle"
+                android:layout_marginTop="24dp"
+                android:text="@string/class_time" />
+
+            <TextView
+                style="@style/CourseScheduleFieldLabel"
+                android:text="@string/day_of_week" />
+
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:clipToPadding="false"
+                android:scrollbars="none">
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/chipGroupDay"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:chipSpacingHorizontal="4dp"
+                    app:selectionRequired="true"
+                    app:singleLine="true"
+                    app:singleSelection="true">
+
+                    <com.google.android.material.chip.Chip android:id="@+id/chipMon" style="@style/CourseScheduleChoiceChip" android:text="周一" />
+                    <com.google.android.material.chip.Chip android:id="@+id/chipTue" style="@style/CourseScheduleChoiceChip" android:text="周二" />
+                    <com.google.android.material.chip.Chip android:id="@+id/chipWed" style="@style/CourseScheduleChoiceChip" android:text="周三" />
+                    <com.google.android.material.chip.Chip android:id="@+id/chipThu" style="@style/CourseScheduleChoiceChip" android:text="周四" />
+                    <com.google.android.material.chip.Chip android:id="@+id/chipFri" style="@style/CourseScheduleChoiceChip" android:text="周五" />
+                    <com.google.android.material.chip.Chip android:id="@+id/chipSat" style="@style/CourseScheduleChoiceChip" android:text="周六" />
+                    <com.google.android.material.chip.Chip android:id="@+id/chipSun" style="@style/CourseScheduleChoiceChip" android:text="周日" />
+                </com.google.android.material.chip.ChipGroup>
+            </HorizontalScrollView>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:orientation="horizontal">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilStartSection"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="@string/start_section"
+                    app:boxBackgroundColor="@color/surface">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/spinnerStartSection"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <Space android:layout_width="12dp" android:layout_height="1dp" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilEndSection"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="@string/end_section"
+                    app:boxBackgroundColor="@color/surface">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/spinnerEndSection"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none" />
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:orientation="horizontal">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilStartWeek"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="@string/start_week"
+                    app:boxBackgroundColor="@color/surface">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/spinnerStartWeek"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <Space android:layout_width="12dp" android:layout_height="1dp" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilEndWeek"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="@string/end_week"
+                    app:boxBackgroundColor="@color/surface">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/spinnerEndWeek"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none" />
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+
+            <TextView
+                style="@style/CourseScheduleFieldLabel"
+                android:layout_marginTop="14dp"
+                android:text="@string/week_type" />
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/chipGroupWeekType"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                app:chipSpacingHorizontal="6dp"
+                app:selectionRequired="true"
+                app:singleLine="true"
+                app:singleSelection="true">
+
+                <com.google.android.material.chip.Chip android:id="@+id/chipEveryWeek" style="@style/CourseScheduleChoiceChip" android:checked="true" android:text="@string/every_week" />
+                <com.google.android.material.chip.Chip android:id="@+id/chipOddWeek" style="@style/CourseScheduleChoiceChip" android:text="@string/odd_week" />
+                <com.google.android.material.chip.Chip android:id="@+id/chipEvenWeek" style="@style/CourseScheduleChoiceChip" android:text="@string/even_week" />
+            </com.google.android.material.chip.ChipGroup>
+
+            <TextView
+                style="@style/CourseScheduleSectionTitle"
+                android:layout_marginTop="24dp"
+                android:text="@string/display_and_reminder" />
+
+            <TextView
+                style="@style/CourseScheduleFieldLabel"
+                android:text="@string/course_color" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerColors"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="6dp"
+                android:clipToPadding="false"
+                android:overScrollMode="never"
+                android:paddingHorizontal="2dp"
+                android:scrollbars="none"
+                tools:itemCount="8"
+                tools:listitem="@layout/item_color" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:hint="@string/reminder"
+                app:boxBackgroundColor="@color/surface">
+
+                <AutoCompleteTextView
+                    android:id="@+id/spinnerReminder"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:hint="@string/note"
+                app:boxBackgroundColor="@color/surface">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etNote"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="top"
+                    android:inputType="textMultiLine|textCapSentences"
+                    android:maxLines="4"
+                    android:minLines="2" />
+            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <LinearLayout
+        android:id="@+id/bottomActions"
+        android:layout_width="0dp"
+        android:layout_height="76dp"
+        android:background="@color/surface"
+        android:elevation="8dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="10dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnDelete"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="12dp"
+            android:text="@string/delete"
+            android:textColor="@color/error"
+            android:visibility="gone"
+            app:strokeColor="@color/error"
+            tools:visibility="visible" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSave"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="@string/save_course"
+            app:cornerRadius="8dp"
+            app:icon="@drawable/ic_check"
+            app:iconGravity="textStart" />
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

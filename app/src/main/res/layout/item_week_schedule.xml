@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/surface"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/weekDayHeader"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="@color/surface"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingBottom="4dp">
+
+        <TextView
+            android:layout_width="48dp"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:lineSpacingExtra="1dp"
+            android:text="@string/section_time_short"
+            android:textColor="@color/text_tertiary"
+            android:textSize="9sp" />
+
+        <TextView android:id="@+id/tvDay1" style="@style/CourseScheduleDayLabel" android:text="周一" />
+        <TextView android:id="@+id/tvDay2" style="@style/CourseScheduleDayLabel" android:text="周二" />
+        <TextView android:id="@+id/tvDay3" style="@style/CourseScheduleDayLabel" android:text="周三" />
+        <TextView android:id="@+id/tvDay4" style="@style/CourseScheduleDayLabel" android:text="周四" />
+        <TextView android:id="@+id/tvDay5" style="@style/CourseScheduleDayLabel" android:text="周五" />
+        <TextView android:id="@+id/tvDay6" style="@style/CourseScheduleDayLabel" android:text="周六" />
+        <TextView android:id="@+id/tvDay7" style="@style/CourseScheduleDayLabel" android:text="周日" />
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@color/surface">
+
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/scheduleScroll"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:fillViewport="false"
+            android:overScrollMode="never"
+            android:paddingBottom="88dp">
+
+            <com.courseschedule.view.CourseTableView
+                android:id="@+id/courseTableView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </androidx.core.widget.NestedScrollView>
+
+        <LinearLayout
+            android:id="@+id/emptyState"
+            android:layout_width="280dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|center_horizontal"
+            android:layout_marginTop="96dp"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <FrameLayout
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:background="@drawable/bg_empty_icon">
+
+                <ImageView
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_today"
+                    app:tint="@color/primary" />
+            </FrameLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:text="@string/no_courses_this_week"
+                android:textColor="@color/text_primary"
+                android:textSize="17sp"
+                android:textStyle="bold" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnEmptyAdd"
+                android:layout_width="wrap_content"
+                android:layout_height="44dp"
+                android:layout_marginTop="16dp"
+                android:minWidth="128dp"
+                android:text="@string/add_course"
+                android:textAllCaps="false"
+                android:textSize="14sp"
+                app:backgroundTint="@color/primary"
+                app:cornerRadius="8dp"
+                app:icon="@drawable/ic_add"
+                app:iconGravity="textStart"
+                app:iconTint="@color/on_primary" />
+        </LinearLayout>
+    </FrameLayout>
+</LinearLayout>

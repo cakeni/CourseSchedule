@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">课程表</string>
+    <string name="my_schedule">我的课表</string>
+    <string name="schedule">课表</string>
+
+    <!-- 通用 -->
+    <string name="ok">确定</string>
+    <string name="cancel">取消</string>
+    <string name="close">关闭</string>
+    <string name="save">保存</string>
+    <string name="delete">删除</string>
+    <string name="edit">编辑</string>
+    <string name="add">添加</string>
+    <string name="confirm">确认</string>
+    <string name="not_set">未填写</string>
+    <string name="back">返回</string>
+    <string name="previous_week">上一周</string>
+    <string name="next_week">下一周</string>
+    <string name="search">搜索</string>
+    <string name="settings">设置</string>
+    <string name="about">关于</string>
+
+    <!-- 课程相关 -->
+    <string name="add_course">添加课程</string>
+    <string name="save_course">保存课程</string>
+    <string name="saving">正在保存…</string>
+    <string name="save_success">保存成功</string>
+    <string name="delete_success">课程已删除</string>
+    <string name="basic_information">基本信息</string>
+    <string name="class_time">上课时间</string>
+    <string name="display_and_reminder">显示与提醒</string>
+    <string name="edit_course">编辑课程</string>
+    <string name="delete_course">删除课程</string>
+    <string name="course_name">课程名称</string>
+    <string name="teacher_name">教师姓名</string>
+    <string name="classroom">教室/地点</string>
+    <string name="course_teacher_inline">师 %s</string>
+    <string name="teacher_not_provided">原文件未提供</string>
+    <string name="teacher_not_provided_hint">这份课表文件没有包含任课教师姓名，可点“编辑”手动补充。</string>
+    <string name="course_time_detail">%1$s · 第%2$d-%3$d节</string>
+    <string name="course_week_detail">%1$s · %2$s</string>
+    <string name="week_range">上课周次</string>
+    <string name="day_of_week">星期</string>
+    <string name="start_section">开始节次</string>
+    <string name="end_section">结束节次</string>
+    <string name="start_week">开始周次</string>
+    <string name="end_week">结束周次</string>
+    <string name="week_type">周类型</string>
+    <string name="every_week">每周</string>
+    <string name="odd_week">单周</string>
+    <string name="even_week">双周</string>
+    <string name="course_color">课程颜色</string>
+    <string name="note">备注</string>
+    <string name="reminder">提醒</string>
+    <string name="no_reminder">不提醒</string>
+    <string name="reminder_before">课前提醒</string>
+    <array name="reminder_options">
+        <item>不提醒</item>
+        <item>5 分钟</item>
+        <item>10 分钟</item>
+        <item>15 分钟</item>
+        <item>30 分钟</item>
+        <item>1 小时</item>
+    </array>
+
+    <!-- 星期 -->
+    <array name="weekdays">
+        <item>周一</item>
+        <item>周二</item>
+        <item>周三</item>
+        <item>周四</item>
+        <item>周五</item>
+        <item>周六</item>
+        <item>周日</item>
+    </array>
+
+    <!-- 节次 -->
+    <string name="section_format">第%d节</string>
+    <string name="section_range_format">第%1$d-%2$d节</string>
+    <string name="week_range_format">第%1$d-%2$d周</string>
+    <string name="week_range_with_type_format">第%1$d-%2$d周(%3$s)</string>
+
+    <!-- 时间 -->
+    <string name="morning">上午</string>
+    <string name="afternoon">下午</string>
+    <string name="evening">晚上</string>
+
+    <!-- 导入 -->
+    <string name="import_course">导入课程</string>
+    <string name="choose_import_method">选择导入方式</string>
+    <string name="import_target_format">将导入到 %1$s</string>
+    <string name="import_from_file">从文件导入</string>
+    <string name="import_from_text">从文本导入</string>
+    <string name="file_import_formats">Excel（.xlsx）、JSON、CSV、HTML 和文本</string>
+    <string name="text_import_description">粘贴课程信息，确认预览后再写入</string>
+    <string name="import_tips_title">导入前请确认</string>
+    <string name="import_tips">Excel 首行建议包含课程名称、星期、开始节次和结束节次。导入前会预览并检查重复与时间冲突，不会直接覆盖已有课程。</string>
+    <string name="import_action">导入</string>
+    <string name="input_schedule_text">请输入课程表文本</string>
+    <string name="no_courses_parsed">没有识别到可导入的课程</string>
+    <string name="import_count_success">成功导入 %1$d 门课程</string>
+    <string name="import_from_qrcode">从二维码导入</string>
+    <string name="import_success">导入成功</string>
+    <string name="import_failed">导入失败</string>
+    <string name="import_failed_detail">文件内容无法识别，请检查格式后重试。</string>
+    <string name="select_file">选择文件</string>
+    <string name="supported_formats">支持的格式：Excel（.xlsx）、JSON、CSV、HTML、纯文本</string>
+    <string name="preview_import">解析并预览</string>
+    <string name="import_preview_title">%1$s 导入预览</string>
+    <string name="import_preview_summary">可导入 %1$d 门　冲突 %2$d 门\n重复 %3$d 门　无效 %4$d 门</string>
+    <string name="import_metadata_summary">信息完整度：地点 %1$d/%2$d　教师 %3$d/%2$d</string>
+    <string name="include_conflict_courses">仍然导入时间冲突的课程</string>
+    <string name="restore_backup_metadata">同时恢复学期信息和应用设置</string>
+    <string name="replace_current_semester_courses">清空当前学期后导入（可撤销）</string>
+    <string name="confirm_import">确认导入</string>
+    <string name="no_courses_selected">没有选中可导入的课程</string>
+    <string name="import_nothing_detail">已识别内容中有 %1$d 门重复课程、%2$d 门无效课程。</string>
+    <string name="conflict_marker">[冲突]</string>
+    <string name="duplicate_marker">[重复]</string>
+    <string name="import_more_courses">\n…以及更多课程</string>
+    <string name="undo">撤销</string>
+    <string name="import_undone">本次导入已撤销</string>
+
+    <!-- 导出 -->
+    <string name="export_course">导出课程</string>
+    <string name="export_success">导出成功</string>
+    <string name="export_failed">导出失败</string>
+
+    <!-- 学期 -->
+    <string name="semester_management">学期管理</string>
+    <string name="add_semester">添加学期</string>
+    <string name="edit_semester">编辑学期</string>
+    <string name="delete_semester">删除学期</string>
+    <string name="semester_name">学期名称</string>
+    <string name="start_date">开学日期</string>
+    <string name="total_weeks">总周数</string>
+    <string name="current_semester">当前学期</string>
+    <string name="set_as_current">设为当前学期</string>
+    <string name="semester_settings">学期设置</string>
+    <string name="semester_saved">学期信息已保存</string>
+    <string name="semester_switched">当前学期已切换</string>
+    <string name="semester_deleted">学期及其课程已删除</string>
+    <string name="input_semester_name">请输入学期名称</string>
+    <string name="no_current_semester">暂无当前学期</string>
+    <string name="week_count_format">%d 周</string>
+    <string name="create_new_semester">+ 新建学期</string>
+    <string name="current_semester_item">%1$s（当前）</string>
+    <string name="semester_active_status">第 %1$d 周 · 共 %2$d 周</string>
+    <string name="semester_not_started">尚未开学</string>
+    <string name="semester_finished">学期已结束</string>
+
+    <!-- 周次 -->
+    <string name="week_format">第%d周</string>
+    <string name="week_one">第1周</string>
+    <string name="section_time_short">节次\n时间</string>
+    <string name="current_week">当前周</string>
+    <string name="select_week">选择周次</string>
+    <string name="vacation">假期</string>
+    <string name="browsing_week">浏览第%d周</string>
+    <string name="week_context_format">%1$s · %2$s-%3$s</string>
+    <string name="week_context_courses_format">%1$s · %2$s-%3$s · %4$d门课</string>
+    <string name="semester_in_progress">学期中</string>
+    <string name="vacation_browsing_week">假期 · 浏览第%d周</string>
+    <string name="before_semester_browsing_week">未开学 · 浏览第%d周</string>
+
+    <!-- 提示 -->
+    <string name="course_conflict">课程时间与已有课程重叠，请调整后再保存。</string>
+    <string name="course_conflict_title">课程时间冲突</string>
+    <string name="delete_confirm">确定要删除吗？</string>
+    <string name="delete_course_confirm">确定要删除这门课程吗？</string>
+    <string name="delete_semester_confirm">确定要删除这个学期吗？学期下的所有课程也将被删除。</string>
+    <string name="input_course_name">请输入课程名称</string>
+    <string name="input_valid_time">请输入有效的时间</string>
+    <string name="end_before_start">结束节次不能早于开始节次</string>
+    <string name="end_week_before_start">结束周次不能早于开始周次</string>
+    <string name="semester_loading">学期信息正在加载，请稍后重试</string>
+    <string name="no_courses">暂无课程</string>
+    <string name="no_courses_this_week">这一周还没有课程</string>
+    <string name="add_course_hint">点击右下角按钮添加课程</string>
+    <string name="course_accessibility_description">%1$s，%2$s，第%3$d到%4$d节，第%5$d到%6$d周，%7$s，教师%8$s，地点%9$s</string>
+
+    <!-- 设置 -->
+    <string name="schedule_display">课表显示</string>
+    <string name="show_weekend">显示周末</string>
+    <string name="show_section_time">显示节次时间</string>
+    <string name="course_block_height">课程块高度</string>
+    <string name="height_dp_format">%d dp</string>
+    <string name="course_reminders">课程提醒</string>
+    <string name="enable_reminders">启用课程提醒</string>
+    <string name="default_reminder_time">默认提前时间</string>
+    <string name="section_time_settings">每节课开始时间</string>
+    <string name="section_start_time">第 %d 节开始时间</string>
+    <string name="section_times_summary">第1节 %1$s · 第12节 %2$s</string>
+    <string name="restore_defaults">恢复默认</string>
+    <string name="invalid_section_times">请使用 24 小时制，并保证时间依次递增</string>
+    <string name="data_management">数据管理</string>
+    <string name="export_full_backup">导出当前学期完整备份</string>
+    <string name="import_or_restore">导入或恢复数据</string>
+    <string name="about_app">关于应用</string>
+
+    <!-- 关于 -->
+    <string name="app_version">版本 %s</string>
+    <string name="app_description">一款简洁美观的课程表应用</string>
+    <string name="github_link">GitHub</string>
+    <string name="about_course_schedule">关于课程表</string>
+    <string name="about_message">课程表 v%1$s\n\n专注于日常排课与查看，支持周视图、课程提醒、Excel 与文本文件导入，以及 JSON 数据导出。</string>
+</resources>
