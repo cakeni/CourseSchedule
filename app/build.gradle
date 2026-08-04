@@ -52,9 +52,9 @@ dependencies {
     implementation 'androidx.viewpager2:viewpager2:1.0.0'
 
     // Room Database
-    implementation 'androidx.room:room-runtime:2.6.0'
-    implementation 'androidx.room:room-ktx:2.6.0'
-    kapt 'androidx.room:room-compiler:2.6.0'
+    implementation 'androidx.room:room-runtime:2.8.4'
+    implementation 'androidx.room:room-ktx:2.8.4'
+    kapt 'androidx.room:room-compiler:2.8.4'
 
     // Lifecycle & ViewModel
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2'
