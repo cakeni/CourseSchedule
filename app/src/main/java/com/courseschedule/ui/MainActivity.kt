@@ -513,6 +513,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
+        menu.findItem(R.id.action_today)?.actionView?.setOnClickListener {
+            goToCurrentWeek()
+        }
         return true
     }
 
@@ -523,12 +526,16 @@ class MainActivity : AppCompatActivity() {
                 true
             }
             R.id.action_today -> {
-                viewModel.refreshSemesterStatus()
-                semesterWeekStatus?.week?.let { selectWeek(it, smoothScroll = true) }
+                goToCurrentWeek()
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    private fun goToCurrentWeek() {
+        viewModel.refreshSemesterStatus()
+        semesterWeekStatus?.week?.let { selectWeek(it, smoothScroll = true) }
     }
 
     override fun onResume() {

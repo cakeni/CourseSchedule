@@ -4,6 +4,7 @@ import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Build
+import app.rive.runtime.kotlin.core.Rive
 
 /**
  * 应用程序类
@@ -12,10 +13,19 @@ class CourseScheduleApp : Application() {
 
     companion object {
         const val NOTIFICATION_CHANNEL_ID = "course_reminder_channel"
+
+        @Volatile
+        var isRiveAvailable = false
+            private set
     }
 
     override fun onCreate() {
         super.onCreate()
+
+        isRiveAvailable = runCatching {
+            Rive.init(this)
+            true
+        }.getOrDefault(false)
 
         // 创建通知渠道
         createNotificationChannel()

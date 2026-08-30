@@ -10,8 +10,8 @@
 
     <item
         android:id="@+id/action_today"
-        android:icon="@drawable/ic_today"
         android:title="@string/current_week"
+        app:actionLayout="@layout/action_duck_mascot"
         app:showAsAction="always" />
 
 </menu>
