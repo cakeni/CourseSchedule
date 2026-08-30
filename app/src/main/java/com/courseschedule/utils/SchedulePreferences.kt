@@ -25,6 +25,10 @@ class SchedulePreferences(context: Context) {
         get() = prefs.getBoolean(KEY_SHOW_TIME, true)
         set(value) = prefs.edit().putBoolean(KEY_SHOW_TIME, value).apply()
 
+    var showInactiveCourses: Boolean
+        get() = prefs.getBoolean(KEY_SHOW_INACTIVE_COURSES, true)
+        set(value) = prefs.edit().putBoolean(KEY_SHOW_INACTIVE_COURSES, value).apply()
+
     var sectionHeightDp: Int
         get() = prefs.getInt(KEY_SECTION_HEIGHT, 64)
         set(value) = prefs.edit().putInt(KEY_SECTION_HEIGHT, value).apply()
@@ -53,6 +57,7 @@ class SchedulePreferences(context: Context) {
     fun snapshot() = SettingsSnapshot(
         showWeekend = showWeekend,
         showTime = showTime,
+        showInactiveCourses = showInactiveCourses,
         sectionHeightDp = sectionHeightDp,
         reminderEnabled = reminderEnabled,
         defaultReminderMinutes = defaultReminderMinutes,
@@ -66,6 +71,7 @@ class SchedulePreferences(context: Context) {
         prefs.edit()
             .putBoolean(KEY_SHOW_WEEKEND, snapshot.showWeekend)
             .putBoolean(KEY_SHOW_TIME, snapshot.showTime)
+            .putBoolean(KEY_SHOW_INACTIVE_COURSES, snapshot.showInactiveCourses)
             .putInt(KEY_SECTION_HEIGHT, snapshot.sectionHeightDp.coerceIn(56, 104))
             .putBoolean(KEY_REMINDER_ENABLED, snapshot.reminderEnabled)
             .putInt(KEY_DEFAULT_REMINDER, snapshot.defaultReminderMinutes)
@@ -78,6 +84,7 @@ class SchedulePreferences(context: Context) {
         const val PREFS_NAME = "settings"
         private const val KEY_SHOW_WEEKEND = "show_weekend"
         private const val KEY_SHOW_TIME = "show_time"
+        private const val KEY_SHOW_INACTIVE_COURSES = "show_inactive_courses"
         private const val KEY_SECTION_HEIGHT = "section_height_dp"
         private const val KEY_COMPACT_DENSITY_MIGRATED = "compact_density_migrated_v2"
         private const val KEY_REMINDER_ENABLED = "reminder_enabled"

@@ -24,10 +24,12 @@
         <item name="colorOnError">@color/on_primary</item>
 
         <!-- Status bar -->
-        <item name="android:statusBarColor">@color/surface</item>
-        <item name="android:navigationBarColor">@color/surface</item>
+        <item name="android:statusBarColor">@color/background</item>
+        <item name="android:navigationBarColor">@color/navigation_surface</item>
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:fontFamily">sans</item>
+        <item name="android:windowActivityTransitions">false</item>
+        <item name="android:windowBackground">@color/background</item>
     </style>
 
     <style name="Theme.CourseSchedule" parent="Theme.CourseSchedule.Base" />
@@ -40,7 +42,18 @@
         <item name="android:gravity">center</item>
         <item name="android:lineSpacingExtra">1dp</item>
         <item name="android:textColor">@color/text_secondary</item>
-        <item name="android:textSize">11sp</item>
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <style name="CourseScheduleToolbarTitle" parent="TextAppearance.MaterialComponents.Headline5">
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">26sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="CourseScheduleToolbarSubtitle" parent="TextAppearance.MaterialComponents.Body2">
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:textSize">14sp</item>
     </style>
 
     <style name="CourseScheduleSectionTitle">
@@ -76,26 +89,25 @@
     <style name="CourseScheduleSettingsSection">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:paddingTop">22dp</item>
-        <item name="android:paddingBottom">8dp</item>
-        <item name="android:textColor">@color/primary</item>
-        <item name="android:textSize">13sp</item>
-        <item name="android:textStyle">bold</item>
+        <item name="android:paddingTop">20dp</item>
+        <item name="android:paddingBottom">7dp</item>
+        <item name="android:paddingStart">4dp</item>
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:textSize">12sp</item>
     </style>
 
     <style name="CourseScheduleSettingsCard" parent="Widget.MaterialComponents.CardView">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="cardBackgroundColor">@color/surface</item>
-        <item name="cardCornerRadius">8dp</item>
+        <item name="cardCornerRadius">20dp</item>
         <item name="cardElevation">0dp</item>
-        <item name="strokeColor">@color/divider</item>
-        <item name="strokeWidth">1dp</item>
+        <item name="strokeWidth">0dp</item>
     </style>
 
     <style name="CourseScheduleSettingsRow">
         <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">64dp</item>
+        <item name="android:layout_height">62dp</item>
         <item name="android:gravity">center_vertical</item>
         <item name="android:orientation">horizontal</item>
         <item name="android:paddingHorizontal">16dp</item>
@@ -114,6 +126,19 @@
         <item name="android:layout_height">1dp</item>
         <item name="android:layout_marginStart">16dp</item>
         <item name="android:background">@color/divider</item>
+    </style>
+
+    <style name="ShapeAppearance.CourseSchedule.NavigationIndicator" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+
+    <style name="CourseScheduleBottomNavigationActiveIndicator" parent="">
+        <item name="android:width">58dp</item>
+        <item name="android:height">34dp</item>
+        <item name="android:color">@color/primary_container</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.CourseSchedule.NavigationIndicator</item>
+        <item name="marginHorizontal">4dp</item>
     </style>
 
     <!-- 课程卡片样式 -->

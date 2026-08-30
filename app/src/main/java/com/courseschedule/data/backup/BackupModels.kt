@@ -20,6 +20,7 @@ data class SemesterSnapshot(
 data class SettingsSnapshot(
     val showWeekend: Boolean = true,
     val showTime: Boolean = true,
+    val showInactiveCourses: Boolean = true,
     val sectionHeightDp: Int = 72,
     val reminderEnabled: Boolean = true,
     val defaultReminderMinutes: Int = 15,

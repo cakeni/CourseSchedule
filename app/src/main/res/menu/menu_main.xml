@@ -3,6 +3,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/action_add_course"
+        android:icon="@drawable/ic_add"
+        android:title="@string/add_course"
+        app:showAsAction="always" />
+
+    <item
         android:id="@+id/action_today"
         android:icon="@drawable/ic_today"
         android:title="@string/current_week"

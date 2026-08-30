@@ -4,28 +4,29 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background"
+    android:background="@drawable/bg_schedule_screen"
     tools:context=".ui.MainActivity">
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="0dp"
-        android:layout_height="64dp"
-        android:background="@color/surface"
+        android:layout_height="92dp"
+        android:background="@android:color/transparent"
         android:elevation="0dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:title="@string/my_schedule"
+        app:subtitle="@string/week_one"
+        app:subtitleTextAppearance="@style/CourseScheduleToolbarSubtitle"
+        app:title="2026/8/29"
         app:titleMarginStart="20dp"
-        app:subtitleTextColor="@color/text_secondary"
-        app:titleTextColor="@color/text_primary" />
+        app:titleTextAppearance="@style/CourseScheduleToolbarTitle" />
 
     <View
         android:id="@+id/toolbarDivider"
         android:layout_width="0dp"
         android:layout_height="1dp"
-        android:background="@color/divider"
+        android:background="#5CFFFFFF"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/toolbar" />
@@ -33,11 +34,12 @@
     <LinearLayout
         android:id="@+id/weekSelector"
         android:layout_width="0dp"
-        android:layout_height="64dp"
-        android:background="@color/surface"
+        android:layout_height="48dp"
+        android:layout_marginHorizontal="8dp"
+        android:background="@drawable/bg_week_selector"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingHorizontal="16dp"
+        android:paddingHorizontal="4dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/toolbarDivider">
@@ -46,17 +48,17 @@
             android:id="@+id/btnPreviousWeek"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:background="@drawable/bg_icon_button"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/previous_week"
             android:padding="8dp"
             android:src="@drawable/ic_chevron_left"
-            app:tint="@color/text_primary" />
+            app:tint="@color/text_secondary" />
 
         <LinearLayout
             android:id="@+id/weekInfo"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_marginHorizontal="12dp"
+            android:layout_marginHorizontal="4dp"
             android:layout_weight="1"
             android:background="?attr/selectableItemBackground"
             android:clickable="true"
@@ -71,14 +73,14 @@
                 android:gravity="center"
                 android:text="@string/week_one"
                 android:textColor="@color/text_primary"
-                android:textSize="18sp"
+                android:textSize="15sp"
                 android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/tvWeekContext"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="1dp"
+                android:layout_marginTop="0dp"
                 android:gravity="center"
                 android:textColor="@color/text_secondary"
                 android:textSize="10sp"
@@ -89,31 +91,35 @@
             android:id="@+id/btnNextWeek"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:background="@drawable/bg_icon_button"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/next_week"
             android:padding="8dp"
             android:src="@drawable/ic_chevron_right"
-            app:tint="@color/text_primary" />
+            app:tint="@color/text_secondary" />
     </LinearLayout>
 
     <com.google.android.material.progressindicator.LinearProgressIndicator
         android:id="@+id/weekProgress"
         android:layout_width="0dp"
-        android:layout_height="3dp"
+        android:layout_height="2dp"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="1dp"
         android:indeterminate="false"
         app:indicatorColor="@color/primary"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/weekSelector"
-        app:trackColor="@color/surface_variant"
-        app:trackThickness="3dp" />
+        app:trackColor="#42FFFFFF"
+        app:trackThickness="2dp" />
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/weekPager"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="@color/surface"
+        android:background="@android:color/transparent"
+        android:clipToPadding="false"
         android:orientation="horizontal"
+        android:paddingTop="0dp"
         android:overScrollMode="never"
         app:layout_constraintBottom_toTopOf="@id/bottomNavigation"
         app:layout_constraintEnd_toEndOf="parent"
@@ -123,9 +129,10 @@
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigation"
         android:layout_width="0dp"
-        android:layout_height="68dp"
-        android:background="@color/surface"
-        android:elevation="8dp"
+        android:layout_height="72dp"
+        android:background="@drawable/bg_bottom_navigation"
+        android:elevation="0dp"
+        app:itemActiveIndicatorStyle="@style/CourseScheduleBottomNavigationActiveIndicator"
         app:itemIconSize="22dp"
         app:itemIconTint="@color/nav_item_color"
         app:itemRippleColor="@color/primary_container"
@@ -135,19 +142,5 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:menu="@menu/menu_bottom_navigation" />
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabAddCourse"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="20dp"
-        android:layout_marginBottom="12dp"
-        android:contentDescription="@string/add_course"
-        android:src="@drawable/ic_add"
-        app:backgroundTint="@color/primary"
-        app:elevation="6dp"
-        app:layout_constraintBottom_toTopOf="@id/bottomNavigation"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:tint="@color/on_primary" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

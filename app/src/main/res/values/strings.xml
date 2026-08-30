@@ -90,6 +90,22 @@
     <string name="import_course">导入课程</string>
     <string name="choose_import_method">选择导入方式</string>
     <string name="import_target_format">将导入到 %1$s</string>
+    <string name="import_from_school">从教务系统导入</string>
+    <string name="swpu_import_description">西南石油大学 · 登录后直接读取当前学期课表</string>
+    <string name="other_import_methods">其他方式</string>
+    <string name="academic_login_title">西南石油大学教务系统</string>
+    <string name="academic_waiting_login">等待登录</string>
+    <string name="academic_privacy_hint">账号和密码只提交给学校网页，本应用不会保存</string>
+    <string name="academic_identifying_term">正在识别学期</string>
+    <string name="academic_fetching_schedule">正在获取课表</string>
+    <string name="academic_parsing_courses">正在解析课程</string>
+    <string name="academic_courses_ready">已获取 %1$d 门课程</string>
+    <string name="academic_import_button">读取当前学期课表</string>
+    <string name="academic_host_blocked">已阻止打开非学校域名页面</string>
+    <string name="academic_ssl_error">学校网站证书校验失败，已停止加载</string>
+    <string name="academic_response_too_large">教务系统返回的数据过大，无法安全导入</string>
+    <string name="academic_fetch_failed">读取课表失败</string>
+    <string name="academic_fetch_failed_detail">请确认已经登录教务系统，并且当前学期课表可以正常查看。</string>
     <string name="import_from_file">从文件导入</string>
     <string name="import_from_text">从文本导入</string>
     <string name="file_import_formats">Excel（.xlsx）、JSON、CSV、HTML 和文本</string>
@@ -160,6 +176,7 @@
     <string name="browsing_week">浏览第%d周</string>
     <string name="week_context_format">%1$s · %2$s-%3$s</string>
     <string name="week_context_courses_format">%1$s · %2$s-%3$s · %4$d门课</string>
+    <string name="toolbar_week_summary">第%1$d周 · %2$s</string>
     <string name="semester_in_progress">学期中</string>
     <string name="vacation_browsing_week">假期 · 浏览第%d周</string>
     <string name="before_semester_browsing_week">未开学 · 浏览第%d周</string>
@@ -183,6 +200,9 @@
     <!-- 设置 -->
     <string name="schedule_display">课表显示</string>
     <string name="show_weekend">显示周末</string>
+    <string name="show_inactive_courses">显示非本周课程</string>
+    <string name="inactive_course_label">非本周</string>
+    <string name="inactive_course_name_format">[非本周]\n%1$s</string>
     <string name="show_section_time">显示节次时间</string>
     <string name="course_block_height">课程块高度</string>
     <string name="height_dp_format">%d dp</string>

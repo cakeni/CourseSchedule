@@ -61,6 +61,7 @@ class ImportParserTest {
 
         assertEquals("秋季", parsed.semester?.name)
         assertEquals(false, parsed.settings?.showWeekend)
+        assertEquals(true, parsed.settings?.showInactiveCourses)
         assertEquals("操作系统", parsed.courses.single().courseName)
     }
 

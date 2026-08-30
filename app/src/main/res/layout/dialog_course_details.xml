@@ -1,138 +1,181 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@drawable/bg_course_detail_sheet"
     android:orientation="vertical"
     android:paddingHorizontal="24dp"
-    android:paddingBottom="8dp">
+    android:paddingBottom="32dp">
+
+    <View
+        android:layout_width="38dp"
+        android:layout_height="4dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/bg_sheet_handle" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="18dp"
         android:gravity="center_vertical"
-        android:minHeight="44dp"
         android:orientation="horizontal">
 
         <TextView
-            android:layout_width="72dp"
-            android:layout_height="wrap_content"
-            android:text="@string/teacher_name"
-            android:textColor="@color/text_secondary"
-            android:textSize="13sp" />
-
-        <TextView
-            android:id="@+id/tvDetailTeacher"
+            android:id="@+id/tvDetailTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:maxLines="2"
             android:textColor="@color/text_primary"
-            android:textIsSelectable="true"
-            android:textSize="15sp" />
-    </LinearLayout>
+            android:textSize="22sp"
+            android:textStyle="bold" />
 
-    <TextView
-        android:id="@+id/tvTeacherHint"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="72dp"
-        android:layout_marginBottom="6dp"
-        android:lineSpacingExtra="2dp"
-        android:text="@string/teacher_not_provided_hint"
-        android:textColor="@color/secondary_variant"
-        android:textSize="12sp"
-        android:visibility="gone" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:minHeight="44dp"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="72dp"
-            android:layout_height="wrap_content"
-            android:text="@string/classroom"
-            android:textColor="@color/text_secondary"
-            android:textSize="13sp" />
-
-        <TextView
-            android:id="@+id/tvDetailClassroom"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textColor="@color/text_primary"
-            android:textIsSelectable="true"
-            android:textSize="15sp" />
+        <ImageButton
+            android:id="@+id/btnEditCourse"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/edit"
+            android:padding="11dp"
+            android:src="@drawable/ic_edit"
+            app:tint="@color/primary" />
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="64dp"
+        android:layout_marginTop="14dp"
         android:gravity="center_vertical"
-        android:minHeight="44dp"
         android:orientation="horizontal">
 
-        <TextView
-            android:layout_width="72dp"
-            android:layout_height="wrap_content"
-            android:text="@string/class_time"
-            android:textColor="@color/text_secondary"
-            android:textSize="13sp" />
-
-        <TextView
-            android:id="@+id/tvDetailTime"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textColor="@color/text_primary"
-            android:textSize="15sp" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:minHeight="44dp"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="72dp"
-            android:layout_height="wrap_content"
-            android:text="@string/week_range"
-            android:textColor="@color/text_secondary"
-            android:textSize="13sp" />
+        <ImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_today"
+            app:tint="@color/detail_week" />
 
         <TextView
             android:id="@+id/tvDetailWeeks"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="22dp"
             android:layout_weight="1"
             android:textColor="@color/text_primary"
-            android:textSize="15sp" />
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_time"
+            app:tint="@color/detail_time" />
+
+        <TextView
+            android:id="@+id/tvDetailTime"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="22dp"
+            android:layout_weight="1"
+            android:textColor="@color/text_primary"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:minHeight="64dp"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_person"
+            app:tint="@color/detail_teacher" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="22dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvDetailTeacher"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/text_primary"
+                android:textIsSelectable="true"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/tvTeacherHint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:text="@string/teacher_not_provided_hint"
+                android:textColor="@color/text_tertiary"
+                android:textSize="11sp"
+                android:visibility="gone" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_room"
+            app:tint="@color/detail_room" />
+
+        <TextView
+            android:id="@+id/tvDetailClassroom"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="22dp"
+            android:layout_weight="1"
+            android:textColor="@color/text_primary"
+            android:textIsSelectable="true"
+            android:textSize="16sp" />
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/rowDetailNote"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="top"
-        android:minHeight="44dp"
+        android:gravity="center_vertical"
+        android:minHeight="64dp"
         android:orientation="horizontal"
         android:visibility="gone">
 
-        <TextView
-            android:layout_width="72dp"
-            android:layout_height="wrap_content"
-            android:paddingTop="2dp"
-            android:text="@string/note"
-            android:textColor="@color/text_secondary"
-            android:textSize="13sp" />
+        <ImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_text"
+            app:tint="@color/text_secondary" />
 
         <TextView
             android:id="@+id/tvDetailNote"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="22dp"
             android:layout_weight="1"
             android:lineSpacingExtra="2dp"
             android:textColor="@color/text_primary"

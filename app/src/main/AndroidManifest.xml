@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <!-- 权限声明 -->
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.VIBRATE" />
@@ -39,6 +40,12 @@
         <activity
             android:name=".ui.importdata.ImportActivity"
             android:label="@string/import_course"
+            android:theme="@style/Theme.CourseSchedule" />
+
+        <activity
+            android:name=".ui.importdata.SwpuWebImportActivity"
+            android:exported="false"
+            android:label="@string/academic_login_title"
             android:theme="@style/Theme.CourseSchedule" />
 
         <!-- 设置 -->

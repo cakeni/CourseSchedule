@@ -1,7 +1,11 @@
 package com.courseschedule.view
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Rect
 import android.graphics.RectF
@@ -13,15 +17,23 @@ import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewConfiguration
+import android.view.animation.DecelerateInterpolator
+import android.view.animation.OvershootInterpolator
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import androidx.customview.widget.ExploreByTouchHelper
+import androidx.dynamicanimation.animation.FloatValueHolder
+import androidx.dynamicanimation.animation.SpringAnimation
+import androidx.dynamicanimation.animation.SpringForce
 import com.courseschedule.R
 import com.courseschedule.data.entity.Course
 import com.courseschedule.domain.ScheduleRules
 import com.courseschedule.utils.SchedulePreferences
+import kotlin.math.abs
 import kotlin.math.roundToInt
+import kotlin.math.sin
 
 /**
  * Weekly timetable canvas. Dimensions are density-aware so the grid stays
@@ -40,8 +52,8 @@ class CourseTableView @JvmOverloads constructor(
     private val density = resources.displayMetrics.density
     private var sectionHeight = dp(64f)
     private val timeColumnWidth = dp(48f)
-    private val courseInset = dp(2.5f)
-    private val courseCornerRadius = dp(6f)
+    private val courseInset = dp(3f)
+    private val courseCornerRadius = dp(10f)
 
     private val courseColors = intArrayOf(
         R.color.course_red,
@@ -64,6 +76,7 @@ class CourseTableView @JvmOverloads constructor(
 
     private val backgroundPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = ContextCompat.getColor(context, R.color.surface_variant)
+        alpha = 105
         style = Paint.Style.FILL
     }
 
@@ -96,6 +109,13 @@ class CourseTableView @JvmOverloads constructor(
 
     private val coursePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.FILL
+    }
+
+    private val courseStrokePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.WHITE
+        alpha = 190
+        strokeWidth = dp(1.25f)
+        style = Paint.Style.STROKE
     }
 
     private val courseNamePaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -139,14 +159,68 @@ class CourseTableView @JvmOverloads constructor(
     private var currentWeek = 1
     private var visibleDaysCount = 7
     private var showTimes = true
+    private var showInactiveCourses = true
     private var highlightedDay: Int? = null
-    private var onCourseClickListener: ((Course) -> Unit)? = null
+    private var onCourseClickListener: ((Course, View, RectF) -> Unit)? = null
+    private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
+    private var pressedCourse: Course? = null
+    private var pressedCourseScale = 1f
+    private var pressAnimator: ValueAnimator? = null
+    private var pressAnimationGeneration = 0
+    private var pagerOffset = 0f
+    private val cardMotionStates = mutableMapOf<Course, CardMotionState>()
+    private var touchDownX = 0f
+    private var touchDownY = 0f
+    private var touchMoved = false
 
     private var dayWidth = 0f
     private var totalWidth = 0f
     private var totalHeight = 0f
 
     private var sectionTimes = SchedulePreferences.DEFAULT_SECTION_TIMES
+
+    private inner class CardMotionState(course: Course) {
+        private val valueHolder = FloatValueHolder(0f)
+        private val variant = Math.floorMod(
+            course.dayOfWeek * 7 + course.startSection * 11 + course.endSection * 3,
+            5
+        )
+        val travelDistance = dp(
+            32f + course.dayOfWeek * 2.8f + variant * 3.5f
+        )
+        var translationX = 0f
+            private set
+        private var targetX = 0f
+        private val springAnimation = SpringAnimation(valueHolder).apply {
+            spring = SpringForce(0f).apply {
+                stiffness = 430f + variant * 95f
+                dampingRatio = 0.7f + variant * 0.035f
+            }
+            setMinimumVisibleChange(0.3f)
+            addUpdateListener { _, value, _ ->
+                translationX = value
+                invalidate()
+            }
+        }
+
+        fun moveTo(offset: Float) {
+            val nextTarget = -offset * travelDistance
+            if (abs(nextTarget - targetX) < dp(0.15f)) return
+            targetX = nextTarget
+            springAnimation.animateToFinalPosition(nextTarget)
+        }
+
+        fun reset() {
+            springAnimation.cancel()
+            valueHolder.value = 0f
+            translationX = 0f
+            targetX = 0f
+        }
+
+        fun cancel() {
+            springAnimation.cancel()
+        }
+    }
 
     private val accessibilityHelper = object : ExploreByTouchHelper(this) {
         override fun getVirtualViewAt(x: Float, y: Float): Int {
@@ -181,14 +255,14 @@ class CourseTableView @JvmOverloads constructor(
         ): Boolean {
             if (action != AccessibilityNodeInfoCompat.ACTION_CLICK) return false
             val course = visibleCourses().getOrNull(virtualViewId) ?: return false
-            onCourseClickListener?.invoke(course)
+            onCourseClickListener?.invoke(course, this@CourseTableView, RectF(courseBounds(course)))
             sendEventForVirtualView(virtualViewId, android.view.accessibility.AccessibilityEvent.TYPE_VIEW_CLICKED)
             return true
         }
     }
 
     init {
-        setBackgroundColor(ContextCompat.getColor(context, R.color.surface))
+        setBackgroundColor(Color.TRANSPARENT)
         importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_YES
         ViewCompat.setAccessibilityDelegate(this, accessibilityHelper)
     }
@@ -276,10 +350,58 @@ class CourseTableView @JvmOverloads constructor(
     }
 
     private fun drawCourses(canvas: Canvas) {
-        visibleCourses().forEach { course -> drawCourse(canvas, course) }
+        val visibleCourses = visibleCourses()
+        visibleCourses.forEach { course ->
+            val bounds = courseBounds(course)
+            val isCurrentWeek = ScheduleRules.isCourseInWeek(course, currentWeek)
+            val sectionSpan = (course.endSection - course.startSection + 1).coerceAtLeast(1)
+            val arcDirection = if ((course.dayOfWeek + course.startSection) % 2 == 0) -1f else 1f
+            val motion = cardMotionStates.getOrPut(course) { CardMotionState(course) }.also {
+                it.moveTo(pagerOffset)
+            }
+            val motionRatio = (motion.translationX / motion.travelDistance).coerceIn(-1f, 1f)
+            val motionDistance = abs(motionRatio)
+            val saveCount = canvas.save()
+
+            canvas.translate(
+                motion.translationX,
+                sin(motionDistance * Math.PI).toFloat() *
+                    arcDirection * dp(1.8f + sectionSpan * 0.55f)
+            )
+
+            canvas.rotate(
+                -motionRatio * arcDirection * (0.7f + sectionSpan * 0.14f),
+                bounds.centerX(),
+                bounds.centerY()
+            )
+
+            val motionScale = 1f - motionDistance * (0.025f + sectionSpan * 0.004f)
+            canvas.scale(
+                motionScale,
+                motionScale,
+                bounds.centerX(),
+                bounds.centerY()
+            )
+
+            if (course == pressedCourse) {
+                canvas.scale(
+                    pressedCourseScale,
+                    pressedCourseScale,
+                    bounds.centerX(),
+                    bounds.centerY()
+                )
+            }
+
+            val motionAlpha = (255f * (1f - motionDistance * 0.22f))
+                .roundToInt()
+                .coerceIn(0, 255)
+            val alpha = if (isCurrentWeek) motionAlpha else (motionAlpha * 0.46f).roundToInt()
+            drawCourse(canvas, course, alpha, isCurrentWeek)
+            canvas.restoreToCount(saveCount)
+        }
     }
 
-    private fun drawCourse(canvas: Canvas, course: Course) {
+    private fun drawCourse(canvas: Canvas, course: Course, alpha: Int, isCurrentWeek: Boolean) {
         val bounds = courseBounds(course)
         val left = bounds.left
         val top = bounds.top
@@ -288,45 +410,61 @@ class CourseTableView @JvmOverloads constructor(
         if (right <= left || bottom <= top) return
 
         coursePaint.color = courseColors[Math.floorMod(course.colorIndex, courseColors.size)]
+        coursePaint.alpha = alpha
+        courseStrokePaint.alpha = 190 * alpha / 255
+        courseNamePaint.alpha = alpha
+        courseRoomPaint.alpha = 220 * alpha / 255
+        courseTeacherPaint.alpha = 205 * alpha / 255
         canvas.drawRoundRect(
             RectF(left, top, right, bottom),
             courseCornerRadius,
             courseCornerRadius,
             coursePaint
         )
+        canvas.drawRoundRect(
+            RectF(left, top, right, bottom),
+            courseCornerRadius,
+            courseCornerRadius,
+            courseStrokePaint
+        )
 
-        val displayName = displayCourseName(course.courseName)
+        val courseName = displayCourseName(course.courseName)
+        val displayName = if (isCurrentWeek) {
+            courseName
+        } else {
+            resources.getString(R.string.inactive_course_name_format, courseName)
+        }
         val nameLength = displayName.count { !it.isWhitespace() }
         courseNamePaint.textSize = sp(
             when {
-                nameLength >= 18 -> 8.5f
-                nameLength >= 12 -> 9.5f
-                else -> 11f
+                nameLength >= 18 -> 9f
+                nameLength >= 12 -> 10f
+                else -> 11.5f
             }
         )
-        courseRoomPaint.textSize = sp(8.5f)
-        courseTeacherPaint.textSize = sp(8f)
+        courseRoomPaint.textSize = sp(9f)
+        courseTeacherPaint.textSize = sp(8.5f)
 
-        val horizontalPadding = dp(3f)
+        val horizontalPadding = dp(6f)
         val textWidth = (right - left - horizontalPadding * 2).roundToInt().coerceAtLeast(1)
         val sectionCount = course.endSection - course.startSection + 1
         val showDetails = sectionCount >= 2
-        val teacherLayout = if (showDetails && course.teacher.isNotBlank()) {
+        val roomLayout = if (showDetails && course.classroom.isNotBlank()) {
             buildTextLayout(
-                resources.getString(R.string.course_teacher_inline, course.teacher),
-                courseTeacherPaint,
+                "@${course.classroom}",
+                courseRoomPaint,
                 textWidth,
-                1
+                2
             )
         } else {
             null
         }
-        val roomLayout = if (showDetails && course.classroom.isNotBlank()) {
-            buildTextLayout(course.classroom, courseRoomPaint, textWidth, 2)
+        val teacherLayout = if (showDetails && course.teacher.isNotBlank()) {
+            buildTextLayout(course.teacher, courseTeacherPaint, textWidth, 1)
         } else {
             null
         }
-        val detailLayouts = listOfNotNull(teacherLayout, roomLayout)
+        val detailLayouts = listOfNotNull(roomLayout, teacherLayout)
         val verticalPadding = dp(5f)
         val nameGap = if (detailLayouts.isNotEmpty()) dp(3f) else 0f
         val detailGap = if (detailLayouts.size > 1) dp(1f) else 0f
@@ -365,7 +503,7 @@ class CourseTableView @JvmOverloads constructor(
         maxLines: Int
     ): StaticLayout = StaticLayout.Builder
         .obtain(text, 0, text.length, paint, width)
-        .setAlignment(Layout.Alignment.ALIGN_CENTER)
+        .setAlignment(Layout.Alignment.ALIGN_NORMAL)
         .setEllipsize(TextUtils.TruncateAt.END)
         .setIncludePad(false)
         .setLineSpacing(0f, 1f)
@@ -373,19 +511,90 @@ class CourseTableView @JvmOverloads constructor(
         .build()
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        if (event.action == MotionEvent.ACTION_UP && event.x > timeColumnWidth) {
-            val day = ((event.x - timeColumnWidth) / dayWidth).toInt() + 1
-            val section = (event.y / sectionHeight).toInt() + 1
-            if (day > visibleDaysCount) return true
-            visibleCourses().firstOrNull { course ->
-                course.dayOfWeek == day &&
-                    section in course.startSection..course.endSection
-            }?.let { course ->
-                performClick()
-                onCourseClickListener?.invoke(course)
+        when (event.actionMasked) {
+            MotionEvent.ACTION_DOWN -> {
+                cancelPressAnimation()
+                touchDownX = event.x
+                touchDownY = event.y
+                touchMoved = false
+                pressedCourse = courseAt(event.x, event.y)
+                pressedCourseScale = 1f
+                animatePressedCourse(0.94f, 130L, clearOnEnd = false)
+            }
+            MotionEvent.ACTION_MOVE -> {
+                if (
+                    !touchMoved &&
+                    (abs(event.x - touchDownX) > touchSlop || abs(event.y - touchDownY) > touchSlop)
+                ) {
+                    touchMoved = true
+                    animatePressedCourse(1f, 180L, clearOnEnd = true)
+                }
+            }
+            MotionEvent.ACTION_UP -> {
+                val course = pressedCourse
+                val isClick = !touchMoved && course != null && courseBounds(course).contains(
+                    event.x,
+                    event.y
+                )
+                animatePressedCourse(1f, 290L, clearOnEnd = true, overshoot = true)
+                if (isClick && course != null) {
+                    val sourceBounds = RectF(courseBounds(course))
+                    performClick()
+                    postDelayed(
+                        { onCourseClickListener?.invoke(course, this, sourceBounds) },
+                        150L
+                    )
+                }
+            }
+            MotionEvent.ACTION_CANCEL -> {
+                if (!touchMoved) {
+                    touchMoved = true
+                    animatePressedCourse(1f, 180L, clearOnEnd = true)
+                }
             }
         }
         return true
+    }
+
+    private fun courseAt(x: Float, y: Float): Course? {
+        if (x <= timeColumnWidth) return null
+        return visibleCourses().asReversed().firstOrNull { course ->
+            courseBounds(course).contains(x, y)
+        }
+    }
+
+    private fun cancelPressAnimation() {
+        pressAnimationGeneration++
+        pressAnimator?.cancel()
+        pressAnimator = null
+    }
+
+    private fun animatePressedCourse(
+        target: Float,
+        duration: Long,
+        clearOnEnd: Boolean,
+        overshoot: Boolean = false
+    ) {
+        val course = pressedCourse ?: return
+        val generation = ++pressAnimationGeneration
+        pressAnimator?.cancel()
+        pressAnimator = ValueAnimator.ofFloat(pressedCourseScale, target).apply {
+            this.duration = duration
+            interpolator = if (overshoot) OvershootInterpolator(1.25f) else DecelerateInterpolator()
+            addUpdateListener { animator ->
+                pressedCourseScale = animator.animatedValue as Float
+                invalidate()
+            }
+            addListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    if (generation != pressAnimationGeneration) return
+                    pressedCourseScale = target
+                    if (clearOnEnd && pressedCourse == course) pressedCourse = null
+                    invalidate()
+                }
+            })
+            start()
+        }
     }
 
     override fun performClick(): Boolean {
@@ -397,9 +606,39 @@ class CourseTableView @JvmOverloads constructor(
         return accessibilityHelper.dispatchHoverEvent(event) || super.dispatchHoverEvent(event)
     }
 
+    override fun onDetachedFromWindow() {
+        cancelPressAnimation()
+        cardMotionStates.values.forEach(CardMotionState::cancel)
+        super.onDetachedFromWindow()
+    }
+
     fun setCourses(courses: List<Course>) {
+        cancelPressAnimation()
+        pressedCourse = null
+        pressedCourseScale = 1f
+        val retainedCourses = courses.toSet()
+        cardMotionStates.entries.removeAll { (course, state) ->
+            if (course !in retainedCourses) state.cancel()
+            course !in retainedCourses
+        }
         this.courses = courses
+        cardMotionStates.values.forEach { it.moveTo(pagerOffset) }
         accessibilityHelper.invalidateRoot()
+        invalidate()
+    }
+
+    fun setPagerOffset(position: Float) {
+        val newOffset = position.coerceIn(-1f, 1f)
+        if (abs(pagerOffset - newOffset) < 0.001f) return
+        pagerOffset = newOffset
+        visibleCourses().forEach { course ->
+            cardMotionStates.getOrPut(course) { CardMotionState(course) }.moveTo(newOffset)
+        }
+    }
+
+    fun resetPagerMotion() {
+        pagerOffset = 0f
+        cardMotionStates.values.forEach(CardMotionState::reset)
         invalidate()
     }
 
@@ -417,11 +656,13 @@ class CourseTableView @JvmOverloads constructor(
     fun applyDisplaySettings(
         showWeekend: Boolean,
         showTimes: Boolean,
+        showInactiveCourses: Boolean,
         sectionHeightDp: Int,
         sectionTimes: List<String>
     ) {
         visibleDaysCount = if (showWeekend) 7 else 5
         this.showTimes = showTimes
+        this.showInactiveCourses = showInactiveCourses
         this.sectionTimes = sectionTimes.takeIf { it.size == TOTAL_SECTIONS }
             ?: SchedulePreferences.DEFAULT_SECTION_TIMES
         sectionHeight = dp(sectionHeightDp.coerceIn(56, 104).toFloat())
@@ -430,13 +671,20 @@ class CourseTableView @JvmOverloads constructor(
         invalidate()
     }
 
-    fun setOnCourseClickListener(listener: (Course) -> Unit) {
+    fun setOnCourseClickListener(listener: (Course, View, RectF) -> Unit) {
         onCourseClickListener = listener
     }
 
-    private fun visibleCourses(): List<Course> = courses.filter {
-        it.dayOfWeek <= visibleDaysCount && ScheduleRules.isCourseInWeek(it, currentWeek)
-    }
+    private fun visibleCourses(): List<Course> = courses
+        .filter { course ->
+            course.dayOfWeek <= visibleDaysCount &&
+                (showInactiveCourses || ScheduleRules.isCourseInWeek(course, currentWeek))
+        }
+        .sortedWith(
+            compareBy<Course> { it.startSection }
+                .thenBy { it.dayOfWeek }
+                .thenBy { if (ScheduleRules.isCourseInWeek(it, currentWeek)) 1 else 0 }
+        )
 
     private fun courseBounds(course: Course): RectF = RectF(
         timeColumnWidth + (course.dayOfWeek - 1) * dayWidth + courseInset,
@@ -452,7 +700,7 @@ class CourseTableView @JvmOverloads constructor(
             2 -> resources.getString(R.string.even_week)
             else -> resources.getString(R.string.every_week)
         }
-        return resources.getString(
+        val description = resources.getString(
             R.string.course_accessibility_description,
             displayCourseName(course.courseName),
             days.getOrElse(course.dayOfWeek - 1) { "" },
@@ -464,6 +712,11 @@ class CourseTableView @JvmOverloads constructor(
             course.teacher.ifBlank { resources.getString(R.string.not_set) },
             course.classroom.ifBlank { resources.getString(R.string.not_set) }
         )
+        return if (ScheduleRules.isCourseInWeek(course, currentWeek)) {
+            description
+        } else {
+            "${resources.getString(R.string.inactive_course_label)}，$description"
+        }
     }
 
     private fun dp(value: Float): Float = value * density
