@@ -15,12 +15,42 @@
         android:elevation="0dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:subtitle="@string/week_one"
-        app:subtitleTextAppearance="@style/CourseScheduleToolbarSubtitle"
-        app:title="2026/8/29"
-        app:titleMarginStart="20dp"
-        app:titleTextAppearance="@style/CourseScheduleToolbarTitle" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.courseschedule.ui.DateHeaderView
+            android:id="@+id/dateHeader"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start|center_vertical"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="8dp" />
+    </com.google.android.material.appbar.MaterialToolbar>
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tvProjectLink"
+        android:layout_width="0dp"
+        android:layout_height="40dp"
+        android:layout_marginEnd="92dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:clickable="true"
+        android:contentDescription="@string/open_source_header_link"
+        android:ellipsize="end"
+        android:focusable="true"
+        android:gravity="center"
+        android:maxLines="1"
+        android:paddingHorizontal="2dp"
+        android:text="@string/project_repository_short"
+        android:textColor="@color/primary"
+        android:textSize="8sp"
+        app:autoSizeMaxTextSize="8sp"
+        app:autoSizeMinTextSize="6sp"
+        app:autoSizeStepGranularity="1sp"
+        app:autoSizeTextType="uniform"
+        app:layout_constraintBottom_toBottomOf="@id/toolbar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintWidth_percent="0.36" />
 
     <View
         android:id="@+id/toolbarDivider"

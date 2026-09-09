@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.RectF
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.Menu
@@ -63,6 +64,8 @@ class MainActivity : AppCompatActivity() {
     private var coursesDataLoaded = false
     private var suppressBottomNavigationMotion = false
     private var hasResumedOnce = false
+    private var dateHeaderWeek: Int? = null
+    private var dateHeaderSemesterId: Long? = null
     private val headerInterpolator = PathInterpolator(0.2f, 0.8f, 0.2f, 1f)
 
     private val pageChangeCallback = object : ViewPager2.OnPageChangeCallback() {
@@ -105,6 +108,13 @@ class MainActivity : AppCompatActivity() {
 
         // 设置工具栏
         setSupportActionBar(binding.toolbar)
+        supportActionBar?.setDisplayShowTitleEnabled(false)
+        binding.tvProjectLink.installPressScale(pressedScale = 0.98f)
+        binding.tvProjectLink.setOnClickListener {
+            runCatching {
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.project_repository_url))))
+            }
+        }
 
         // 初始化ViewModel
         viewModel = ViewModelProvider(this)[CourseViewModel::class.java]
@@ -120,7 +130,7 @@ class MainActivity : AppCompatActivity() {
     private fun initViews() {
         weekPagerAdapter = WeekPagerAdapter(
             onCourseClick = ::showCourseDetails,
-            onAddCourse = { startActivity(Intent(this, AddCourseActivity::class.java)) }
+            onAddCourse = { day, section -> openNewCourse(day, section) }
         )
         binding.weekPager.adapter = weekPagerAdapter
         binding.weekPager.visibility = View.INVISIBLE
@@ -415,6 +425,14 @@ class MainActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
+    private fun openNewCourse(dayOfWeek: Int? = null, section: Int? = null) {
+        val intent = Intent(this, AddCourseActivity::class.java).apply {
+            dayOfWeek?.let { putExtra(AddCourseActivity.EXTRA_DAY_OF_WEEK, it) }
+            section?.let { putExtra(AddCourseActivity.EXTRA_SECTION, it) }
+        }
+        startActivity(intent)
+    }
+
     /**
      * 更新周次显示
      */
@@ -427,7 +445,7 @@ class MainActivity : AppCompatActivity() {
                 add(Calendar.DAY_OF_MONTH, (currentWeek - 1) * 7)
             }
         }
-        binding.toolbar.title = SimpleDateFormat("yyyy/M/d", Locale.CHINA).format(displayDate.time)
+        val dateTitle = SimpleDateFormat("yyyy/M/d", Locale.CHINA).format(displayDate.time)
         val weekday = resources.getStringArray(R.array.weekdays).getOrElse(
             when (displayDate.get(Calendar.DAY_OF_WEEK)) {
                 Calendar.MONDAY -> 0
@@ -440,7 +458,16 @@ class MainActivity : AppCompatActivity() {
                 else -> 0
             }
         ) { "" }
-        binding.toolbar.subtitle = getString(R.string.toolbar_week_summary, currentWeek, weekday)
+        val previousHeaderWeek = dateHeaderWeek
+        binding.dateHeader.setDate(
+            date = dateTitle,
+            summary = getString(R.string.toolbar_week_summary, currentWeek, weekday),
+            animate = pagerMotionReady && dateHeaderSemesterId == semester.id &&
+                previousHeaderWeek != null && previousHeaderWeek != currentWeek,
+            forward = currentWeek >= (previousHeaderWeek ?: currentWeek)
+        )
+        dateHeaderWeek = currentWeek
+        dateHeaderSemesterId = semester.id
         binding.tvCurrentWeek.text = getString(R.string.week_format, currentWeek)
         val isOutsideSemester = status?.phase == SemesterPhase.BEFORE ||
             status?.phase == SemesterPhase.AFTER
@@ -522,7 +549,7 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_add_course -> {
-                startActivity(Intent(this, AddCourseActivity::class.java))
+                openNewCourse()
                 true
             }
             R.id.action_today -> {

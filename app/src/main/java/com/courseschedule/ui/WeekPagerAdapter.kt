@@ -32,7 +32,7 @@ data class WeekPageSettings(
 
 class WeekPagerAdapter(
     private val onCourseClick: (Course, View, RectF) -> Unit,
-    private val onAddCourse: () -> Unit
+    private val onAddCourse: (dayOfWeek: Int?, section: Int?) -> Unit
 ) : RecyclerView.Adapter<WeekPagerAdapter.WeekViewHolder>() {
 
     private var semester: Semester? = null
@@ -127,8 +127,11 @@ class WeekPagerAdapter(
                 binding.courseTableView.resetPagerMotion()
             }
             boundWeek = week
-            val activeCourses = courses.filter { ScheduleRules.isCourseInWeek(it, week) }
-            val displayCourses = if (settings.showInactiveCourses) courses else activeCourses
+            val displayCourses = ScheduleRules.selectCoursesForWeek(
+                courses,
+                week,
+                settings.showInactiveCourses
+            )
             val visibleCourses = if (settings.showWeekend) {
                 displayCourses
             } else {
@@ -139,15 +142,17 @@ class WeekPagerAdapter(
             binding.courseTableView.applyDisplaySettings(
                 showWeekend = settings.showWeekend,
                 showTimes = settings.showTimes,
-                showInactiveCourses = settings.showInactiveCourses,
                 sectionHeightDp = settings.sectionHeightDp,
                 sectionTimes = settings.sectionTimes
             )
             binding.courseTableView.setCurrentWeek(week)
             binding.courseTableView.setCourses(displayCourses)
             binding.courseTableView.setOnCourseClickListener(onCourseClick)
+            binding.courseTableView.setOnEmptySlotClickListener { day, section ->
+                onAddCourse(day, section)
+            }
             binding.emptyState.visibility = if (visibleCourses.isEmpty()) View.VISIBLE else View.GONE
-            binding.btnEmptyAdd.setOnClickListener { onAddCourse() }
+            binding.btnEmptyAdd.setOnClickListener { onAddCourse(null, null) }
             binding.btnEmptyAdd.installPressScale(0.97f)
             binding.root.contentDescription = binding.root.context.getString(R.string.week_format, week)
 

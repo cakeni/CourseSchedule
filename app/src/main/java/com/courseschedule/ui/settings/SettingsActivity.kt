@@ -1,7 +1,11 @@
 package com.courseschedule.ui.settings
 
 import android.app.DatePickerDialog
+import android.content.ActivityNotFoundException
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.text.InputType
 import android.view.View
@@ -180,6 +184,11 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun initActions() {
+        binding.cardOpenSource.setOnClickListener { openProjectRepository() }
+        binding.cardOpenSource.setOnLongClickListener {
+            copyProjectAddress()
+            true
+        }
         binding.cardSemester.setOnClickListener { showSemesterManager() }
         binding.cardSectionTimes.setOnClickListener { showSectionTimesDialog() }
         binding.cardExport.setOnClickListener { exportData() }
@@ -190,6 +199,7 @@ class SettingsActivity : AppCompatActivity() {
         binding.cardAbout.setOnClickListener { showAboutDialog() }
 
         listOf(
+            binding.cardOpenSource,
             binding.cardSemester,
             binding.rowShowWeekend,
             binding.rowShowInactiveCourses,
@@ -329,6 +339,7 @@ class SettingsActivity : AppCompatActivity() {
     private fun showSemesterEditor(existing: Semester?) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_semester, null)
         val nameLayout = dialogView.findViewById<TextInputLayout>(R.id.tilSemesterName)
+        val dateLayout = dialogView.findViewById<TextInputLayout>(R.id.tilSemesterStartDate)
         val nameInput = dialogView.findViewById<TextInputEditText>(R.id.etSemesterName)
         val dateInput = dialogView.findViewById<TextInputEditText>(R.id.etSemesterStartDate)
         val weeksDropdown = dialogView.findViewById<AutoCompleteTextView>(R.id.dropdownTotalWeeks)
@@ -343,7 +354,7 @@ class SettingsActivity : AppCompatActivity() {
             getString(R.string.week_count_format, existing?.totalWeeks?.coerceIn(12, 30) ?: 20),
             false
         )
-        dateInput.setOnClickListener {
+        val showDatePicker = View.OnClickListener {
             val calendar = Calendar.getInstance().apply { timeInMillis = selectedStartDate }
             DatePickerDialog(
                 this,
@@ -358,6 +369,8 @@ class SettingsActivity : AppCompatActivity() {
                 calendar.get(Calendar.DAY_OF_MONTH)
             ).show()
         }
+        dateInput.setOnClickListener(showDatePicker)
+        dateLayout.setEndIconOnClickListener(showDatePicker)
 
         val dialog = MaterialAlertDialogBuilder(this)
             .setTitle(if (existing == null) R.string.add_semester else R.string.edit_semester)
@@ -375,7 +388,10 @@ class SettingsActivity : AppCompatActivity() {
                 val totalWeeks = Regex("\\d+").find(weeksDropdown.text.toString())
                     ?.value?.toIntOrNull() ?: 20
                 dialog.dismiss()
-                saveSemester(existing, name, selectedStartDate, totalWeeks)
+                val displayedStartDate = runCatching {
+                    dateFormat.parse(dateInput.text?.toString().orEmpty())?.time
+                }.getOrNull() ?: selectedStartDate
+                saveSemester(existing, name, mondayStart(displayedStartDate), totalWeeks)
             }
         }
         dialog.show()
@@ -397,6 +413,7 @@ class SettingsActivity : AppCompatActivity() {
                 val courses = courseViewModel.getSemesterCourses(existing.id)
                 manager.cancelAllReminders(courses)
                 semesterViewModel.updateSemesterNow(updated)
+                semesters = semesters.map { if (it.id == updated.id) updated else it }
                 if (existing.isCurrent && preferences.reminderEnabled) {
                     manager.rescheduleReminders(courses, updated)
                 }
@@ -515,8 +532,26 @@ class SettingsActivity : AppCompatActivity() {
         MaterialAlertDialogBuilder(this)
             .setTitle(R.string.about_course_schedule)
             .setMessage(getString(R.string.about_message, versionName))
+            .setNeutralButton(R.string.open_source_view_project) { _, _ -> openProjectRepository() }
             .setPositiveButton(R.string.ok, null)
             .show()
+    }
+
+    private fun openProjectRepository() {
+        try {
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.project_repository_url)))
+                .addCategory(Intent.CATEGORY_BROWSABLE))
+        } catch (_: ActivityNotFoundException) {
+            // A device without a browser can still share/open the public address elsewhere.
+            copyProjectAddress()
+        }
+    }
+
+    private fun copyProjectAddress() {
+        getSystemService(ClipboardManager::class.java).setPrimaryClip(
+            ClipData.newPlainText(getString(R.string.app_name), getString(R.string.project_repository_url))
+        )
+        Toast.makeText(this, R.string.open_source_address_copied, Toast.LENGTH_SHORT).show()
     }
 
     private fun mondayStart(timestamp: Long): Long {

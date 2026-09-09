@@ -92,9 +92,9 @@ class SchedulePreferences(context: Context) {
         private const val KEY_SECTION_TIMES = "section_times"
 
         val DEFAULT_SECTION_TIMES = listOf(
-            "08:00", "08:55", "10:00", "10:55",
-            "14:00", "14:55", "16:00", "16:55",
-            "19:00", "19:55", "20:50", "21:45"
+            "08:00", "08:50", "09:50", "10:40",
+            "11:30", "14:30", "15:20", "16:20",
+            "17:10", "19:00", "19:50", "20:40"
         )
 
         fun isValidTime(value: String): Boolean {

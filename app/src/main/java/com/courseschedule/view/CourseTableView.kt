@@ -161,9 +161,9 @@ class CourseTableView @JvmOverloads constructor(
     private var currentWeek = 1
     private var visibleDaysCount = 7
     private var showTimes = true
-    private var showInactiveCourses = true
     private var highlightedDay: Int? = null
     private var onCourseClickListener: ((Course, View, RectF) -> Unit)? = null
+    private var onEmptySlotClickListener: ((dayOfWeek: Int, section: Int) -> Unit)? = null
     private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
     private var pressedCourse: Course? = null
     private val coursePressMotion = CoursePressMotion()
@@ -613,7 +613,8 @@ class CourseTableView @JvmOverloads constructor(
                         event.y < bounds.top - touchSlop ||
                         event.y > bounds.bottom + touchSlop
                     )
-                if (!touchMoved && course != null && (movedPastSlop || outsideCourse)) {
+                if (!touchMoved && movedPastSlop) touchMoved = true
+                if (course != null && (movedPastSlop || outsideCourse)) {
                     touchMoved = true
                     releaseCoursePress()
                 }
@@ -629,6 +630,11 @@ class CourseTableView @JvmOverloads constructor(
                     val sourceBounds = RectF(courseBounds(course))
                     performClick()
                     onCourseClickListener?.invoke(course, this, sourceBounds)
+                } else if (!touchMoved && course == null) {
+                    emptySlotAt(event.x, event.y)?.let { (day, section) ->
+                        performClick()
+                        onEmptySlotClickListener?.invoke(day, section)
+                    }
                 }
             }
             MotionEvent.ACTION_CANCEL -> {
@@ -643,9 +649,18 @@ class CourseTableView @JvmOverloads constructor(
 
     private fun courseAt(x: Float, y: Float): Course? {
         if (x <= timeColumnWidth) return null
-        return visibleCourses().asReversed().firstOrNull { course ->
+        return visibleCourses().firstOrNull { course ->
             courseBounds(course).contains(x, y)
         }
+    }
+
+    private fun emptySlotAt(x: Float, y: Float): Pair<Int, Int>? {
+        if (x <= timeColumnWidth || x >= totalWidth || y < 0f || y >= totalHeight || dayWidth <= 0f) {
+            return null
+        }
+        val day = ((x - timeColumnWidth) / dayWidth).toInt() + 1
+        val section = (y / sectionHeight).toInt() + 1
+        return (day to section).takeIf { day in 1..visibleDaysCount && section in 1..TOTAL_SECTIONS }
     }
 
     private fun resetCoursePress() {
@@ -712,13 +727,11 @@ class CourseTableView @JvmOverloads constructor(
     fun applyDisplaySettings(
         showWeekend: Boolean,
         showTimes: Boolean,
-        showInactiveCourses: Boolean,
         sectionHeightDp: Int,
         sectionTimes: List<String>
     ) {
         visibleDaysCount = if (showWeekend) 7 else 5
         this.showTimes = showTimes
-        this.showInactiveCourses = showInactiveCourses
         this.sectionTimes = sectionTimes.takeIf { it.size == TOTAL_SECTIONS }
             ?: SchedulePreferences.DEFAULT_SECTION_TIMES
         sectionHeight = dp(sectionHeightDp.coerceIn(56, 104).toFloat())
@@ -733,16 +746,12 @@ class CourseTableView @JvmOverloads constructor(
         onCourseClickListener = listener
     }
 
+    fun setOnEmptySlotClickListener(listener: (dayOfWeek: Int, section: Int) -> Unit) {
+        onEmptySlotClickListener = listener
+    }
+
     private fun rebuildVisibleCourses() {
-        visibleCourseCache = courses.filter { course ->
-            course.dayOfWeek <= visibleDaysCount &&
-                (showInactiveCourses || ScheduleRules.isCourseInWeek(course, currentWeek))
-        }
-        .sortedWith(
-            compareBy<Course> { it.startSection }
-                .thenBy { it.dayOfWeek }
-                .thenBy { if (ScheduleRules.isCourseInWeek(it, currentWeek)) 1 else 0 }
-        )
+        visibleCourseCache = courses.filter { it.dayOfWeek <= visibleDaysCount }
     }
 
     private fun clearCourseRenderCaches() {

@@ -22,6 +22,11 @@ import java.util.Calendar
 
 class AddCourseActivity : AppCompatActivity() {
 
+    companion object {
+        const val EXTRA_DAY_OF_WEEK = "day_of_week"
+        const val EXTRA_SECTION = "section"
+    }
+
     private lateinit var binding: ActivityAddCourseBinding
     private lateinit var viewModel: CourseViewModel
 
@@ -82,7 +87,9 @@ class AddCourseActivity : AppCompatActivity() {
             binding.chipMon, binding.chipTue, binding.chipWed,
             binding.chipThu, binding.chipFri, binding.chipSat, binding.chipSun
         )
-        selectedDay = when (Calendar.getInstance().get(Calendar.DAY_OF_WEEK)) {
+        selectedDay = intent.getIntExtra(EXTRA_DAY_OF_WEEK, 0).takeIf { it in 1..7 } ?: when (
+            Calendar.getInstance().get(Calendar.DAY_OF_WEEK)
+        ) {
             Calendar.MONDAY -> 1
             Calendar.TUESDAY -> 2
             Calendar.WEDNESDAY -> 3
@@ -109,8 +116,9 @@ class AddCourseActivity : AppCompatActivity() {
     }
 
     private fun initDropdowns() {
-        setupDropdown(binding.spinnerStartSection, sectionOptions, 0)
-        setupDropdown(binding.spinnerEndSection, sectionOptions, 1)
+        val selectedSection = intent.getIntExtra(EXTRA_SECTION, 0).takeIf { it in 1..12 }
+        setupDropdown(binding.spinnerStartSection, sectionOptions, (selectedSection ?: 1) - 1)
+        setupDropdown(binding.spinnerEndSection, sectionOptions, (selectedSection ?: 2) - 1)
     }
 
     private fun configureWeekDropdowns(totalWeeks: Int) {
