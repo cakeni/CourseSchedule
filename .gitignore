@@ -17,6 +17,14 @@ captures/
 .jdk*/
 .codex-tmp/
 
+# Local reverse-engineering and research caches
+/apk_unpack_*/
+/analysis/schedule-ui-import-fixes-*/
+/analysis/unpacked-adapter-audit-*/
+/analysis/ziyan-url-recovery-*/*.json
+!/analysis/ziyan-url-recovery-*/verified_urls.json
+/analysis/ziyan-url-recovery-*/ricraft-wakeup-schedule/
+
 # Signing credentials and environment files
 *.jks
 *.keystore

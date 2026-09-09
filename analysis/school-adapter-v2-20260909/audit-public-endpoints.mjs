@@ -59,7 +59,7 @@ const rows = selected.map((entry) => ({
 const reasons = Object.fromEntries([...new Set(rows.map((row) => row.reason))]
   .sort().map((reason) => [reason, rows.filter((row) => row.reason === reason).length]));
 const report = {
-  generatedAt: new Date().toISOString(),
+  catalogGeneratedAt: catalog.generatedAt || null,
   directorySchemaVersion: catalog.schemaVersion,
   scanned: rows.length,
   promoted: 0,
