@@ -8,27 +8,22 @@ import android.view.ViewGroup
 import android.view.animation.PathInterpolator
 import android.widget.FrameLayout
 import app.rive.runtime.kotlin.RiveAnimationView
-import app.rive.runtime.kotlin.controllers.RiveFileController
 import app.rive.runtime.kotlin.core.Alignment
-import app.rive.runtime.kotlin.core.File as RiveFile
 import app.rive.runtime.kotlin.core.Fit
-import app.rive.runtime.kotlin.core.PlayableInstance
-import com.courseschedule.CourseScheduleApp
 import com.courseschedule.R
 
-/** Toolbar action that keeps a canvas duck visible until Rive is actually running. */
+/** Toolbar action backed by one long-lived Rive renderer. */
 class CourseDuckActionView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
-    private val fallbackView = DuckMascotView(context).apply {
+    private val riveView = RiveAnimationView(context).apply {
         layoutParams = centeredLayoutParams()
         isClickable = false
         isFocusable = false
     }
-    private var riveView: RiveAnimationView? = null
     private var pressed = false
 
     init {
@@ -37,44 +32,9 @@ class CourseDuckActionView @JvmOverloads constructor(
         importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_YES
         clipChildren = false
         clipToPadding = false
-        addView(fallbackView)
-        installRiveIfAvailable()
-    }
-
-    private fun installRiveIfAvailable() {
-        if (!CourseScheduleApp.isRiveAvailable || !hasExpectedScene()) return
-
+        addView(riveView)
         runCatching {
-            val view = RiveAnimationView(context).apply {
-                layoutParams = centeredLayoutParams()
-                alpha = 0f
-                isClickable = false
-                isFocusable = false
-            }
-            val listener = object : RiveFileController.Listener {
-                private var revealed = false
-
-                override fun notifyAdvance(elapsed: Float) {
-                    if (revealed) return
-                    revealed = true
-                    view.post {
-                        if (riveView !== view) return@post
-                        view.alpha = 1f
-                        fallbackView.alpha = 0f
-                        view.unregisterListener(this)
-                    }
-                }
-
-                override fun notifyPlay(animation: PlayableInstance) = Unit
-                override fun notifyPause(animation: PlayableInstance) = Unit
-                override fun notifyStop(animation: PlayableInstance) = Unit
-                override fun notifyLoop(animation: PlayableInstance) = Unit
-                override fun notifyStateChanged(stateMachineName: String, stateName: String) = Unit
-            }
-            view.registerListener(listener)
-            addView(view)
-            riveView = view
-            view.setRiveResource(
+            riveView.setRiveResource(
                 R.raw.course_duck,
                 artboardName = ARTBOARD_NAME,
                 stateMachineName = STATE_MACHINE_NAME,
@@ -82,23 +42,8 @@ class CourseDuckActionView @JvmOverloads constructor(
                 fit = Fit.CONTAIN,
                 alignment = Alignment.CENTER
             )
-        }.onFailure {
-            riveView?.let(::removeView)
-            riveView = null
-            fallbackView.alpha = 1f
         }
     }
-
-    private fun hasExpectedScene(): Boolean = runCatching {
-        val bytes = resources.openRawResource(R.raw.course_duck).use { it.readBytes() }
-        val file = RiveFile(bytes)
-        try {
-            ARTBOARD_NAME in file.artboardNames &&
-                STATE_MACHINE_NAME in file.artboard(ARTBOARD_NAME).stateMachineNames
-        } finally {
-            file.release()
-        }
-    }.getOrDefault(false)
 
     override fun onInterceptTouchEvent(ev: MotionEvent): Boolean = true
 
@@ -132,7 +77,6 @@ class CourseDuckActionView @JvmOverloads constructor(
     }
 
     override fun performClick(): Boolean {
-        fallbackView.playInspectMotion()
         return super.performClick()
     }
 

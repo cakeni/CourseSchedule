@@ -13,19 +13,12 @@ class CourseScheduleApp : Application() {
 
     companion object {
         const val NOTIFICATION_CHANNEL_ID = "course_reminder_channel"
-
-        @Volatile
-        var isRiveAvailable = false
-            private set
     }
 
     override fun onCreate() {
         super.onCreate()
 
-        isRiveAvailable = runCatching {
-            Rive.init(this)
-            true
-        }.getOrDefault(false)
+        runCatching { Rive.init(this) }
 
         // 创建通知渠道
         createNotificationChannel()
