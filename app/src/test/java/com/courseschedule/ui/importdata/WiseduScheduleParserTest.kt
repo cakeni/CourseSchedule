@@ -210,4 +210,42 @@ class WiseduScheduleParserTest {
         assertEquals(1, course.startWeek)
         assertEquals(4, course.endWeek)
     }
+
+    @Test
+    fun parsesHomeAppMobileRowsWithExplicitWeekType() {
+        val json = """
+            {"data":{"items":[{
+              "kcmc":"移动端课程","xqj":3,"djj":6,"qmz":"1-8","dsz":1,
+              "jsxm":"周老师","skdd":"实验楼201","bjmc":null,"lx":0,"mz":0,
+              "qz":0,"rwlx":0,"xkkh":null
+            }]}}
+        """.trimIndent()
+
+        val course = parser.parse(json).courses.single()
+
+        assertEquals("移动端课程", course.courseName)
+        assertEquals(3, course.dayOfWeek)
+        assertEquals(6, course.startSection)
+        assertEquals(1, course.startWeek)
+        assertEquals(7, course.endWeek)
+        assertEquals(1, course.weekType)
+    }
+
+    @Test
+    fun parsesXkjglappPackedMeetingRows() {
+        val json = """
+            {"datas":{"xsjxrwcx":{"rows":[{
+              "KCMC":"操作系统","RKJS":"陈老师",
+              "PKSJDD":"[1-8单周]星期一[3-4节]明理楼A201;[10,12,14周]星期五[7节]实验室"
+            }]}}}
+        """.trimIndent()
+
+        val courses = parser.parse(json).courses
+
+        assertEquals(2, courses.size)
+        assertEquals(listOf(1 to 3, 5 to 7), courses.map { it.dayOfWeek to it.startSection })
+        assertEquals(listOf(1 to 7, 10 to 14), courses.map { it.startWeek to it.endWeek })
+        assertEquals(listOf(1, 2), courses.map { it.weekType })
+        assertEquals(listOf("明理楼A201", "实验室"), courses.map { it.classroom })
+    }
 }

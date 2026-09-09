@@ -8,6 +8,9 @@ import com.google.gson.Gson
 import com.google.gson.JsonParser
 import com.google.gson.reflect.TypeToken
 import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
+import java.io.ByteArrayInputStream
+import java.io.InputStream
 
 data class ParsedImport(
     val courses: List<Course>,
@@ -16,7 +19,24 @@ data class ParsedImport(
     val sourceLabel: String = ""
 )
 
-class ImportFormatException(message: String) : IllegalArgumentException(message)
+enum class AcademicImportErrorCode {
+    NO_TIMETABLE,
+    UNSUPPORTED_VARIANT,
+    MISSING_DAY,
+    MISSING_SECTION,
+    MISSING_WEEK,
+    PARTIAL_PARSE,
+    AMBIGUOUS_VARIANT,
+    FRAME_BLOCKED,
+    CAPTURE_MISS,
+    PAYLOAD_TOO_LARGE,
+    UNTRUSTED_SOURCE
+}
+
+class ImportFormatException(
+    message: String,
+    val errorCode: AcademicImportErrorCode? = null
+) : IllegalArgumentException(message)
 
 class ImportParser(private val defaultTotalWeeks: Int) {
 
@@ -96,8 +116,26 @@ class ImportParser(private val defaultTotalWeeks: Int) {
         return ParsedImport(courses, sourceLabel = "文本")
     }
 
-    fun parseHtml(text: String): ParsedImport {
-        val document = Jsoup.parse(text)
+    fun parseHtml(text: String): ParsedImport = parseHtmlDocument(Jsoup.parse(text))
+
+    /** HTML exports can declare GBK/GB2312. Let Jsoup honor the charset before parsing. */
+    fun parseHtml(input: InputStream): ParsedImport {
+        val bytes = ByteArray(2_000_001)
+        var size = 0
+        while (size < bytes.size) {
+            val read = input.read(bytes, size, bytes.size - size)
+            if (read < 0) break
+            if (read == 0) throw ImportFormatException("HTML 文件读取中断，请重新选择文件")
+            size += read
+        }
+        if (size == bytes.size) throw ImportFormatException("HTML 文件过大，请只导出学期课表页面（不超过 2 MB）")
+        return parseHtmlDocument(Jsoup.parse(ByteArrayInputStream(bytes, 0, size), null, ""))
+    }
+
+    private fun parseHtmlDocument(document: Document): ParsedImport {
+        if (document.getElementById("kbtable") != null) {
+            return QiangzhiScheduleParser(defaultTotalWeeks).parseDocument(document)
+        }
         val parsed = mutableListOf<Course>()
         document.select("table").forEach { table ->
             val rows = table.select("tr")

@@ -32,12 +32,15 @@ internal fun normalizeWiseduTerm(raw: String): String? {
 }
 
 /**
- * Parser for Wisedu/金智 jwapp timetable responses.
+ * Parser for common Wisedu/金智 timetable responses.
  *
  * The school WebView performs the authenticated request. This class only
  * converts the returned JSON payload into the app's existing import model.
  */
-class WiseduScheduleParser(private val defaultTotalWeeks: Int) {
+class WiseduScheduleParser(
+    private val defaultTotalWeeks: Int,
+    private val requireExplicitTimes: Boolean = false
+) {
 
     fun parse(text: String): ParsedImport {
         val root = runCatching { JsonParser.parseString(text).asJsonObject }
@@ -77,38 +80,47 @@ class WiseduScheduleParser(private val defaultTotalWeeks: Int) {
             .orEmpty()
         if (rootRows.isNotEmpty()) return rootRows
 
-        return findCourseArray(payload, depth = 0).orEmpty()
+        return findCourseArray(payload, depth = 0, visited = intArrayOf(0)).orEmpty()
     }
 
-    private fun findCourseArray(element: JsonElement, depth: Int): List<JsonObject>? {
-        if (depth > 10 || element.isJsonNull || element.isJsonPrimitive) return null
+    private fun findCourseArray(element: JsonElement, depth: Int, visited: IntArray): List<JsonObject>? {
+        if (depth > 10 || ++visited[0] > 12_000 || element.isJsonNull || element.isJsonPrimitive) return null
         if (element.isJsonArray) {
             val rows = element.asJsonArray
                 .mapNotNull { it.takeIf(JsonElement::isJsonObject)?.asJsonObject }
-                .filter { row -> row.has("KCM") && row.has("SKXQ") && row.has("KSJC") }
+                .filter { row ->
+                    (row.has("KCM") || row.has("KCMC")) && row.has("SKXQ") && row.has("KSJC") ||
+                        row.has("KCMC") && row.has("PKSJDD") ||
+                        row.has("kcmc") && row.has("xqj") && row.has("djj") && row.has("qmz")
+                }
             if (rows.isNotEmpty()) return rows
             return element.asJsonArray.firstNotNullOfOrNull { child ->
-                findCourseArray(child, depth + 1)
+                findCourseArray(child, depth + 1, visited)
             }
         }
         return element.asJsonObject.entrySet().firstNotNullOfOrNull { (_, child) ->
-            findCourseArray(child, depth + 1)
+            findCourseArray(child, depth + 1, visited)
         }
     }
 
     private fun parseRow(row: JsonObject): List<Course> {
-        val name = row.string("KCM").trim()
-        val day = row.string("SKXQ").firstInteger()
-        val startSection = row.string("KSJC").firstInteger()
-        val endSection = row.string("JSJC").firstInteger() ?: startSection
+        if (row.has("kcmc")) return parseMobileRow(row)
+        if (row.has("KCMC") && row.has("PKSJDD")) return parsePackedRow(row)
+        val name = row.string("KCM").ifBlank { row.string("KCMC") }.trim()
+        fun number(key: String): Int? = if (requireExplicitTimes) row.string(key).trim().toIntOrNull()
+            else row.string(key).firstInteger()
+        val day = number("SKXQ")
+        val startSection = number("KSJC")
+        val endSection = number("JSJC") ?: startSection.takeUnless { requireExplicitTimes }
         if (name.isBlank() || day == null || day !in 1..7 || startSection == null || endSection == null) {
+            if (requireExplicitTimes) throw ImportFormatException("课程名称、星期或节次字段不完整，本次未导入；此页面可能不是受支持的金智课表版本")
             return emptyList()
         }
 
         val teacher = row.string("SKJS").trim()
-        val classroom = row.string("JASMC").trim()
+        val classroom = row.string("JASMC").ifBlank { row.string("SKDD") }.trim()
         val weekPattern = row.string("SKZC").trim()
-        val weekGroups = compressWeeks(parseWeeks(weekPattern))
+        val weekGroups = compressImportWeeks(parseWeeks(weekPattern))
         val colorIndex = Math.floorMod(name.hashCode(), 16)
 
         return weekGroups.map { group ->
@@ -127,15 +139,106 @@ class WiseduScheduleParser(private val defaultTotalWeeks: Int) {
         }
     }
 
+    /** Some xkjglapp responses pack every meeting into a single PKSJDD string. */
+    private fun parsePackedRow(row: JsonObject): List<Course> {
+        val name = row.string("KCMC").trim()
+        val meetings = row.string("PKSJDD").split(Regex("[;；\\n]+"))
+            .map(String::trim)
+            .filter(String::isNotBlank)
+        if (name.isBlank() || meetings.isEmpty()) {
+            throw ImportFormatException("金智课表的课程名称或上课安排字段不完整")
+        }
+        val teacher = row.string("RKJS").ifBlank { row.string("SKJS") }.trim()
+        val fallbackRoom = row.string("JASMC").ifBlank { row.string("SKDD") }.trim()
+        val dayPattern = Regex("(?:星期|周)([一二三四五六日天七])")
+        val sectionPattern = Regex("(\\d{1,2})(?:\\s*[-~～—–－至]\\s*(\\d{1,2}))?\\s*节")
+        val weekPattern = Regex(
+            "(?:\\d{1,2}\\s*(?:[-~～—–－至]\\s*\\d{1,2})?\\s*[,，、]?\\s*)+" +
+                "[单双]?\\s*周(?:\\s*[（(][单双][）)])?"
+        )
+        val colorIndex = Math.floorMod(name.hashCode(), 16)
+        return meetings.flatMap { meeting ->
+            val dayText = dayPattern.find(meeting)?.groupValues?.get(1)
+                ?: throw ImportFormatException("金智课表的星期字段不完整")
+            val day = when (dayText) {
+                "天", "七" -> 7
+                else -> "一二三四五六日".indexOf(dayText).plus(1)
+            }
+            val sectionMatch = sectionPattern.find(meeting)
+                ?: throw ImportFormatException("金智课表的节次字段不完整")
+            val startSection = sectionMatch.groupValues[1].toInt()
+            val endSection = sectionMatch.groupValues[2].toIntOrNull() ?: startSection
+            val weeks = weekPattern.findAll(meeting)
+                .flatMap { match -> parseWeeks(match.value).asSequence() }
+                .distinct()
+                .sorted()
+                .toList()
+            if (day !in 1..7 || startSection !in 1..30 || endSection !in startSection..30 || weeks.isEmpty()) {
+                throw ImportFormatException("金智课表的星期、节次或周次字段不完整")
+            }
+            val room = meeting.substring(sectionMatch.range.last + 1)
+                .trim().trimStart(']', '】', '、', ',', '，').trim()
+                .ifBlank { fallbackRoom }
+            compressImportWeeks(weeks).map { group ->
+                Course(
+                    courseName = name,
+                    teacher = teacher,
+                    classroom = room,
+                    dayOfWeek = day,
+                    startSection = startSection,
+                    endSection = endSection,
+                    startWeek = group.start,
+                    endWeek = group.end,
+                    weekType = group.weekType,
+                    colorIndex = colorIndex
+                )
+            }
+        }
+    }
+
+    private fun parseMobileRow(row: JsonObject): List<Course> {
+        val name = row.string("kcmc").trim()
+        val day = row.string("xqj").trim().toIntOrNull()
+        val section = row.string("djj").trim().toIntOrNull()
+        val weeks = parseWeeks(row.string("qmz")).filter { week ->
+            when (row.string("dsz").toIntOrNull()) {
+                0 -> week % 2 == 0
+                1 -> week % 2 == 1
+                2 -> true
+                else -> throw ImportFormatException("金智移动课表的单双周字段不完整")
+            }
+        }
+        if (name.isBlank() || day !in 1..7 || section !in 1..30 || weeks.isEmpty()) {
+            throw ImportFormatException("金智移动课表的课程名称、星期、节次或周次字段不完整")
+        }
+        return compressImportWeeks(weeks).map { group ->
+            Course(
+                courseName = name,
+                teacher = row.string("jsxm").trim(),
+                classroom = row.string("skdd").trim(),
+                dayOfWeek = day!!,
+                startSection = section!!,
+                endSection = section,
+                startWeek = group.start,
+                endWeek = group.end,
+                weekType = group.weekType,
+                colorIndex = Math.floorMod(name.hashCode(), 16)
+            )
+        }
+    }
+
     private fun parseWeeks(pattern: String): List<Int> {
+        if (requireExplicitTimes && pattern.isBlank()) throw ImportFormatException("课程周次缺失，本次未导入")
         if (pattern.isBlank()) return (1..defaultTotalWeeks.coerceAtLeast(1)).toList()
 
         val normalized = pattern.trim()
         if (normalized.matches(Regex("[01]+"))) {
+            if (requireExplicitTimes && normalized.length > 52) throw ImportFormatException("课程周次超出支持范围")
             return normalized.mapIndexedNotNull { index, value ->
                 if (value == '1') index + 1 else null
             }
         }
+        if (requireExplicitTimes) return QiangzhiScheduleParser(defaultTotalWeeks).parseWeeks(normalized)
 
         val explicit = mutableSetOf<Int>()
         Regex("(\\d+)\\s*(?:[-~～—–－]|至)\\s*(\\d+)").findAll(normalized).forEach { match ->
@@ -161,42 +264,6 @@ class WiseduScheduleParser(private val defaultTotalWeeks: Int) {
             }
         }.sorted()
     }
-
-    private fun compressWeeks(weeks: List<Int>): List<WeekGroup> {
-        val sorted = weeks.distinct().sorted()
-        if (sorted.isEmpty()) return emptyList()
-        if (sorted.size == 1) return listOf(WeekGroup(sorted.first(), sorted.first(), 0))
-
-        val groups = mutableListOf<WeekGroup>()
-        var index = 0
-        while (index < sorted.size) {
-            val start = sorted[index]
-            val canUseParityRun = index + 1 < sorted.size && sorted[index + 1] - start == 2
-            if (canUseParityRun) {
-                var endIndex = index + 1
-                while (endIndex + 1 < sorted.size && sorted[endIndex + 1] - sorted[endIndex] == 2) {
-                    endIndex++
-                }
-                groups += WeekGroup(
-                    start = start,
-                    end = sorted[endIndex],
-                    weekType = if (start % 2 == 0) 2 else 1
-                )
-                index = endIndex + 1
-                continue
-            }
-
-            var endIndex = index
-            while (endIndex + 1 < sorted.size && sorted[endIndex + 1] - sorted[endIndex] == 1) {
-                endIndex++
-            }
-            groups += WeekGroup(start, sorted[endIndex], 0)
-            index = endIndex + 1
-        }
-        return groups
-    }
-
-    private data class WeekGroup(val start: Int, val end: Int, val weekType: Int)
 
     private fun JsonObject.string(key: String): String = get(key)
         ?.takeUnless { it.isJsonNull }

@@ -1,0 +1,50 @@
+The bundled academic school directory contains factual interoperability metadata
+(school name, public academic-system entry URL, and system-family label) observed
+in WakeUp Schedule 6.1.20 on 2026-09-02:
+https://www.wakeup.fun/
+Directory versionTimeLine: 1763017986
+
+No WakeUp implementation code, credentials, cookies, or timetable responses are
+included. CourseSchedule independently implements its parsers. Entries that depend
+on a private/school-specific adapter remain visible as "adapter required" instead
+of being presented as functional. Numeric IP addresses, private-network hosts,
+malformed URLs, credentials, query tickets, fragments, and session IDs are excluded.
+Legacy HTTP directory entries require an explicit warning confirmation in the app.
+Subsequent HTTP and HTTPS navigation is handled by the academic-import WebView
+without a school-domain allowlist.
+
+The optional "referenceUrl" field on some "adapter required" entries repeats the
+public entry address WakeUp recorded for that school (which may be a campus-IP or
+WebVPN address). It is displayed as guidance text only and is never loaded or
+trusted by the app; users must paste their own address, which passes the normal
+generic-import validation.
+
+Per-school "operation guidance" strings shown during import are short factual
+navigation steps (menu and page names) adapted in CourseSchedule's own wording
+from WakeUp's published import instructions for those schools.
+
+Additional or replacement public entries are derived from the MIT-licensed project:
+https://github.com/baoozak/timetable
+Source commit: e4b57dfa63359320ad0642aaf8c1f703e9236101
+
+MIT License
+
+Copyright (c) 2026 baoozak
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

@@ -52,10 +52,31 @@ class ImportActivity : AppCompatActivity() {
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode != Activity.RESULT_OK) return@registerForActivityResult
-        val json = result.data?.getStringExtra(SwpuWebImportActivity.EXTRA_SCHEDULE_JSON)
+        val school = result.data?.let(AcademicWebImportActivity::schoolFromIntent)
+            ?: return@registerForActivityResult
+        val json = result.data?.getStringExtra(AcademicWebImportActivity.EXTRA_SCHEDULE_JSON)
             ?.takeIf(String::isNotBlank)
             ?: return@registerForActivityResult
-        importParsed { totalWeeks -> WiseduScheduleParser(totalWeeks).parse(json) }
+        importParsed { totalWeeks -> AcademicSchools.parse(school, json, totalWeeks) }
+    }
+
+    private val schoolPickerLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode != Activity.RESULT_OK) return@registerForActivityResult
+        val entry = AcademicSchoolDirectory.find(
+            this,
+            result.data?.getStringExtra(SchoolPickerActivity.EXTRA_DIRECTORY_ID)
+        ) ?: return@registerForActivityResult
+        val totalWeeks = courseViewModel.currentSemester.value?.totalWeeks ?: run {
+            Toast.makeText(this, R.string.semester_loading, Toast.LENGTH_SHORT).show()
+            return@registerForActivityResult
+        }
+        val school = entry.toAcademicSchool() ?: run {
+            Toast.makeText(this, R.string.academic_directory_entry_invalid, Toast.LENGTH_SHORT).show()
+            return@registerForActivityResult
+        }
+        launchAcademicImport(school, totalWeeks, entry.importHint)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -73,10 +94,7 @@ class ImportActivity : AppCompatActivity() {
                 Toast.makeText(this, R.string.semester_loading, Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-            schoolImportLauncher.launch(
-                Intent(this, SwpuWebImportActivity::class.java)
-                    .putExtra(SwpuWebImportActivity.EXTRA_TOTAL_WEEKS, totalWeeks)
-            )
+            schoolPickerLauncher.launch(Intent(this, SchoolPickerActivity::class.java))
         }
         binding.cardImportJson.setOnClickListener { openFilePicker() }
         binding.cardImportText.setOnClickListener { showTextImportDialog() }
@@ -173,6 +191,12 @@ class ImportActivity : AppCompatActivity() {
     }
 
     private fun dp(value: Float): Float = value * resources.displayMetrics.density
+
+    private fun launchAcademicImport(school: AcademicSchool, totalWeeks: Int, hint: String? = null) {
+        schoolImportLauncher.launch(AcademicWebImportActivity.schoolIntent(this, school)
+            .putExtra(AcademicWebImportActivity.EXTRA_TOTAL_WEEKS, totalWeeks)
+            .putExtra(AcademicWebImportActivity.EXTRA_GENERIC_HINT, hint.orEmpty()))
+    }
 
     private fun openFilePicker() {
         // Some Android file providers report CSV/HTML as application/octet-stream.
@@ -307,7 +331,8 @@ class ImportActivity : AppCompatActivity() {
         restoreMetadata.visibility = if (parsed.semester != null || parsed.settings != null) {
             View.VISIBLE
         } else View.GONE
-        restoreMetadata.isChecked = restoreMetadata.visibility == View.VISIBLE
+        // Importing courses must not silently undo a start date edited by the user.
+        restoreMetadata.isChecked = false
         replaceExisting.visibility = View.VISIBLE
 
         val dialog = MaterialAlertDialogBuilder(this)
