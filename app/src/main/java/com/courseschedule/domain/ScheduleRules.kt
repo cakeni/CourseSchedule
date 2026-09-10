@@ -42,6 +42,25 @@ object ScheduleRules {
         }
     }
 
+    fun selectCoursesForWeek(
+        courses: List<Course>,
+        week: Int,
+        showInactiveCourses: Boolean
+    ): List<Course> = courses
+        .groupBy { Triple(it.dayOfWeek, it.startSection, it.endSection) }
+        .values
+        .mapNotNull { sameSlot ->
+            sameSlot.mapNotNull { course ->
+                val nextWeek = (maxOf(week, course.startWeek)..course.endWeek)
+                    .firstOrNull { isCourseInWeek(course, it) }
+                if (nextWeek == null || (!showInactiveCourses && nextWeek != week)) {
+                    null
+                } else {
+                    course to nextWeek
+                }
+            }.minByOrNull { it.second }?.first
+        }
+
     fun coursesOverlap(first: Course, second: Course): Boolean {
         if (first.semesterId != second.semesterId || first.dayOfWeek != second.dayOfWeek) {
             return false

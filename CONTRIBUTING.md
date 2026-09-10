@@ -23,12 +23,19 @@ Windows PowerShell 使用：
 .\gradlew.bat lintDebug testDebugUnitTest assembleDebug
 ```
 
+修改 WebView、导入流程或界面交互时，还应在已连接的模拟器或真机上执行：
+
+```powershell
+.\gradlew.bat connectedDebugAndroidTest
+```
+
 ## 分支与提交
 
 - 从最新的 `main` 创建分支。
-- 建议使用 `feature/简短说明`、`fix/简短说明` 或 `docs/简短说明`。
+- 建议使用 `feat/简短说明`、`fix/简短说明` 或 `docs/简短说明`。
 - 每个提交只处理一个清晰的问题，避免混入无关格式化或重构。
 - 不要提交 `local.properties`、签名文件、真实课程表、个人截图或构建产物。
+- APK 解包、JADX 输出和临时克隆应放在项目目录之外；`analysis/` 只保留可复现脚本、脱敏的小型证据和结论。
 
 ## 代码要求
 

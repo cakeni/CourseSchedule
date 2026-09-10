@@ -9,67 +9,138 @@
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="0dp"
-        android:layout_height="56dp"
+        android:layout_height="64dp"
         android:background="@color/surface"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:navigationIcon="@drawable/ic_back"
-        app:navigationIconTint="@color/primary"
         app:title="@string/import_course"
+        app:titleMarginStart="16dp"
         app:titleTextColor="@color/text_primary" />
-
-    <View
-        android:id="@+id/toolbarDivider"
-        android:layout_width="0dp"
-        android:layout_height="1dp"
-        android:background="@color/divider"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toolbar" />
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:clipToPadding="false"
         android:fillViewport="true"
         android:overScrollMode="never"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:paddingBottom="24dp"
+        app:layout_constraintBottom_toTopOf="@id/bottomNavigation"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toolbarDivider">
+        app:layout_constraintTop_toBottomOf="@id/toolbar">
 
         <LinearLayout
+            android:id="@+id/importContent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:paddingHorizontal="16dp"
+            android:paddingTop="18dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/choose_import_method"
                 android:textColor="@color/text_primary"
-                android:textSize="20sp"
+                android:textSize="24sp"
                 android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/tvImportTarget"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="5dp"
                 android:textColor="@color/text_secondary"
                 android:textSize="13sp"
                 tools:text="将导入到 2025-2026 第二学期" />
 
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardImportJson"
+                android:id="@+id/cardImportSchool"
                 android:layout_width="match_parent"
-                android:layout_height="96dp"
+                android:layout_height="116dp"
                 android:layout_marginTop="20dp"
                 android:clickable="true"
                 android:focusable="true"
+                app:cardBackgroundColor="@color/primary_container"
+                app:cardCornerRadius="22dp"
+                app:cardElevation="0dp"
+                app:rippleColor="@color/today_highlight">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="18dp">
+
+                    <FrameLayout
+                        android:id="@+id/schoolIconContainer"
+                        android:layout_width="58dp"
+                        android:layout_height="58dp"
+                        android:background="@drawable/bg_import_school_icon">
+
+                        <ImageView
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:layout_gravity="center"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_school"
+                            app:tint="@color/on_primary" />
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/import_from_school"
+                            android:textColor="@color/text_primary"
+                            android:textSize="17sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp"
+                            android:lineSpacingExtra="2dp"
+                            android:text="@string/academic_import_description"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_chevron_right_gray"
+                        app:tint="@color/primary_variant" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="10dp"
+                android:text="@string/other_import_methods"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardImportJson"
+                android:layout_width="match_parent"
+                android:layout_height="96dp"
+                android:clickable="true"
+                android:focusable="true"
                 app:cardBackgroundColor="@color/surface"
-                app:cardCornerRadius="8dp"
+                app:cardCornerRadius="18dp"
                 app:cardElevation="0dp"
                 app:rippleColor="@color/primary_container"
                 app:strokeColor="@color/divider"
@@ -137,7 +208,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 app:cardBackgroundColor="@color/surface"
-                app:cardCornerRadius="8dp"
+                app:cardCornerRadius="18dp"
                 app:cardElevation="0dp"
                 app:rippleColor="@color/primary_container"
                 app:strokeColor="@color/divider"
@@ -200,9 +271,9 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                app:cardBackgroundColor="@color/primary_container"
-                app:cardCornerRadius="8dp"
+                android:layout_marginTop="22dp"
+                app:cardBackgroundColor="@color/surface_variant"
+                app:cardCornerRadius="16dp"
                 app:cardElevation="0dp">
 
                 <LinearLayout
@@ -216,21 +287,38 @@
                         android:layout_height="wrap_content"
                         android:text="@string/import_tips_title"
                         android:textColor="@color/primary_variant"
-                        android:textSize="14sp"
+                        android:textSize="13sp"
                         android:textStyle="bold" />
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
+                        android:layout_marginTop="7dp"
                         android:lineSpacingExtra="3dp"
                         android:text="@string/import_tips"
                         android:textColor="@color/text_secondary"
-                        android:textSize="13sp" />
+                        android:textSize="12sp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNavigation"
+        android:layout_width="0dp"
+        android:layout_height="72dp"
+        android:background="@drawable/bg_bottom_navigation"
+        android:elevation="0dp"
+        app:itemActiveIndicatorStyle="@style/CourseScheduleBottomNavigationActiveIndicator"
+        app:itemIconSize="22dp"
+        app:itemIconTint="@color/nav_item_color"
+        app:itemRippleColor="@color/primary_container"
+        app:itemTextColor="@color/nav_item_color"
+        app:labelVisibilityMode="labeled"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:menu="@menu/menu_bottom_navigation" />
 
     <com.google.android.material.progressindicator.CircularProgressIndicator
         android:id="@+id/progressImport"

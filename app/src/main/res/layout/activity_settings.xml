@@ -10,11 +10,11 @@
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:background="@color/surface"
-        app:navigationIcon="@drawable/ic_back"
-        app:navigationIconTint="@color/primary"
+        android:layout_height="64dp"
+        android:background="@color/background"
+        android:elevation="0dp"
         app:title="@string/settings"
+        app:titleMarginStart="20dp"
         app:titleTextColor="@color/text_primary" />
 
     <androidx.core.widget.NestedScrollView
@@ -26,11 +26,54 @@
         android:overScrollMode="never">
 
         <LinearLayout
+            android:id="@+id/settingsContent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:paddingHorizontal="16dp"
             android:paddingBottom="32dp">
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardOpenSource"
+                style="@style/CourseScheduleSettingsCard"
+                android:layout_marginTop="12dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardBackgroundColor="@color/primary_container"
+                app:rippleColor="@color/surface">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/open_source_notice_title"
+                        android:textColor="@color/text_primary"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:text="@string/open_source_notice_detail"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:id="@+id/tvProjectUrl"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/project_repository_url"
+                        android:textColor="@color/primary"
+                        android:textSize="12sp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
             <TextView style="@style/CourseScheduleSettingsSection" android:text="@string/semester_management" />
 
@@ -105,7 +148,12 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <LinearLayout style="@style/CourseScheduleSettingsRow">
+                    <LinearLayout
+                        android:id="@+id/rowShowWeekend"
+                        style="@style/CourseScheduleSettingsRow"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:foreground="?attr/selectableItemBackground">
                         <TextView style="@style/CourseScheduleSettingsLabel" android:text="@string/show_weekend" />
                         <com.google.android.material.switchmaterial.SwitchMaterial
                             android:id="@+id/switchShowWeekend"
@@ -117,7 +165,31 @@
 
                     <View style="@style/CourseScheduleSettingsDivider" />
 
-                    <LinearLayout style="@style/CourseScheduleSettingsRow">
+                    <LinearLayout
+                        android:id="@+id/rowShowInactiveCourses"
+                        style="@style/CourseScheduleSettingsRow"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:foreground="?attr/selectableItemBackground">
+                        <TextView
+                            style="@style/CourseScheduleSettingsLabel"
+                            android:text="@string/show_inactive_courses" />
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switchShowInactiveCourses"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:thumbTint="@color/switch_thumb_color"
+                            app:trackTint="@color/switch_track_color" />
+                    </LinearLayout>
+
+                    <View style="@style/CourseScheduleSettingsDivider" />
+
+                    <LinearLayout
+                        android:id="@+id/rowShowTime"
+                        style="@style/CourseScheduleSettingsRow"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:foreground="?attr/selectableItemBackground">
                         <TextView style="@style/CourseScheduleSettingsLabel" android:text="@string/show_section_time" />
                         <com.google.android.material.switchmaterial.SwitchMaterial
                             android:id="@+id/switchShowTime"
@@ -148,7 +220,12 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <LinearLayout style="@style/CourseScheduleSettingsRow">
+                    <LinearLayout
+                        android:id="@+id/rowReminder"
+                        style="@style/CourseScheduleSettingsRow"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:foreground="?attr/selectableItemBackground">
                         <TextView style="@style/CourseScheduleSettingsLabel" android:text="@string/enable_reminders" />
                         <com.google.android.material.switchmaterial.SwitchMaterial
                             android:id="@+id/switchReminder"
@@ -249,4 +326,18 @@
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNavigation"
+        android:layout_width="match_parent"
+        android:layout_height="72dp"
+        android:background="@drawable/bg_bottom_navigation"
+        android:elevation="0dp"
+        app:itemActiveIndicatorStyle="@style/CourseScheduleBottomNavigationActiveIndicator"
+        app:itemIconSize="22dp"
+        app:itemIconTint="@color/nav_item_color"
+        app:itemRippleColor="@color/primary_container"
+        app:itemTextColor="@color/nav_item_color"
+        app:labelVisibilityMode="labeled"
+        app:menu="@menu/menu_bottom_navigation" />
 </LinearLayout>

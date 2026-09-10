@@ -3,15 +3,21 @@ package com.courseschedule.ui
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
+import android.graphics.RectF
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.ViewGroup
+import android.view.animation.PathInterpolator
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.view.doOnPreDraw
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.widget.ViewPager2
 import com.courseschedule.R
@@ -25,12 +31,15 @@ import com.courseschedule.ui.settings.SettingsActivity
 import com.courseschedule.domain.SemesterPhase
 import com.courseschedule.domain.SemesterWeekStatus
 import com.courseschedule.utils.SchedulePreferences
+import com.courseschedule.view.CourseTableView
 import com.courseschedule.viewmodel.CourseViewModel
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import kotlin.math.abs
 
 /**
  * 主界面 - 课程表显示
@@ -46,15 +55,44 @@ class MainActivity : AppCompatActivity() {
     private var currentCourses: List<Course> = emptyList()
     private var semesterWeekStatus: SemesterWeekStatus? = null
     private var pageSettings = WeekPageSettings()
+    private var lastPagerPosition = -1
+    private var lastAnimatedPagerPosition = -1
+    private var pendingPagerMotionPosition = -1
+    private var pendingPagerMotionForward = true
+    private var pagerMotionReady = false
+    private var semesterDataLoaded = false
+    private var coursesDataLoaded = false
+    private var suppressBottomNavigationMotion = false
+    private var hasResumedOnce = false
+    private var dateHeaderWeek: Int? = null
+    private var dateHeaderSemesterId: Long? = null
+    private val headerInterpolator = PathInterpolator(0.2f, 0.8f, 0.2f, 1f)
 
     private val pageChangeCallback = object : ViewPager2.OnPageChangeCallback() {
         override fun onPageSelected(position: Int) {
+            val previousPosition = lastPagerPosition
+            lastPagerPosition = position
             val week = position + 1
             if (currentWeek != week) {
                 currentWeek = week
                 viewModel.setCurrentWeek(week)
             }
             updateWeekDisplay()
+            if (pagerMotionReady && previousPosition >= 0 && previousPosition != position) {
+                pendingPagerMotionPosition = position
+                pendingPagerMotionForward = position > previousPosition
+                animateWeekHeader(forward = pendingPagerMotionForward)
+                if (binding.weekPager.scrollState == ViewPager2.SCROLL_STATE_IDLE) {
+                    playSelectedPageMotion(position, pendingPagerMotionForward)
+                    pendingPagerMotionPosition = -1
+                }
+            }
+        }
+
+        override fun onPageScrollStateChanged(state: Int) {
+            if (state != ViewPager2.SCROLL_STATE_IDLE || pendingPagerMotionPosition < 0) return
+            playSelectedPageMotion(pendingPagerMotionPosition, pendingPagerMotionForward)
+            pendingPagerMotionPosition = -1
         }
     }
 
@@ -70,6 +108,13 @@ class MainActivity : AppCompatActivity() {
 
         // 设置工具栏
         setSupportActionBar(binding.toolbar)
+        supportActionBar?.setDisplayShowTitleEnabled(false)
+        binding.tvProjectLink.installPressScale(pressedScale = 0.98f)
+        binding.tvProjectLink.setOnClickListener {
+            runCatching {
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.project_repository_url))))
+            }
+        }
 
         // 初始化ViewModel
         viewModel = ViewModelProvider(this)[CourseViewModel::class.java]
@@ -85,11 +130,22 @@ class MainActivity : AppCompatActivity() {
     private fun initViews() {
         weekPagerAdapter = WeekPagerAdapter(
             onCourseClick = ::showCourseDetails,
-            onAddCourse = { startActivity(Intent(this, AddCourseActivity::class.java)) }
+            onAddCourse = { day, section -> openNewCourse(day, section) }
         )
         binding.weekPager.adapter = weekPagerAdapter
+        binding.weekPager.visibility = View.INVISIBLE
         binding.weekPager.offscreenPageLimit = 1
         binding.weekPager.registerOnPageChangeCallback(pageChangeCallback)
+        binding.weekPager.setPageTransformer { page, position ->
+            val distance = abs(position).coerceIn(0f, 1f)
+            val scale = 1f - (distance * 0.02f)
+            page.alpha = 1f - (distance * 0.16f)
+            page.scaleX = scale
+            page.scaleY = scale
+            page.translationX = -position * dp(14f) * (1f - distance)
+            page.rotationY = 0f
+            page.findViewById<CourseTableView>(R.id.courseTableView)?.setPagerOffset(position)
+        }
 
         binding.btnPreviousWeek.setOnClickListener {
             selectWeek(currentWeek - 1, smoothScroll = true)
@@ -100,36 +156,88 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.weekInfo.setOnClickListener { showWeekPicker() }
-
-        binding.fabAddCourse.setOnClickListener {
-            startActivity(Intent(this, AddCourseActivity::class.java))
-        }
+        binding.weekInfo.installPressScale(0.97f)
+        binding.btnPreviousWeek.installPressScale(0.97f)
+        binding.btnNextWeek.installPressScale(0.97f)
 
         binding.bottomNavigation.setOnItemSelectedListener { item ->
+            if (suppressBottomNavigationMotion) return@setOnItemSelectedListener true
+            val itemView = binding.bottomNavigation.findViewById<View>(item.itemId)
             when (item.itemId) {
-                R.id.nav_home -> true
+                R.id.nav_home -> {
+                    itemView.playNavigationMotion()
+                    true
+                }
                 R.id.nav_import -> {
-                    startActivity(Intent(this, ImportActivity::class.java))
+                    openTab(Intent(this, ImportActivity::class.java))
                     true
                 }
                 R.id.nav_settings -> {
-                    startActivity(Intent(this, SettingsActivity::class.java))
+                    openTab(Intent(this, SettingsActivity::class.java))
                     true
                 }
                 else -> false
             }
         }
+        binding.bottomNavigation.setOnItemReselectedListener { item ->
+            binding.bottomNavigation.findViewById<View>(item.itemId)?.playNavigationMotion()
+        }
     }
+
+    private fun animateWeekHeader(forward: Boolean) {
+        val offset = dp(if (forward) 18f else -18f)
+        listOf(binding.tvCurrentWeek, binding.tvWeekContext).forEachIndexed { index, view ->
+            view.animate().cancel()
+            view.alpha = 0.25f
+            view.translationX = offset
+            view.animate()
+                .alpha(1f)
+                .translationX(0f)
+                .setStartDelay(index * 28L)
+                .setDuration(290L)
+                .setInterpolator(headerInterpolator)
+                .start()
+        }
+    }
+
+    private fun openTab(intent: Intent) {
+        startActivity(intent)
+        overridePendingTransition(0, 0)
+    }
+
+    private fun playSelectedPageMotion(position: Int, forward: Boolean = true) {
+        if (lastAnimatedPagerPosition == position) return
+        binding.weekPager.post {
+            if (binding.weekPager.currentItem != position) return@post
+            if (weekPagerAdapter.playSelectionMotion(binding.weekPager, position, forward)) {
+                lastAnimatedPagerPosition = position
+            }
+        }
+    }
+
+    private fun dp(value: Float): Float = value * resources.displayMetrics.density
 
     private fun observeData() {
         viewModel.currentSemester.observe(this) { semester ->
+            semesterDataLoaded = true
+            if (currentSemester?.id != semester?.id) {
+                lastAnimatedPagerPosition = -1
+                pendingPagerMotionPosition = -1
+                pagerMotionReady = false
+            }
             currentSemester = semester
             semester?.let {
-                binding.toolbar.subtitle = it.name
                 refreshWeekPager()
                 syncPagerToCurrentWeek(smoothScroll = false)
                 updateWeekDisplay()
+                binding.weekPager.post {
+                    if (currentSemester?.id == it.id) {
+                        lastPagerPosition = binding.weekPager.currentItem
+                        pagerMotionReady = true
+                    }
+                }
             }
+            showWeekPagerWhenReady()
         }
 
         viewModel.currentWeek.observe(this) { week ->
@@ -145,9 +253,17 @@ class MainActivity : AppCompatActivity() {
         }
 
         viewModel.allCourses.observe(this) { courses ->
+            coursesDataLoaded = true
             currentCourses = courses
             refreshWeekPager()
             updateWeekDisplay()
+            showWeekPagerWhenReady()
+        }
+    }
+
+    private fun showWeekPagerWhenReady() {
+        if (semesterDataLoaded && coursesDataLoaded) {
+            binding.weekPager.visibility = View.VISIBLE
         }
     }
 
@@ -185,8 +301,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun showCourseDetails(course: Course) {
+    private fun showCourseDetails(course: Course, sourceView: View, sourceBounds: RectF) {
         val detailView = layoutInflater.inflate(R.layout.dialog_course_details, null)
+        detailView.findViewById<TextView>(R.id.tvDetailTitle).text = course.courseName
         val teacherMissing = course.teacher.isBlank()
         detailView.findViewById<TextView>(R.id.tvDetailTeacher).text = if (teacherMissing) {
             getString(R.string.teacher_not_provided)
@@ -224,12 +341,80 @@ class MainActivity : AppCompatActivity() {
             noteRow.visibility = View.VISIBLE
         }
 
-        MaterialAlertDialogBuilder(this)
-            .setTitle(course.courseName)
-            .setView(detailView)
-            .setNegativeButton(R.string.close, null)
-            .setPositiveButton(R.string.edit) { _, _ -> openCourseEditor(course) }
-            .show()
+        val dialog = BottomSheetDialog(this)
+        detailView.findViewById<View>(R.id.btnEditCourse).apply {
+            installPressScale(0.9f)
+            setOnClickListener {
+                dialog.dismiss()
+                openCourseEditor(course)
+            }
+        }
+        dialog.setContentView(detailView)
+        dialog.setOnShowListener {
+            dialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)?.apply {
+                setBackgroundColor(Color.TRANSPARENT)
+                playCourseDetailEntrance(detailView, sourceView, sourceBounds)
+            }
+            dialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
+            dialog.behavior.skipCollapsed = true
+        }
+        dialog.show()
+    }
+
+    private fun playCourseDetailEntrance(
+        detailView: View,
+        sourceView: View,
+        sourceBounds: RectF
+    ) {
+        detailView.doOnPreDraw {
+            val sourceLocation = IntArray(2)
+            val detailLocation = IntArray(2)
+            sourceView.getLocationOnScreen(sourceLocation)
+            detailView.getLocationOnScreen(detailLocation)
+
+            val sourceCenterX = sourceLocation[0] + sourceBounds.centerX()
+            val sourceCenterY = sourceLocation[1] + sourceBounds.centerY()
+            val detailCenterX = detailLocation[0] + detailView.width / 2f
+            val detailCenterY = detailLocation[1] + detailView.height / 2f
+
+            detailView.pivotX = (sourceCenterX - detailLocation[0])
+                .coerceIn(0f, detailView.width.toFloat())
+            detailView.pivotY = (sourceCenterY - detailLocation[1])
+                .coerceIn(0f, detailView.height.toFloat())
+            detailView.alpha = 0.72f
+            detailView.scaleX = 0.9f
+            detailView.scaleY = 0.92f
+            detailView.translationX = ((sourceCenterX - detailCenterX) * 0.16f)
+                .coerceIn(-dp(44f), dp(44f))
+            detailView.translationY = ((sourceCenterY - detailCenterY) * 0.18f)
+                .coerceIn(-dp(72f), dp(104f))
+
+            (detailView as? ViewGroup)?.let { content ->
+                repeat(content.childCount) { index ->
+                    content.getChildAt(index).apply {
+                        alpha = 0f
+                        translationY = dp(10f + index.coerceAtMost(3) * 2f)
+                        animate()
+                            .alpha(1f)
+                            .translationY(0f)
+                            .setStartDelay(90L + index * 36L)
+                            .setDuration(330L)
+                            .setInterpolator(headerInterpolator)
+                            .start()
+                    }
+                }
+            }
+
+            detailView.animate()
+                .alpha(1f)
+                .scaleX(1f)
+                .scaleY(1f)
+                .translationX(0f)
+                .translationY(0f)
+                .setDuration(480L)
+                .setInterpolator(headerInterpolator)
+                .start()
+        }
     }
 
     private fun openCourseEditor(course: Course) {
@@ -240,12 +425,49 @@ class MainActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
+    private fun openNewCourse(dayOfWeek: Int? = null, section: Int? = null) {
+        val intent = Intent(this, AddCourseActivity::class.java).apply {
+            dayOfWeek?.let { putExtra(AddCourseActivity.EXTRA_DAY_OF_WEEK, it) }
+            section?.let { putExtra(AddCourseActivity.EXTRA_SECTION, it) }
+        }
+        startActivity(intent)
+    }
+
     /**
      * 更新周次显示
      */
     private fun updateWeekDisplay() {
         val semester = currentSemester ?: return
         val status = semesterWeekStatus
+        val displayDate = Calendar.getInstance().apply {
+            if (status?.phase != SemesterPhase.ACTIVE || status.week != currentWeek) {
+                timeInMillis = semester.startDate
+                add(Calendar.DAY_OF_MONTH, (currentWeek - 1) * 7)
+            }
+        }
+        val dateTitle = SimpleDateFormat("yyyy/M/d", Locale.CHINA).format(displayDate.time)
+        val weekday = resources.getStringArray(R.array.weekdays).getOrElse(
+            when (displayDate.get(Calendar.DAY_OF_WEEK)) {
+                Calendar.MONDAY -> 0
+                Calendar.TUESDAY -> 1
+                Calendar.WEDNESDAY -> 2
+                Calendar.THURSDAY -> 3
+                Calendar.FRIDAY -> 4
+                Calendar.SATURDAY -> 5
+                Calendar.SUNDAY -> 6
+                else -> 0
+            }
+        ) { "" }
+        val previousHeaderWeek = dateHeaderWeek
+        binding.dateHeader.setDate(
+            date = dateTitle,
+            summary = getString(R.string.toolbar_week_summary, currentWeek, weekday),
+            animate = pagerMotionReady && dateHeaderSemesterId == semester.id &&
+                previousHeaderWeek != null && previousHeaderWeek != currentWeek,
+            forward = currentWeek >= (previousHeaderWeek ?: currentWeek)
+        )
+        dateHeaderWeek = currentWeek
+        dateHeaderSemesterId = semester.id
         binding.tvCurrentWeek.text = getString(R.string.week_format, currentWeek)
         val isOutsideSemester = status?.phase == SemesterPhase.BEFORE ||
             status?.phase == SemesterPhase.AFTER
@@ -263,12 +485,6 @@ class MainActivity : AppCompatActivity() {
             weekCourses.filter { it.dayOfWeek <= 5 }
         }
         binding.tvWeekContext.text = buildWeekContext(status, visibleCourses.size)
-        binding.fabAddCourse.visibility = if (visibleCourses.isEmpty()) {
-            android.view.View.GONE
-        } else {
-            android.view.View.VISIBLE
-        }
-
         binding.weekProgress.max = semester.totalWeeks
         binding.weekProgress.progress = currentWeek
         binding.weekProgress.setIndicatorColor(
@@ -324,24 +540,47 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
+        menu.findItem(R.id.action_today)?.actionView?.setOnClickListener {
+            goToCurrentWeek()
+        }
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
+            R.id.action_add_course -> {
+                openNewCourse()
+                true
+            }
             R.id.action_today -> {
-                viewModel.refreshSemesterStatus()
-                semesterWeekStatus?.week?.let { selectWeek(it, smoothScroll = true) }
+                goToCurrentWeek()
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
     }
 
+    private fun goToCurrentWeek() {
+        viewModel.refreshSemesterStatus()
+        semesterWeekStatus?.week?.let { selectWeek(it, smoothScroll = true) }
+    }
+
     override fun onResume() {
         super.onResume()
         applyDisplaySettings()
-        binding.bottomNavigation.selectedItemId = R.id.nav_home
+        val returningToHome = hasResumedOnce &&
+            binding.bottomNavigation.selectedItemId != R.id.nav_home
+        if (binding.bottomNavigation.selectedItemId != R.id.nav_home) {
+            suppressBottomNavigationMotion = true
+            binding.bottomNavigation.selectedItemId = R.id.nav_home
+            suppressBottomNavigationMotion = false
+        }
+        if (returningToHome) {
+            binding.bottomNavigation.post {
+                binding.bottomNavigation.findViewById<View>(R.id.nav_home)?.playNavigationMotion()
+            }
+        }
+        hasResumedOnce = true
         refreshWeekPager()
         updateWeekDisplay()
     }
@@ -351,6 +590,7 @@ class MainActivity : AppCompatActivity() {
         pageSettings = WeekPageSettings(
             showWeekend = prefs.showWeekend,
             showTimes = prefs.showTime,
+            showInactiveCourses = prefs.showInactiveCourses,
             sectionHeightDp = prefs.sectionHeightDp,
             sectionTimes = prefs.sectionTimes
         )

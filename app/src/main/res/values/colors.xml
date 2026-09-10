@@ -1,44 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- 主题颜色 -->
-    <color name="primary">#176B5B</color>
-    <color name="primary_variant">#0F4F43</color>
-    <color name="primary_container">#DDEFEA</color>
-    <color name="secondary">#D29436</color>
-    <color name="secondary_variant">#A66D1F</color>
+    <color name="primary">#3E628C</color>
+    <color name="primary_variant">#294967</color>
+    <color name="primary_container">#DCE8F5</color>
+    <color name="secondary">#D69043</color>
+    <color name="secondary_variant">#A96928</color>
 
     <!-- 背景颜色 -->
-    <color name="background">#F4F7F6</color>
-    <color name="surface">#FFFFFF</color>
-    <color name="surface_variant">#F8FAF9</color>
+    <color name="background">#EDF2FA</color>
+    <color name="surface">#FAFCFF</color>
+    <color name="surface_variant">#F3F6FB</color>
+    <color name="navigation_surface">#EBF4F7FC</color>
     <color name="error">#B3261E</color>
 
     <!-- 文字颜色 -->
     <color name="on_primary">#FFFFFF</color>
     <color name="on_secondary">#2B1B00</color>
-    <color name="on_background">#1D2422</color>
-    <color name="on_surface">#1D2422</color>
-    <color name="text_primary">#1D2422</color>
-    <color name="text_secondary">#66716E</color>
-    <color name="text_tertiary">#8C9693</color>
+    <color name="on_background">#1C2733</color>
+    <color name="on_surface">#1C2733</color>
+    <color name="text_primary">#1C2733</color>
+    <color name="text_secondary">#667487</color>
+    <color name="text_tertiary">#8A96A5</color>
 
     <!-- 课程表颜色 -->
-    <color name="course_red">#C65D57</color>
-    <color name="course_pink">#B7567A</color>
-    <color name="course_purple">#8062B5</color>
-    <color name="course_deep_purple">#6555A3</color>
-    <color name="course_indicate">#586FB3</color>
-    <color name="course_blue">#397EAE</color>
-    <color name="course_light_blue">#398CA6</color>
-    <color name="course_cyan">#368C8A</color>
-    <color name="course_teal">#397E70</color>
-    <color name="course_green">#4A855E</color>
-    <color name="course_light_green">#718B45</color>
-    <color name="course_lime">#8A913E</color>
-    <color name="course_yellow">#B4882F</color>
-    <color name="course_amber">#B8772F</color>
-    <color name="course_orange">#B9673E</color>
-    <color name="course_brown">#8A6859</color>
+    <color name="course_red">#E78387</color>
+    <color name="course_pink">#DD86A8</color>
+    <color name="course_purple">#A58BE2</color>
+    <color name="course_deep_purple">#8F82D3</color>
+    <color name="course_indicate">#819DDB</color>
+    <color name="course_blue">#68A6DA</color>
+    <color name="course_light_blue">#73B4DE</color>
+    <color name="course_cyan">#70C2C7</color>
+    <color name="course_teal">#68B8A8</color>
+    <color name="course_green">#7BB38C</color>
+    <color name="course_light_green">#9CB97B</color>
+    <color name="course_lime">#B0BE73</color>
+    <color name="course_yellow">#CDB36C</color>
+    <color name="course_amber">#DAA56E</color>
+    <color name="course_orange">#E28C70</color>
+    <color name="course_brown">#B39182</color>
 
     <!-- 课程颜色数组 -->
     <array name="course_colors">
@@ -61,14 +62,18 @@
     </array>
 
     <!-- 其他 -->
-    <color name="divider">#E3E9E7</color>
-    <color name="grid_line">#E8ECEB</color>
-    <color name="today_highlight">#DDEFEA</color>
-    <color name="today_column">#EDF7F4</color>
-    <color name="schedule_afternoon">#FAFCFB</color>
-    <color name="schedule_evening">#F6F9F8</color>
-    <color name="current_week_indicator">#176B5B</color>
+    <color name="divider">#DCE4EF</color>
+    <color name="grid_line">#DCE4EF</color>
+    <color name="today_highlight">#DCE8F5</color>
+    <color name="today_column">#2ADCE8F5</color>
+    <color name="schedule_afternoon">#1AFFFFFF</color>
+    <color name="schedule_evening">#24D9E5F5</color>
+    <color name="current_week_indicator">#3E628C</color>
+    <color name="detail_week">#18A995</color>
+    <color name="detail_time">#E19A3D</color>
+    <color name="detail_teacher">#4F84C4</color>
+    <color name="detail_room">#D65D64</color>
 
     <!-- 应用图标背景色 -->
-    <color name="ic_launcher_background">#176B5B</color>
+    <color name="ic_launcher_background">#3E628C</color>
 </resources>

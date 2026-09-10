@@ -1,0 +1,5218 @@
+{
+  "catalogGeneratedAt": "2026-09-02",
+  "directorySchemaVersion": 3,
+  "scanned": 578,
+  "promoted": 0,
+  "policy": "Promotion requires a school-official public source, an explicit academic endpoint, safe redirect/domain review, and an observable family signature. Static upstream references alone never qualify.",
+  "reasons": {
+    "invalid_url": 15,
+    "ip_literal": 141,
+    "missing_reference": 357,
+    "no_family_signature": 1,
+    "vpn_portal_without_resource": 64
+  },
+  "entries": [
+    {
+      "id": "wakeup_de36de46d32c451a",
+      "name": "金智教务",
+      "sourceType": "jz",
+      "adapterId": "wisedu_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_9906bff264be0c2c",
+      "name": "南软教务",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_ab1d282accefd72f",
+      "name": "强智教务",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_1790df9cb3b18c6e",
+      "name": "新青果教学安排表",
+      "sourceType": "kingo_new",
+      "adapterId": "kingosoft_new",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_d83cd7465c82896a",
+      "name": "正方教务",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_9ddff5ad17452828",
+      "name": "安徽大学江淮学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_3ba4aee7229179f3",
+      "name": "安徽工程大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_5b552ca8dc007d47",
+      "name": "安徽工业大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_3a6632c0e6a9c2fa",
+      "name": "安徽建筑大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_ca9991e6841f32ce",
+      "name": "安徽建筑大学城市建设学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_61294ea95e35306c",
+      "name": "安徽农业大学经济技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_ec07af6a9549976e",
+      "name": "安徽卫生健康职业学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_0c57e45841d4ddaa",
+      "name": "安徽文达信息工程学院",
+      "sourceType": "kingo_new",
+      "adapterId": "kingosoft_new",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_fd95ab8856606294",
+      "name": "安徽新华学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://10-8-6-10.webvpn.axhu.edu.cn/kbcx/xskbcx_cxXskbcxIndex.html",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_e1ddba257f9a1b0f",
+      "name": "安徽医科大学临床医学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_9bd8e0e73ce06338",
+      "name": "安徽邮电职业技术学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_fa64aafd9ad61b6d",
+      "name": "安顺学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_88f46c478c7358b4",
+      "name": "蚌埠学院",
+      "sourceType": "kingo_new",
+      "adapterId": "kingosoft_new",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_dba93f7ad109a687",
+      "name": "蚌埠医学院",
+      "sourceType": "kingo_new",
+      "adapterId": "kingosoft_new",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_76ef364c631a0775",
+      "name": "包头师范学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_fea808a550ffe829",
+      "name": "保定学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "http://webvpn.bdu.edu.cn/login",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_5a33125a71e5ba4c",
+      "name": "北部湾大学",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_9aed06bf19b54de8",
+      "name": "北华大学",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://10-2-0-102.sslvpn.beihua.edu.cn/jsxsd/",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_eb660a2d8e3b4238",
+      "name": "北华大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_b9b47246fb50cd3e",
+      "name": "北津学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_dd9a8aaa1bd83872",
+      "name": "北京城市学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://webvpn.bcu.edu.cn:8000/users/sign_in",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_cbb67ee419c304d4",
+      "name": "北京大学医学部 - 研究生",
+      "sourceType": "jz",
+      "adapterId": "wisedu_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_76435b1cca6ff323",
+      "name": "北京电子科技职业学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_bdfb7bf7d94527dd",
+      "name": "北京航空航天大学 - 研究生",
+      "sourceType": "jz",
+      "adapterId": "wisedu_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_e639c702ddd0703f",
+      "name": "北京化工大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_d36ea90f4ebed895",
+      "name": "北京化工大学昌平校区",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_a6531b8429cc18b0",
+      "name": "北京交通大学海滨学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_7c3553abd057290f",
+      "name": "北京科技大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_c17cb40c959c2ea5",
+      "name": "北京科技大学天津学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_4ff52b9957fbff72",
+      "name": "北京联合大学",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://wvpn.buu.edu.cn/login",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_c25d4bf5c0fb2618",
+      "name": "北京联合大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_27b5becff66ec414",
+      "name": "北京联合大学商务学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_fc7de965c1083e50",
+      "name": "北京联合大学应用文理学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_e2d7d4fa680fd596",
+      "name": "北京青年政治学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://vpn.bjypc.edu.cn/login",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_bf3eacae067600be",
+      "name": "北京社会管理职业学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_c90e21816603e1a2",
+      "name": "北京物资学院 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_e4e450b052f6ed73",
+      "name": "北京信息科技大学 - 研究生",
+      "sourceType": "jz",
+      "adapterId": "wisedu_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_85eaa753137bcc39",
+      "name": "北京信息职业技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://vpn.bitc.edu.cn/users/sign_in",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_08ce45536746e0b1",
+      "name": "北京印刷学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://webvpn.bupt.edu.cn/",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_defe0db56a47753d",
+      "name": "北京有色金属研究院 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_93eab54056dbd0b8",
+      "name": "北京语言大学",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://webvpn.blcu.edu.cn/users/sign_in",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_648a1d4e35d7ed95",
+      "name": "滨州科技职业学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_1d5584f01b31772f",
+      "name": "滨州医学院烟台校区",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_96cadc489fb14dd2",
+      "name": "渤海大学 - 研究生",
+      "sourceType": "jz",
+      "adapterId": "wisedu_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_069b146061e1cb40",
+      "name": "沧州交通学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://vpn.czjtu.edu.cn/users/sign_in",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_1f0b4e646d283bb2",
+      "name": "沧州交通学院 - 研究生",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_7443a4c276bb8e83",
+      "name": "曹妃甸职业技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_e0c1581ca07022fd",
+      "name": "常熟理工学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_7519ca4e22ae7003",
+      "name": "常熟理工学院（苏州常熟）",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_5360aef96c70c160",
+      "name": "常州大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_dc34711c41b4d40e",
+      "name": "常州轻工职业技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_921db63c6c3d70f1",
+      "name": "潮州卫生健康职业学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_bdd68fdb6f0de297",
+      "name": "成都工贸职业技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_e0e95906bdd2d03b",
+      "name": "成都体育学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://cas-cdsu-edu-cn-s.webvpn.cdsu.edu.cn:8118/cas/WEB/index.html",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_389beabc271b8c3c",
+      "name": "成都信息工程大学银杏酒店管理学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_5894a1025b45bea5",
+      "name": "成都学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_36effeebe6fdf891",
+      "name": "成都职业艺术大学",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_b60ee7abb47e168a",
+      "name": "承德石油高等专科学校",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_44f28d5d232161ed",
+      "name": "重庆传媒职业技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_a585204bc119683f",
+      "name": "重庆电子工程职业技术学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_138153b102b59569",
+      "name": "重庆工商大学融智学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_3f2ec9a3ecc378c2",
+      "name": "重庆建筑工程职业学院 - 研究生",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_a13b369e5cb04127",
+      "name": "重庆建筑科技职业学校",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_cb8df824b978beab",
+      "name": "重庆交通大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_73c863b84fd4e98d",
+      "name": "重庆交通职业学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_a80ea3a1896105ad",
+      "name": "重庆师范大学初等教育学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_ec14497816b1f412",
+      "name": "重庆师范大学涉外商贸学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_3ec66669c1b599ef",
+      "name": "重庆医科大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_6e0d4a458b619322",
+      "name": "重庆移通学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://10-252-6-31.webvpn.cqytxy.edu.cn/jwglxt/xtgl/login_slogin.html",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_0816c6ae68b22fda",
+      "name": "重庆邮电大学移通学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_9175e607e6fd98ec",
+      "name": "重庆幼儿师范高等专科学校",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_1b389c183e239289",
+      "name": "重庆智能工程职业学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_0999f38fc0f6b27a",
+      "name": "滁州职业技术学院",
+      "sourceType": "kingo_new",
+      "adapterId": "kingosoft_new",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_a0ff51e8feea1b9a",
+      "name": "川北医学院 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_d2505ca78263e111",
+      "name": "长春大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_cdf8116042f10991",
+      "name": "长春工业大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_0eca4d6143cf0bd4",
+      "name": "长春汽车工业高等专科学校",
+      "sourceType": "jz",
+      "adapterId": "wisedu_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_ce364bd9b09b4243",
+      "name": "长江大学工程技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_43423e7095dd486b",
+      "name": "长沙理工大学计通学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_11edad6bcade40c4",
+      "name": "长沙师范学院",
+      "sourceType": "kingo_new",
+      "adapterId": "kingosoft_new",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_f0b4f480ab70c0f9",
+      "name": "长沙幼儿师范高等专科学校",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_7dbd821f821c3025",
+      "name": "大理大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_f4bfd03605c2c3e8",
+      "name": "大连大学",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://webvpn.dlu.edu.cn/login",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_ce0dbc3b13a7c73d",
+      "name": "大连海事大学 - 研究生",
+      "sourceType": "jz",
+      "adapterId": "wisedu_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_d20f7e6841ff3687",
+      "name": "大连海洋大学应用技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_d1de9fb087c6b317",
+      "name": "大连医科大学",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_15a4e34ae258d2d7",
+      "name": "定西师范高等专科学校",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_6da4c41fe375ba2a",
+      "name": "东北大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_15569f5b90d4b498",
+      "name": "东北林业大学",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://jwcnew.webvpn.nefu.edu.cn/dblydx_jsxsd/",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_dfe483e6a368f16b",
+      "name": "东莞理工学院 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_2a3adbfdc2f494f1",
+      "name": "东莞理工学院城市学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_6fda394f2417bb53",
+      "name": "东华理工大学 - 研究生",
+      "sourceType": "jz",
+      "adapterId": "wisedu_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_086b45986d6e35c3",
+      "name": "福建工程学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://i.webvpn.fjut.edu.cn/index.portal",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_333ea70c7d5b8910",
+      "name": "福建理工大学",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://webvpn.fjut.edu.cn/users/sign_in",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_6f9f61bfba315b09",
+      "name": "福建师范大学协和学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_459c075873748a05",
+      "name": "福建医科大学",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://eone-443.webvpn.fjmu.edu.cn/oauth2/authorize",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_5adf23eeb6a3f78a",
+      "name": "福建医科大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_fd8abc6fc8bfd776",
+      "name": "福建中医药大学",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_1e4edf33ec3ab85f",
+      "name": "福州外语外贸学院 - 研究生",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_3a8c527452f61d14",
+      "name": "福州英华职业学院",
+      "sourceType": "kingo_new",
+      "adapterId": "kingosoft_new",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_ad65f1caff1543da",
+      "name": "阜阳幼儿师范高等专科学校",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_e0710d36f4b26c01",
+      "name": "甘肃理工大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_e3975477e364b98e",
+      "name": "甘肃农业大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_7dba80e3bc6f9f19",
+      "name": "甘肃卫生职业学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_982bb87ef8cc2de9",
+      "name": "甘肃卫生职业学院 - 研究生",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_677078e4d2e42964",
+      "name": "甘肃医学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_5bb307f4bdef7f00",
+      "name": "甘肃政法大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_3818db9a45072a8d",
+      "name": "甘肃中医药大学 - 研究生",
+      "sourceType": "jz",
+      "adapterId": "wisedu_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_de1157c782aa8a8c",
+      "name": "赣南卫生健康职业学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_4b9aff64091793c3",
+      "name": "广东财经大学华商学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_434cbe0c0de33a27",
+      "name": "广东潮州卫生健康职业学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_4b2a8057e32f3a80",
+      "name": "广东创新科技职业学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_1d2691a620daf950",
+      "name": "广东大学松田学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_a5d7d31a503466c7",
+      "name": "广东工业大学 - 研究生",
+      "sourceType": "jz",
+      "adapterId": "wisedu_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_f5425656a95b2be0",
+      "name": "广东工业大学华立学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_aaebd1c47c6f322c",
+      "name": "广东海洋大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_01d02c6bbb893d8a",
+      "name": "广东环境工程职业学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_2525256a5f429941",
+      "name": "广东技术师范大学",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://webvpn.gpnu.edu.cn/",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_ec6080c21ae4c6e5",
+      "name": "广东技术师范大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_0464d2865bb48372",
+      "name": "广东岭南现代技师学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_b784e24679c1a334",
+      "name": "广东茂名健康职业学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_e25e237d1e233761",
+      "name": "广东南华工商职业技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_c8ecc41512292c6d",
+      "name": "广东青年职业学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_4ef3c2d79fa8c23f",
+      "name": "广东轻工职业技术学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_ab8dd5b0efa86de0",
+      "name": "广东司法警官职业学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_75734e4134911b6f",
+      "name": "广东外语艺术职业学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_bf16e6a06a29c85c",
+      "name": "广东舞蹈戏剧职业学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_87a9e675d95b4a92",
+      "name": "广东行政职业学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://webvpn.gdxzzy.edu.cn/login",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_01cb44bd493c5ebc",
+      "name": "广东职业技术学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_b58d1622443811fe",
+      "name": "广西大学行健文理学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_b27184649b062280",
+      "name": "广西电力职业技术学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://ids.vpn.gxdlxy.com/authserver/login",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_6edf69b2e9c4461f",
+      "name": "广西经贸职业技术学院 - 研究生",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_dda7d40826423cb2",
+      "name": "广西科技大学鹿山学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_6777d0b8033522e4",
+      "name": "广西民族大学",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://cas-443.webvpn.gxmzu.edu.cn/lyuapServer/login",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_d5b6b1f71cb93c2c",
+      "name": "广西民族大学相思湖学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_95acfe61fd5f50c8",
+      "name": "广西农业职业技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_79a86f3466ce8aca",
+      "name": "广西师范大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_ea0c2e2f2c2e089f",
+      "name": "广西师范学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_10d4d2a7981dd6fd",
+      "name": "广西师范职业学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_80d16384b40b6b3b",
+      "name": "广西体育高等专科学校",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_914287348444c36f",
+      "name": "广西外国语学校",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_43f6b5e9d67b6026",
+      "name": "广西梧州学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_634a81fb58efbd93",
+      "name": "广西职业技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_db59700c9400975e",
+      "name": "广西制造工程技术职业学院",
+      "sourceType": "kingo_new",
+      "adapterId": "kingosoft_new",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_7c7ff6afeaf6337c",
+      "name": "广州财经学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_c9f5502a3817d77e",
+      "name": "广州大学松田学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_6da996af3b2f6424",
+      "name": "广州南洋理工职业学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_ce8f575fd3af4555",
+      "name": "广州中医药大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_1ac7053113d8e454",
+      "name": "贵阳护理职业学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_19e2be038d7fcc4d",
+      "name": "贵阳信息技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_c903e52aeb58e1b4",
+      "name": "贵阳学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_b3fd399c7306b250",
+      "name": "贵阳中医学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_f7318c237f007b00",
+      "name": "贵州大学",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_2c16bae874bdba8f",
+      "name": "贵州大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_17830481101a9c97",
+      "name": "贵州大学科技学院",
+      "sourceType": "kingo_new",
+      "adapterId": "kingosoft_new",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_edb86b05d3a2e30c",
+      "name": "贵州大学明德学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_05d7a78267e6dd37",
+      "name": "贵州工程应用技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_560a48eef31e3ac4",
+      "name": "贵州交通职业技术学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_b521813f6dad3ffb",
+      "name": "贵州师范大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_098474d28370b614",
+      "name": "贵州食品工程职业学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_4cee11b092fe030c",
+      "name": "桂林电子科技大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_07d488d2ec558ec7",
+      "name": "桂林理工博文管理学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_15f065f56472f833",
+      "name": "桂林理工大学博文管理学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_e17049de862fa9b3",
+      "name": "哈尔滨电力职业技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_d0995316f55d4406",
+      "name": "哈尔滨工程大学",
+      "sourceType": "jz",
+      "adapterId": "wisedu_auto",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://jwgl.wvpn.hrbeu.edu.cn/jwapp/sys/wdkb/*default/index.do",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_6657d2488f469b7f",
+      "name": "哈尔滨工业大学华德学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_780755a180ba447d",
+      "name": "哈尔滨华徳学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_f8f1851d4af66add",
+      "name": "哈尔滨华德学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_2af42f3281ff9879",
+      "name": "海南大学 - 研究生",
+      "sourceType": "jz",
+      "adapterId": "wisedu_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_b6c5769d3e4ab77f",
+      "name": "海南工商职业学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "invalid_url",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_4f49847feb0da41b",
+      "name": "海南热带海洋学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_06b71d74042c820a",
+      "name": "海南师范大学",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_a5f3cf1467c0451b",
+      "name": "海南医学院",
+      "sourceType": "kingo_new",
+      "adapterId": "kingosoft_new",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_698bd4e40c2e1e29",
+      "name": "邯郸学院 - 研究生",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_48b26e2d94f94ffa",
+      "name": "汉江师范学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://webvpn.hjnu.edu.cn/",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_e638cd39459ab34f",
+      "name": "汉口学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_69bfda1119ed4128",
+      "name": "杭州电子科技大学信息工程学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_5eb71df31f553fa7",
+      "name": "杭州医学院 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_7827c2f798fa5083",
+      "name": "杭州职业技术学院",
+      "sourceType": "kingo_new",
+      "adapterId": "kingosoft_new",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_bc1172ee07946248",
+      "name": "合肥城市学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_ca1723628f1b8b59",
+      "name": "合肥工业大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_90690a711067840e",
+      "name": "合肥学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_71b339243452e3cb",
+      "name": "河北北方学院动物科技学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_da83ca6bed4cba67",
+      "name": "河北地质大学华信学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_4c256dba7336e470",
+      "name": "河北东方学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_c71bce252b007e48",
+      "name": "河北工业职业技术大学",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "invalid_url",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_13577a998ad898d0",
+      "name": "河北工业职业技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_6655f4a30162c323",
+      "name": "河北环境工程学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://webvpn.hebuee.edu.cn/",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_fb288d50866524a7",
+      "name": "河北机电职业技术学院",
+      "sourceType": "kingo_new",
+      "adapterId": "kingosoft_new",
+      "reason": "invalid_url",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_11464b9c5e4a0188",
+      "name": "河北交通职业技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "invalid_url",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_9da55ba526080274",
+      "name": "河北经贸大学经济管理学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_ddabcaddd62e1c5f",
+      "name": "河北科技大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_4d65f5c391e7b4f5",
+      "name": "河北科技大学理工学院",
+      "sourceType": "kingo_new",
+      "adapterId": "kingosoft_new",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_1e05ac49a67d821d",
+      "name": "河北科技师范学院 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_fe1203d6153f53fb",
+      "name": "河北美术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_4c564d3eb76d14a8",
+      "name": "河北农业大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_7b7686fe0263d20b",
+      "name": "河北农业大学海洋学院",
+      "sourceType": "jz",
+      "adapterId": "wisedu_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_6e9ff20b27d19683",
+      "name": "河北外国语学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_68bca5073ec47ce6",
+      "name": "河北医科大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_b7e2877940563970",
+      "name": "河南财政金融学院象湖校区",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_c36306581036b51f",
+      "name": "河南工业大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_cba2e4d55dd9a4e3",
+      "name": "河南机电职业学院",
+      "sourceType": "kingo_new",
+      "adapterId": "kingosoft_new",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_80a32144250ad212",
+      "name": "河南科技大学应用工程学院",
+      "sourceType": "kingo_new",
+      "adapterId": "kingosoft_new",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_52bba7d40c44b295",
+      "name": "河南牧业经济学院",
+      "sourceType": "kingo_new",
+      "adapterId": "kingosoft_new",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_8ec98747b6156b0c",
+      "name": "河南师范大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_29b3a29a5633da3f",
+      "name": "河南中医药大学",
+      "sourceType": "kingo_new",
+      "adapterId": "kingosoft_new",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_880acdc2be3df44f",
+      "name": "河西学院",
+      "sourceType": "kingo_new",
+      "adapterId": "kingosoft_new",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_80453ea02c2bb26e",
+      "name": "黑河学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://172-16-121-26.webvpn.hhxy.edu.cn/jwglxt/kbcx/xskbcx_cxXskbcxIndex.html",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_4c358b88d3a56b8f",
+      "name": "黑龙江工程学院昆仑旅游学院",
+      "sourceType": "kingo_new",
+      "adapterId": "kingosoft_new",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_2b3e14f937276329",
+      "name": "黑龙江工业学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "http://webvpn.hljut.edu.cn/users/sign_in",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_6c047294f47c74ba",
+      "name": "横店影视学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_c1987e7c5a68bad2",
+      "name": "衡阳师范学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_f2b33538bca70bc4",
+      "name": "呼和浩特职业学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_226deca56255f4f1",
+      "name": "呼伦贝尔学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "invalid_url",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_2c8ccfd77288fa35",
+      "name": "呼伦贝尔学院 - 研究生",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_85577ad06cc82633",
+      "name": "湖北大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_a5b5640d81894f3c",
+      "name": "湖北经济学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_5fe7b8a1daa3e6a3",
+      "name": "湖北经济学院 - 研究生",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_3f077855c9a0fe32",
+      "name": "湖北警官学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "invalid_url",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_1b5fc5c351e2a97d",
+      "name": "湖北师范大学 - 研究生",
+      "sourceType": "jz",
+      "adapterId": "wisedu_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_7cd0ee5e5b6d3c83",
+      "name": "湖北师范大学文理学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_80123e469eb04ca3",
+      "name": "湖北文理学院 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_f599aa58f3d65eb5",
+      "name": "湖北孝感美珈职业学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_c8ad1e65250da4a6",
+      "name": "湖北中医药大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_d39e6d3497e7b160",
+      "name": "湖南工商大学北津学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_f8eca1ec67f03af4",
+      "name": "湖南工业职业学院",
+      "sourceType": "jz",
+      "adapterId": "wisedu_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_bf74aa45cb75abf1",
+      "name": "湖南吉利汽车职业技术学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_c8514b0f761c9aa6",
+      "name": "湖南吉利汽车职业技术学院 - 研究生",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_5709c91994ff17cf",
+      "name": "湖南科技大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_655be71724b9309e",
+      "name": "湖南劳动人事职业学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "invalid_url",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_5e1f8b991b4f0dc0",
+      "name": "湖南理工学院 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_b0556ae613a520ee",
+      "name": "湖南南华大学",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_35f803b0967a22d8",
+      "name": "湖南南华大学船山学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_19a5d41eb46afcb0",
+      "name": "湖南农业大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_9f583256e23a99e1",
+      "name": "湖南商学院北津学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_e36987a333b9a365",
+      "name": "湖南师范大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_5dd1fb7708db3b45",
+      "name": "湖南铁路科技职业学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_ceb7d715e8ce7d0f",
+      "name": "湖南外国语职业学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_60bac764e1096713",
+      "name": "湖南文理学院芙蓉学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_8413249f0ea1071a",
+      "name": "湖州师范学院求真学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_145925fb48f6a86a",
+      "name": "华北电力大学",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://ids-443.webvpn.ncepu.edu.cn/",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_fefaabf005031e46",
+      "name": "华北电力大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_d804bda43ab01d14",
+      "name": "华北电力大学北京校区",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_3f7292ab3fd2af2c",
+      "name": "华北电力大学科技学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_02ec2ba581730b9b",
+      "name": "华东交通大学理工学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_7c8be92e9029337a",
+      "name": "华东政法大学 - 研究生",
+      "sourceType": "jz",
+      "adapterId": "wisedu_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_8f8eacf7d74329b2",
+      "name": "华立技师学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_83a3bbeec054e7c7",
+      "name": "华南理工大学广州学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_bb250376e3120ed7",
+      "name": "华中科技大学文华学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_7925dedd27699a3a",
+      "name": "淮安生物工程高等职业学校",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_6dd7a27a87dd0868",
+      "name": "淮安信息技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_5890bd6319d9ed23",
+      "name": "淮安信息职业技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_ad0752f34e1c8e38",
+      "name": "淮海工学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_316c9fc189379c9d",
+      "name": "淮南师范学院泉山校区",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_5de311cfd5fb7147",
+      "name": "黄河科技学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://vpn.hhstu.edu.cn/login/index",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_8b392a07660848a4",
+      "name": "黄山学校",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_40dfae48f13a564a",
+      "name": "冮苏工程职业技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_5d1d387ca3c834be",
+      "name": "吉安幼儿师范高等专科学校",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "no_family_signature",
+      "safeUrl": "https://jw.japec.edu.cn//sso/lyiotlogin",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_019e50c4f729b97d",
+      "name": "吉利学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_025e3160a9dc2540",
+      "name": "吉利医药学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_47219b08504d0a13",
+      "name": "吉林财经大学",
+      "sourceType": "jz",
+      "adapterId": "wisedu_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_fea67b55d64e6689",
+      "name": "吉林大学",
+      "sourceType": "jz",
+      "adapterId": "wisedu_auto",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://vpn.jlu.edu.cn/login",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_4a966bde787a1e55",
+      "name": "吉林大学(新)教务管理系统 - 研究生",
+      "sourceType": "jz",
+      "adapterId": "wisedu_auto",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://vpn.jlu.edu.cn/login",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_0dfc83e037c608c8",
+      "name": "吉林大学珠海学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_850e043e04b51808",
+      "name": "吉林电子信息职业技术学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "invalid_url",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_754bf32cfac60e84",
+      "name": "吉林工程技术师范",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_a55cf643d18e4571",
+      "name": "吉林华桥外国语学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_4f69bc1a7a9c0676",
+      "name": "吉林体育学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://webvpn.jlsu.edu.cn:4431/portal/",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_d20a7d7ea8c951f2",
+      "name": "吉林外国语大学",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_c3029ce3f9776a75",
+      "name": "吉林医药学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "http://vpn.jlmu.cn/users/sign_in",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_d1fc45ee0dc1a641",
+      "name": "吉首大学",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://webvpn.jsu.edu.cn/",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_84e1e5f81aef3f6e",
+      "name": "集宁师范学院",
+      "sourceType": "kingo_new",
+      "adapterId": "kingosoft_new",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_3789feafc9490224",
+      "name": "济宁学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_12c696022b605429",
+      "name": "济宁职业技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_9aaba22b229044ee",
+      "name": "暨南大学",
+      "sourceType": "jz",
+      "adapterId": "wisedu_auto",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://webvpn.jnu.edu.cn/",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_f4596b4e748d9e26",
+      "name": "嘉兴学院南湖学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_d9c9733d3cc53983",
+      "name": "嘉应学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "invalid_url",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_dbb240d825c0c18a",
+      "name": "嘉应学院医学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_2c5868a108fb7089",
+      "name": "江汉大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_591d3d772c80d69a",
+      "name": "江汉大学文理学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_ea2c67948bc63e70",
+      "name": "江南大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_ef7badc0f622b93b",
+      "name": "江苏财经职业技术学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_1dcbe5a72f199d48",
+      "name": "江苏城乡建设学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_856d4a5a9463a1cb",
+      "name": "江苏电子信息职业技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_5d577a750880a3ad",
+      "name": "江苏电子信息职业学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://jwpd.webvpn.jsei.edu.cn/sso/jznewsixlogin",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_fe8aad1345162601",
+      "name": "江苏科技大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_6da8ad79d3039010",
+      "name": "江西师范大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_e9a18faa447b7d77",
+      "name": "江西卫生职业学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_dd60c52567729c24",
+      "name": "江西中医药大学科技学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_a47c26d719a1006b",
+      "name": "焦作师范高等专科学校",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://webvpn.jzsz.edu.cn/login/index",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_5f2765e6b9ebaa4f",
+      "name": "景德镇陶瓷职业技术学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_07693e907daa0a2d",
+      "name": "九江职业技术学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_b5c969d31360d001",
+      "name": "九州职业技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_0432b0ba91c2302e",
+      "name": "开封职业学院",
+      "sourceType": "kingo_new",
+      "adapterId": "kingosoft_new",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_52dbedba161433fe",
+      "name": "凯里学院 - 研究生",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_f61cb88d3d8d1703",
+      "name": "空军军医大学",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_61feb2003f12468d",
+      "name": "昆明国土资源学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_b35e235b3c50e9be",
+      "name": "昆明理工大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_a5b666e714789dd0",
+      "name": "昆明医科大学",
+      "sourceType": "kingo_new",
+      "adapterId": "kingosoft_new",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_5db00e7dc3bc3677",
+      "name": "昆明医科大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_e274521c4c47b5f4",
+      "name": "莱芜职业技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_2e9831785c87947a",
+      "name": "兰考三农职业学院",
+      "sourceType": "kingo_new",
+      "adapterId": "kingosoft_new",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_be18229ac0195d65",
+      "name": "兰州财经大学陇桥学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_576ca7610435e707",
+      "name": "兰州财经大学长青学院",
+      "sourceType": "kingo_new",
+      "adapterId": "kingosoft_new",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_3d497d216597e620",
+      "name": "兰州交通大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_4f7503d852b1d6f0",
+      "name": "兰州理工大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_fa2de65bc01e6e79",
+      "name": "兰州理工大学技术工程学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_14fa19d4c170715f",
+      "name": "兰州资源环境职业技术学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_7e8660fe698e1932",
+      "name": "廊坊师范学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "invalid_url",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_3eb9c6480a3c9379",
+      "name": "廊坊卫生职业学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://vpn.lfwx.net:44321/portal/",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_03470e66561f22bb",
+      "name": "连云港师范高等专科学校",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_5aa68b416272e803",
+      "name": "辽宁传媒学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_2d395a9622f70fc1",
+      "name": "辽宁工程技术大学 - 研究生",
+      "sourceType": "jz",
+      "adapterId": "wisedu_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_c0d45433b50ef0da",
+      "name": "辽宁警察学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_5edb2142a149adf6",
+      "name": "辽宁农业职业技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_0abff3df8cdd0a08",
+      "name": "辽宁特殊教育师范高等专科学校",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_428314ee809eab80",
+      "name": "聊城职业技术学院",
+      "sourceType": "kingo_new",
+      "adapterId": "kingosoft_new",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_dd7940759eca5c6c",
+      "name": "林业职业技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_eba99edb6a439614",
+      "name": "岭南师范学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_47bf027e508c0ddf",
+      "name": "陆军军医大学",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_34770b04e6eb5bbb",
+      "name": "满洲里俄语职业学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "invalid_url",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_7c15852ba888e75c",
+      "name": "闽南师范大学",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://sso-443.webvpn.mnnu.edu.cn/login",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_859c11fc4f0c3c2f",
+      "name": "牡丹江师范学院",
+      "sourceType": "kingo_new",
+      "adapterId": "kingosoft_new",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "http://webvpn.mdjnu.edu.cn/",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_984b1770ba3f5c33",
+      "name": "南昌大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_b7b75b697f25c0e7",
+      "name": "南昌航空大学科技学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_ea72f4ad23c112e4",
+      "name": "南京工业大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_ddc229455635e0ca",
+      "name": "南京工业大学-研究生 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_e13957d4e2ea4393",
+      "name": "南京航空航天大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_96550d83c768a6d5",
+      "name": "南京审计大学 - 研究生",
+      "sourceType": "jz",
+      "adapterId": "wisedu_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_f61907f24ec0bcf3",
+      "name": "南京师范大学 - 研究生",
+      "sourceType": "jz",
+      "adapterId": "wisedu_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_ae8f5901a2535c3f",
+      "name": "南京师范大学中北学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_dd3842e7feba8b81",
+      "name": "南京特殊教育师范学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_60a7f85162ee8c08",
+      "name": "南京信息工程大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_45be20bcdbf46e5a",
+      "name": "南京信息工程大学滨江学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_5028744a1ee4eabb",
+      "name": "南京医科大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_26597f5b4a7f10a7",
+      "name": "南京中医药大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_65240f3db58b3d8e",
+      "name": "南通大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_3672be2203a1e54d",
+      "name": "南通航运职业技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_72fb4d4754ebdfa5",
+      "name": "南通科技职业学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_99ac3cfc5d89c76f",
+      "name": "内蒙古包头师范学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_e576908e9836ac84",
+      "name": "内蒙古大学 - 研究生",
+      "sourceType": "jz",
+      "adapterId": "wisedu_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_cb2530bd51793df4",
+      "name": "内蒙古电子信息职业技术学院 - 研究生",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_7c58065db0cef3f4",
+      "name": "内蒙古工业大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_04541cf9a1d196b6",
+      "name": "内蒙古警察职业学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_6b8323d3aa746624",
+      "name": "内蒙古科技大学包头师范学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_3b15384a97052c6f",
+      "name": "内蒙古科技大学包头医学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_9360bc74731246ae",
+      "name": "内蒙古民族大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_69bd6b2f71b30a86",
+      "name": "宁波大红鹰学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_fe103e04fbbabea9",
+      "name": "宁波卫生职业技术学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://vpn.nchs.edu.cn/portal/",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_ce1ba26aabeeda92",
+      "name": "宁波职业技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_576d0fe23213faf2",
+      "name": "宁夏师范大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_59435a923bf24158",
+      "name": "齐齐哈尔高等师范专科学校",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_8c50fdc539b45e69",
+      "name": "黔南民族幼儿师范高等专科学校",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_8af683606643f43d",
+      "name": "秦皇岛职业技术学院",
+      "sourceType": "kingo_new",
+      "adapterId": "kingosoft_new",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_69284ae3087f462b",
+      "name": "青岛滨海学",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_f1225f835888ce37",
+      "name": "青岛电影学院",
+      "sourceType": "jz",
+      "adapterId": "wisedu_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_4cfd6a1e5f800e2d",
+      "name": "青岛科技大学高密校区",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_87414ac5baa07e75",
+      "name": "青岛理工大学临沂校区",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_8ddf206bbace9068",
+      "name": "青海大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_3580bdcdde36333c",
+      "name": "曲阜师范大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_e6891b4e9fc214d8",
+      "name": "衢州职业技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://vpn.qzct.net/",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_a79fc00802e2f39f",
+      "name": "泉州纺织服装学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_79456bf510d6beef",
+      "name": "日照航海工程职业学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_8b09f02ebb8013d8",
+      "name": "三明医学科技职业学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_ae794a5ec4568576",
+      "name": "三峡医药高等专科学校",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_44952239427ef4db",
+      "name": "三亚学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_899059c774470f07",
+      "name": "山东第二医科大学",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://webvpn.sdsmu.edu.cn/login",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_3a16bea693803c50",
+      "name": "山东第二医科大学（原潍坊医学院）",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://webvpn.sdsmu.edu.cn/login",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_e7e45186c0390709",
+      "name": "山东第一医科大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_5299cb0067b0c0fa",
+      "name": "山东电子职业技术学院 - 研究生",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_b16790a911206b77",
+      "name": "山东服装职业学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_2e2170bc0058a0b5",
+      "name": "山东华宇工学院 - 研究生",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_368b86f74a4bfbec",
+      "name": "山东交通学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_11327d2bb912bc56",
+      "name": "山东科技大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_b4b9bc3bbd5da457",
+      "name": "山东科技大学泰安科技学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_3cdc68f00c8a9928",
+      "name": "山东理工大学",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_f9ac20a09532749b",
+      "name": "山东理工大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_3d69f14533ef091e",
+      "name": "山东司法警官职业学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_0e5a1a94200672fd",
+      "name": "山东外贸职业技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_863f4a2e367443e8",
+      "name": "山东文化产业职业学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_adf7586661083906",
+      "name": "山东现代学院",
+      "sourceType": "kingo_new",
+      "adapterId": "kingosoft_new",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_57f46a43be98496a",
+      "name": "山东政法大学",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_ee62c2e3d7b6faca",
+      "name": "山东中医院大学",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_b97403d9ee9bdc72",
+      "name": "山西大同大学",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_ea35f163c4aeac42",
+      "name": "山西大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_d5f6c21ba65b7008",
+      "name": "山西工程科技职业大学",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_26c40aad7d60f0ff",
+      "name": "山西晋中理工学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_7f8b8dfe330ca357",
+      "name": "山西警察学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_3565c401d6df8eb3",
+      "name": "山西科技学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_77b22717c81477d5",
+      "name": "山西医科大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_536c3c0ad3250fd2",
+      "name": "山西应用科技学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "invalid_url",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_76fdc8753a7ece70",
+      "name": "陕西机电职业技术学校",
+      "sourceType": "jz",
+      "adapterId": "wisedu_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_cb46813c51812e51",
+      "name": "陕西交通职业技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_582eef077399dcd1",
+      "name": "陕西能源职业技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_21176477cbbbb3f9",
+      "name": "陕西省建筑材料工业学校",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_f9f7b3823e74fd96",
+      "name": "陕西铁路工程职业技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_aa587012decfc111",
+      "name": "汕头大学",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "http://jw-stu-edu-cn.webvpn.stu.edu.cn:8118/",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_acfa4ee6a2634b5e",
+      "name": "上海电力大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_d22ebefe03f4e0dc",
+      "name": "上海交通大学 - 研究生",
+      "sourceType": "jz",
+      "adapterId": "wisedu_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_9d389ee2b5d93fd7",
+      "name": "上海交通大学医学院 - 研究生",
+      "sourceType": "jz",
+      "adapterId": "wisedu_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_2247e9280b5b725b",
+      "name": "上海理工大学 - 研究生",
+      "sourceType": "jz",
+      "adapterId": "wisedu_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_6f0295a106fd7e75",
+      "name": "上海商学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_7dfcd14c57da7028",
+      "name": "上海师范大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_a9e8ffcbfe2f0d5c",
+      "name": "上海体育大学",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_abc877cefb73c00e",
+      "name": "上海体育学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_c32ccfe2eb4396b6",
+      "name": "上海体育学院 - 研究生",
+      "sourceType": "jz",
+      "adapterId": "wisedu_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_8dc66acf81f6d6bc",
+      "name": "上海外国语大学 - 研究生",
+      "sourceType": "jz",
+      "adapterId": "wisedu_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_0b3c2dbc143d6ce1",
+      "name": "上海政法学院 - 研究生",
+      "sourceType": "jz",
+      "adapterId": "wisedu_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_221a2be64eb625e1",
+      "name": "绍兴文理学院 - 研究生",
+      "sourceType": "jz",
+      "adapterId": "wisedu_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_6973b042a4cf0b58",
+      "name": "绍兴文理学院元陪学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_cafa41a81efd2e05",
+      "name": "深圳大学 - 研究生",
+      "sourceType": "jz",
+      "adapterId": "wisedu_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_81258b2b69838935",
+      "name": "深圳职业技术大学",
+      "sourceType": "jz",
+      "adapterId": "wisedu_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_30a13bae9c9fb286",
+      "name": "深圳职业技术学院",
+      "sourceType": "jz",
+      "adapterId": "wisedu_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_27fa361f7855654b",
+      "name": "沈阳航空航天大学",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://webvpn.sau.edu.cn/Unauthorized",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_8d2677c85e23a470",
+      "name": "沈阳理工大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_40c91b3cb73f0a38",
+      "name": "沈阳师范大学",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://210-30-208-200.webvpn.synu.edu.cn/(ku5dsqznpdlpim45ytupko55)/default2.aspx",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_f550d8a34ec1eb10",
+      "name": "沈阳职业技术学院",
+      "sourceType": "kingo_new",
+      "adapterId": "kingosoft_new",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_6fb884ce219a53a7",
+      "name": "石家庄铁路职业技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "invalid_url",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_9d07db20dfe13fda",
+      "name": "首都师范大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_b98bf9227b3e5a3a",
+      "name": "四川财经职业学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "http://cas-scpcfe-cn.vpn.scpcfe.cn:8118/cas/login",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_85a7e6de99a713f8",
+      "name": "四川机电职业技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_40eb9b32e40208e2",
+      "name": "四川交通职业技术",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_f647c38ce53680ee",
+      "name": "四川理工学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_450e62c345a5bd38",
+      "name": "四川美术学院 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_2051cabdc132ba94",
+      "name": "四川天一学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_7e05457a07412433",
+      "name": "四川托普信息职业技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_d0594e18525a9fec",
+      "name": "四川外国语大学成都学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_f85cf35866b45a82",
+      "name": "四川文轩职业学校",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_ce108ce0f54dc81a",
+      "name": "四川邮电职业技术学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "http://ces-sptc-cn.vpn.sptc.cn:8118/cas/login",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_697d4aada08c518b",
+      "name": "四川幼儿师范高等专科学校",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_9808a76ce568451e",
+      "name": "苏州高博软件技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_fd8bda66f100c001",
+      "name": "苏州高博软件技术职业学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_35d0915479d36361",
+      "name": "苏州工业园区服务外包学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_fd4a20035236b830",
+      "name": "苏州健雄职业技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://jxvpn.csit.edu.cn:10443/enlink/sso/login",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_4770230e093388fc",
+      "name": "苏州科技大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_bb0a24974f1667e2",
+      "name": "苏州市职业大学",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_48721b7aa83b9a28",
+      "name": "宿州学院",
+      "sourceType": "kingo_new",
+      "adapterId": "kingosoft_new",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_48ac71d8b0f78a75",
+      "name": "太湖学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_cae748236aa8b7e8",
+      "name": "太原科技大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_ae4650a5a419dfe7",
+      "name": "太原科技大学华科学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_588f7a4ee1115287",
+      "name": "太原理工大学现代科技学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_a40121dd1a989bf6",
+      "name": "唐山工业职业技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_29c4208a1c4aa994",
+      "name": "唐山海运职业学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "invalid_url",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_d0f78fef6e74af4d",
+      "name": "唐山职业技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://cas.vpn.tsvtc.edu.cn:20000/cas/login",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_f82b2dc4f3ded369",
+      "name": "天津滨海职业学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "invalid_url",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_19b7a8e13beede6a",
+      "name": "天津城建大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_1c42058e5e976b9a",
+      "name": "天津城市职业学院 - 研究生",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_2ae9dfbb2eade404",
+      "name": "天津大学仁爱学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_59e7fc0c7b000ffc",
+      "name": "天津工业大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_44a7b1502c030230",
+      "name": "天津科技大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_94cee5c552d44cf9",
+      "name": "天津师范大学",
+      "sourceType": "kingo_new",
+      "adapterId": "kingosoft_new",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_722e467e0b93a378",
+      "name": "天津市职业大学",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://vpn.tjtc.edu.cn/portal/",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_2cbbb0435f601da8",
+      "name": "天津体育学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://vpn.tjus.edu.cn/users/sign_in",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_483e0b7349aec53f",
+      "name": "天津体育学院 - 研究生",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_aefff3e0c41a3b93",
+      "name": "天津外国语大学滨海外事学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_62ce29aad3b9e16d",
+      "name": "天津医科大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_d9d2c149b428bf85",
+      "name": "天津职业大学",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_06801d2421cbaa55",
+      "name": "铁道警察学院",
+      "sourceType": "kingo_new",
+      "adapterId": "kingosoft_new",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_cc0903618de9b2a5",
+      "name": "潍坊工程职业学院",
+      "sourceType": "kingo_new",
+      "adapterId": "kingosoft_new",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_4e8101f113c03eb4",
+      "name": "潍坊科技学院",
+      "sourceType": "kingo_new",
+      "adapterId": "kingosoft_new",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_ec8e9ddbe2dda850",
+      "name": "潍坊医学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://webvpn.sdsmu.edu.cn/login",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_97825f7186574d94",
+      "name": "渭南师范学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_951dfc51f094fa67",
+      "name": "温州大学瓯江学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_cabbd56df13e88c2",
+      "name": "梧州职业学院",
+      "sourceType": "kingo_new",
+      "adapterId": "kingosoft_new",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_35b196dcd62e7595",
+      "name": "五邑大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_f58fcf4f0a46b256",
+      "name": "武昌工学院 - 研究生",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_ca2e22f3d8ed6387",
+      "name": "武汉电力职业学院技术",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_ecef842d67368da1",
+      "name": "武汉纺织大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_beb2f072af1a7af6",
+      "name": "武汉工程大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_9109b66a872368e5",
+      "name": "武汉工程职业技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_45d499df66a404e5",
+      "name": "武汉商贸职业学校",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_c5a97994042185b2",
+      "name": "厦门海洋职业技术学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_73bd0d204a35ebfc",
+      "name": "厦门南洋职业学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_91cbf234c42113b0",
+      "name": "厦门市华天涉外职业技术学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_171e49da11705f90",
+      "name": "西安财经大学行知学院",
+      "sourceType": "kingo_new",
+      "adapterId": "kingosoft_new",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_fa1c31a888d8f7ff",
+      "name": "西安翻译学院",
+      "sourceType": "kingo_new",
+      "adapterId": "kingosoft_new",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_49d4080d938bdfcc",
+      "name": "西安工程大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_9af9683b9125330d",
+      "name": "西安交通工程学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_ec532963616da0b0",
+      "name": "西安理工大学高科学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_917a4047f28bc03c",
+      "name": "西安石油大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_62fbb9148362ce43",
+      "name": "西北农林科技大学 - 研究生",
+      "sourceType": "jz",
+      "adapterId": "wisedu_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_45323e8c3a5800c6",
+      "name": "西北师范大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_672a9eba236c1415",
+      "name": "西北师范大学知行学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_7a08cd9628428b61",
+      "name": "西藏大学",
+      "sourceType": "jz",
+      "adapterId": "wisedu_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_d3a9d39cf0a3d0b0",
+      "name": "西藏农牧大学",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_874781dc8b7ed373",
+      "name": "西藏农牧学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_6953bac984a0516f",
+      "name": "西昌民族幼儿师范高等专科学校",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_8196c4478dcfc7de",
+      "name": "西华大学应用技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_c062787eeaf173a3",
+      "name": "西南大学荣昌校区",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_d688abf6326d1750",
+      "name": "西南石油大学 - 研究生",
+      "sourceType": "jz",
+      "adapterId": "wisedu_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_a22b82cd14fb3db6",
+      "name": "湘潭大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_566d8689cd065d70",
+      "name": "湘潭理工学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_84923e79a455a04e",
+      "name": "忻州师范学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_01b60334660dfdd9",
+      "name": "新疆财经大学 - 研究生",
+      "sourceType": "jz",
+      "adapterId": "wisedu_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_1756eee528b28d2c",
+      "name": "新疆第二医学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_7f532066ad24d84e",
+      "name": "新疆理工学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://cas-xjit-edu-cn-443.webvpn.xjistedu.cn/cas/login",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_9f60124b52fad3b4",
+      "name": "新疆农业大家 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_02c8a9d582738fce",
+      "name": "新疆农业大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_fdb89b11262fb584",
+      "name": "新疆医科大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_f5c04fa567f04f4f",
+      "name": "新疆医科大学厚博学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_70c93817c3a5cdb2",
+      "name": "新疆政法学校",
+      "sourceType": "jz",
+      "adapterId": "wisedu_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_216a0c8c3556a8c0",
+      "name": "信阳师范大学",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_aeb8d10d5e238a67",
+      "name": "信阳艺术职业学院",
+      "sourceType": "kingo_new",
+      "adapterId": "kingosoft_new",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_5196317dbdfd0632",
+      "name": "邢台职业技术学院",
+      "sourceType": "kingo_new",
+      "adapterId": "kingosoft_new",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_6d268f72647cf437",
+      "name": "徐州工程学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_503d596ac3a851a7",
+      "name": "徐州医科大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_b737a2c4f911f9a0",
+      "name": "许昌学院医学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_3ef81e6ed13cdf68",
+      "name": "许昌职业技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_a1d303d10dc0fff0",
+      "name": "烟台大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_061608a722d10b73",
+      "name": "伊犁师范大学霍尔果斯商学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_774f7d839bbd4da4",
+      "name": "右江民族医学院 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_2aa13d6ec9d38c2a",
+      "name": "玉林师范学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_660830660c2147e4",
+      "name": "玉溪农业职业技术学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_b61bfaa1f6b2609f",
+      "name": "豫章师范学院",
+      "sourceType": "kingo_new",
+      "adapterId": "kingosoft_new",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://vpn.yuznu.edu.cn/portal/",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_81404e9c5e08b743",
+      "name": "云南大学 - 研究生",
+      "sourceType": "jz",
+      "adapterId": "wisedu_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_3d678d0b7eb055c6",
+      "name": "云南农业大学热带作物学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_6f09591eb50fe1eb",
+      "name": "云南锡业职业技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_23e3419af5d94539",
+      "name": "运城职业技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_2db64d531bcb02ba",
+      "name": "扎兰屯职业学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_2cbd076c027cf305",
+      "name": "张家口职业技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_cbc8d92ac5b8dace",
+      "name": "浙江财经大学东方学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "http://cas-paas-443.webvpn.zufedfc.edu.cn/cas//login",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_19b1b7a1712c0e12",
+      "name": "浙江大学宁波理工学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_58100e8c21308525",
+      "name": "浙江东方职业技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_f366a919330e59a9",
+      "name": "浙江纺织纺织职业技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_08019d88fc13fb30",
+      "name": "浙江纺织服装技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_94d858e46e82355d",
+      "name": "浙江纺织服装技术职业学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_22a5dc5977c75cfb",
+      "name": "浙江工商大学",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_b9049d9307380516",
+      "name": "浙江工业大学 - 研究生",
+      "sourceType": "jz",
+      "adapterId": "wisedu_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_8343184199445e6e",
+      "name": "浙江广厦建设职业技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_da90ec6b56685e9d",
+      "name": "浙江广厦职业技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_4b8b832a1b0449d8",
+      "name": "浙江海洋大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_4a2df45956109ed3",
+      "name": "浙江海洋大学东海科学技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_2c9481fca3721e18",
+      "name": "浙江机电职业技术大学",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_00da54deb35337e7",
+      "name": "浙江机电职业技术学校",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_6bcab83f510a5eea",
+      "name": "浙江经济职业技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://dean-443.webvpn.zjtie.edu.cn/jwglxt/xtgl/login_slogin.html",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_95975917802ff8ab",
+      "name": "浙江警察学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://0vpn.zjjcxy.cn/portal/",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_fbc71a8b58cd0961",
+      "name": "浙江警官职业学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://webvpn.zjjy.com.cn/portal/",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_29b47cded895a445",
+      "name": "浙江科技学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_086319da76a9d144",
+      "name": "浙江科贸职业技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_1e64f78a1ddfff22",
+      "name": "浙江理工大学科技与艺术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://sso-ky-zstu-edu-cn-s.webvpn2.ky.zstu.edu.cn:8070/login",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_8accae7856d12251",
+      "name": "浙江旅游职业学院 - 研究生",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_ebacadaab9797fd3",
+      "name": "浙江省医学科学院 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_92dfad12ee342a37",
+      "name": "浙江师范大学 - 研究生",
+      "sourceType": "jz",
+      "adapterId": "wisedu_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_117afb85e2e422b9",
+      "name": "浙江师范大学杭州幼儿师范学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_5019d0c1da5e6e44",
+      "name": "浙江树人大学",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_eb79c32aa1f608c5",
+      "name": "镇江高等专科学校",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_e0125eaedc4a19e5",
+      "name": "郑州财税金融学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_1c430643e8cc7aba",
+      "name": "郑州大学旅游管理学院",
+      "sourceType": "kingo_new",
+      "adapterId": "kingosoft_new",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_8af3df442e9ba965",
+      "name": "郑州工程技术学院",
+      "sourceType": "kingo_new",
+      "adapterId": "kingosoft_new",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_b46a0e847d4b9063",
+      "name": "中北大学信息商务学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_f4bb93dfe47174eb",
+      "name": "中国传媒大学 - 研究生",
+      "sourceType": "jz",
+      "adapterId": "wisedu_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_dd0575e469f4135f",
+      "name": "中国传媒大学南广学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_14e561555364eacd",
+      "name": "中国地质大学（北京） - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_20f801a34df407ef",
+      "name": "中国地质大学长城学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_cfe9c82ce1e3970a",
+      "name": "中国海洋大学青岛学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_2fad7f4ca7d15f93",
+      "name": "中国航空研究院研究生院 - 研究生",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_0857188bd1ee1b02",
+      "name": "中国矿业大学南湖校区",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_c531c4ad84855485",
+      "name": "中国矿业大学银川学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_b9de1f94a699545e",
+      "name": "中国民用航空飞行学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://vpn.cafuc.edu.cn/",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_273ef0fe130edc0b",
+      "name": "中国农业大学（烟台）",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_0a8264df84bf7144",
+      "name": "中国农业大学（烟台） - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_af6ef35319c3caf2",
+      "name": "中国农业大学烟台研究院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_41749323eda43dde",
+      "name": "中国人民解放军陆军军医大学",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_6c704253fbd87076",
+      "name": "中国石油大学（北京） - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_8dd3e390daa7272d",
+      "name": "中国石油大学胜利学院",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_59dc1b99995dd16e",
+      "name": "中国医科大学 - 研究生",
+      "sourceType": "south_soft",
+      "adapterId": "south_soft",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_ac3524de6a47ab0b",
+      "name": "中南财经政法大学 - 研究生",
+      "sourceType": "jz",
+      "adapterId": "wisedu_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_4c8dc139772970a4",
+      "name": "中南林业科技大学",
+      "sourceType": "qz",
+      "adapterId": "qiangzhi_standard",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://webvpn.csuft.edu.cn/",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_119772e44f5b119d",
+      "name": "中南民族大学",
+      "sourceType": "jz",
+      "adapterId": "wisedu_auto",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://webvpn.scuec.edu.cn/",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_2cd80d3cf12d8841",
+      "name": "中山大学新华学院东莞校区",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_43a78da7879144ea",
+      "name": "中山火炬职业技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "ip_literal",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_290caf93b58d4317",
+      "name": "中山市火炬职业技术学院",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "missing_reference",
+      "safeUrl": "",
+      "eligibleForPromotion": false
+    },
+    {
+      "id": "wakeup_5cf9a74bd2547d54",
+      "name": "中央财经大学 - 研究生",
+      "sourceType": "zf",
+      "adapterId": "zhengfang_auto",
+      "reason": "vpn_portal_without_resource",
+      "safeUrl": "https://yjsjy.webvpn.cufe.edu.cn/yjsxt/xtgl/login_slogin.html",
+      "eligibleForPromotion": false
+    }
+  ]
+}

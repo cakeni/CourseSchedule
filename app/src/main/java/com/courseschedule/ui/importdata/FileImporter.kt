@@ -19,15 +19,17 @@ class FileImporter(
         if (fileName.endsWith(".xls")) {
             throw ImportFormatException("暂不支持旧版 .xls，请在 Excel 中另存为 .xlsx 后导入")
         }
+        val parser = ImportParser(totalWeeks)
+        if (fileName.endsWith(".html") || fileName.endsWith(".htm") || "html" in mimeType) {
+            val input = context.contentResolver.openInputStream(uri)
+                ?: throw ImportFormatException("无法读取所选文件")
+            return input.use { parser.parseHtml(it) }
+        }
         val text = context.contentResolver.openInputStream(uri)?.bufferedReader()?.use { it.readText() }
             ?: throw ImportFormatException("无法读取所选文件")
-        val parser = ImportParser(totalWeeks)
         return when {
             fileName.endsWith(".json") || "json" in mimeType -> parser.parseJson(text)
             fileName.endsWith(".csv") || "csv" in mimeType -> parser.parseCsv(text)
-            fileName.endsWith(".html") || fileName.endsWith(".htm") || "html" in mimeType -> {
-                parser.parseHtml(text)
-            }
             else -> parser.parseText(text)
         }
     }

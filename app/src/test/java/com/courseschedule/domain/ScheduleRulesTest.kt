@@ -43,12 +43,25 @@ class ScheduleRulesTest {
         assertEquals(SemesterPhase.AFTER, ScheduleRules.semesterWeekStatus(semester, 12 * week).phase)
     }
 
+    @Test
+    fun sameSlotKeepsCurrentOrNearestUpcomingCourseOnly() {
+        val ethics = course(name = "计算机伦理", startWeek = 5, endWeek = 5)
+        val project = course(name = "IT项目管理", startWeek = 10, endWeek = 10)
+
+        assertEquals(listOf(ethics), ScheduleRules.selectCoursesForWeek(listOf(project, ethics), 3, true))
+        assertEquals(listOf(ethics), ScheduleRules.selectCoursesForWeek(listOf(project, ethics), 5, true))
+        assertEquals(listOf(project), ScheduleRules.selectCoursesForWeek(listOf(project, ethics), 6, true))
+        assertTrue(ScheduleRules.selectCoursesForWeek(listOf(project, ethics), 11, true).isEmpty())
+        assertTrue(ScheduleRules.selectCoursesForWeek(listOf(project, ethics), 3, false).isEmpty())
+    }
+
     private fun course(
+        name: String = "高等数学",
         startWeek: Int = 1,
         endWeek: Int = 16,
         weekType: Int = 0
     ) = Course(
-        courseName = "高等数学",
+        courseName = name,
         dayOfWeek = 1,
         startSection = 1,
         endSection = 2,

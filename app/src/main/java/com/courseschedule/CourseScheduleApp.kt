@@ -4,6 +4,7 @@ import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Build
+import app.rive.runtime.kotlin.core.Rive
 
 /**
  * 应用程序类
@@ -16,6 +17,8 @@ class CourseScheduleApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+
+        runCatching { Rive.init(this) }
 
         // 创建通知渠道
         createNotificationChannel()

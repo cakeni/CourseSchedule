@@ -1,12 +1,16 @@
 package com.courseschedule.ui.settings
 
 import android.app.DatePickerDialog
+import android.content.ActivityNotFoundException
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.text.InputType
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.PathInterpolator
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
@@ -14,6 +18,7 @@ import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.doOnPreDraw
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.courseschedule.R
@@ -23,6 +28,8 @@ import com.courseschedule.data.entity.Semester
 import com.courseschedule.databinding.ActivitySettingsBinding
 import com.courseschedule.domain.ScheduleRules
 import com.courseschedule.domain.SemesterPhase
+import com.courseschedule.ui.installPressScale
+import com.courseschedule.ui.playNavigationMotion
 import com.courseschedule.ui.importdata.ImportActivity
 import com.courseschedule.utils.ReminderManager
 import com.courseschedule.utils.SchedulePreferences
@@ -47,6 +54,8 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var courseViewModel: CourseViewModel
     private lateinit var preferences: SchedulePreferences
     private var semesters: List<Semester> = emptyList()
+    private var suppressBottomNavigationMotion = false
+    private val motionInterpolator = PathInterpolator(0.22f, 1f, 0.36f, 1f)
 
     private val sectionHeightValues = intArrayOf(56, 64, 72, 84)
     private val reminderValues = intArrayOf(-1, 5, 10, 15, 30, 60)
@@ -61,18 +70,20 @@ class SettingsActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setSupportActionBar(binding.toolbar)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
         semesterViewModel = ViewModelProvider(this)[SemesterViewModel::class.java]
         courseViewModel = ViewModelProvider(this)[CourseViewModel::class.java]
         preferences = SchedulePreferences(this)
 
         initSettingsControls()
         initActions()
+        initBottomNavigation()
         observeData()
+        animateSettingsEntrance()
     }
 
     private fun initSettingsControls() {
         binding.switchShowWeekend.isChecked = preferences.showWeekend
+        binding.switchShowInactiveCourses.isChecked = preferences.showInactiveCourses
         binding.switchShowTime.isChecked = preferences.showTime
         binding.switchReminder.isChecked = preferences.reminderEnabled
 
@@ -87,18 +98,34 @@ class SettingsActivity : AppCompatActivity() {
         binding.spinnerDefaultReminder.setSelection(
             reminderValues.indexOf(preferences.defaultReminderMinutes).takeIf { it >= 0 } ?: 3
         )
-        updateReminderControlState(preferences.reminderEnabled)
+        updateReminderControlState(preferences.reminderEnabled, animate = false)
         updateSectionTimesSummary()
+
+        binding.rowShowWeekend.setOnClickListener {
+            binding.switchShowWeekend.toggle()
+        }
+        binding.rowShowInactiveCourses.setOnClickListener {
+            binding.switchShowInactiveCourses.toggle()
+        }
+        binding.rowShowTime.setOnClickListener {
+            binding.switchShowTime.toggle()
+        }
+        binding.rowReminder.setOnClickListener {
+            binding.switchReminder.toggle()
+        }
 
         binding.switchShowWeekend.setOnCheckedChangeListener { _, checked ->
             preferences.showWeekend = checked
+        }
+        binding.switchShowInactiveCourses.setOnCheckedChangeListener { _, checked ->
+            preferences.showInactiveCourses = checked
         }
         binding.switchShowTime.setOnCheckedChangeListener { _, checked ->
             preferences.showTime = checked
         }
         binding.switchReminder.setOnCheckedChangeListener { _, checked ->
             preferences.reminderEnabled = checked
-            updateReminderControlState(checked)
+            updateReminderControlState(checked, animate = true)
             updateReminderScheduling(checked)
         }
         binding.spinnerSectionHeight.onItemSelectedListener = onItemSelected { position ->
@@ -124,11 +151,26 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateReminderControlState(enabled: Boolean) {
+    private fun updateReminderControlState(enabled: Boolean, animate: Boolean) {
         binding.spinnerDefaultReminder.isEnabled = enabled
-        binding.spinnerDefaultReminder.alpha = if (enabled) 1f else 0.45f
         binding.cardSectionTimes.isEnabled = enabled
-        binding.cardSectionTimes.alpha = if (enabled) 1f else 0.55f
+        val spinnerAlpha = if (enabled) 1f else 0.45f
+        val sectionTimesAlpha = if (enabled) 1f else 0.55f
+        if (animate) {
+            binding.spinnerDefaultReminder.animate()
+                .alpha(spinnerAlpha)
+                .setDuration(220L)
+                .setInterpolator(motionInterpolator)
+                .start()
+            binding.cardSectionTimes.animate()
+                .alpha(sectionTimesAlpha)
+                .setDuration(220L)
+                .setInterpolator(motionInterpolator)
+                .start()
+        } else {
+            binding.spinnerDefaultReminder.alpha = spinnerAlpha
+            binding.cardSectionTimes.alpha = sectionTimesAlpha
+        }
     }
 
     private fun updateReminderScheduling(enabled: Boolean) {
@@ -142,13 +184,86 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun initActions() {
+        binding.cardOpenSource.setOnClickListener { openProjectRepository() }
+        binding.cardOpenSource.setOnLongClickListener {
+            copyProjectAddress()
+            true
+        }
         binding.cardSemester.setOnClickListener { showSemesterManager() }
         binding.cardSectionTimes.setOnClickListener { showSectionTimesDialog() }
         binding.cardExport.setOnClickListener { exportData() }
         binding.cardBackup.setOnClickListener {
             startActivity(Intent(this, ImportActivity::class.java))
+            overridePendingTransition(0, 0)
         }
         binding.cardAbout.setOnClickListener { showAboutDialog() }
+
+        listOf(
+            binding.cardOpenSource,
+            binding.cardSemester,
+            binding.rowShowWeekend,
+            binding.rowShowInactiveCourses,
+            binding.rowShowTime,
+            binding.rowReminder,
+            binding.cardSectionTimes,
+            binding.cardExport,
+            binding.cardBackup,
+            binding.cardAbout
+        ).forEach { it.installPressScale() }
+    }
+
+    private fun initBottomNavigation() {
+        binding.bottomNavigation.selectedItemId = R.id.nav_settings
+        binding.bottomNavigation.setOnItemSelectedListener { item ->
+            if (suppressBottomNavigationMotion) return@setOnItemSelectedListener true
+            val itemView = binding.bottomNavigation.findViewById<View>(item.itemId)
+            when (item.itemId) {
+                R.id.nav_home -> {
+                    finish()
+                    overridePendingTransition(0, 0)
+                    true
+                }
+                R.id.nav_import -> {
+                    startActivity(Intent(this, ImportActivity::class.java))
+                    overridePendingTransition(0, 0)
+                    finish()
+                    overridePendingTransition(0, 0)
+                    true
+                }
+                R.id.nav_settings -> {
+                    itemView.playNavigationMotion()
+                    true
+                }
+                else -> false
+            }
+        }
+        binding.bottomNavigation.setOnItemReselectedListener { item ->
+            binding.bottomNavigation.findViewById<View>(item.itemId)?.playNavigationMotion()
+        }
+        binding.bottomNavigation.post {
+            binding.bottomNavigation.findViewById<View>(R.id.nav_settings)?.playNavigationMotion()
+        }
+    }
+
+    private fun animateSettingsEntrance() {
+        val container = binding.settingsContent
+        val children = List(container.childCount, container::getChildAt)
+        children.forEach { child ->
+            child.alpha = 0.18f
+            child.translationX = dp(32).toFloat()
+        }
+        container.doOnPreDraw {
+            children.forEachIndexed { index, child ->
+                child.animate()
+                    .alpha(1f)
+                    .translationX(0f)
+                    .setStartDelay(index * 56L)
+                    .setDuration(620L)
+                    .setInterpolator(motionInterpolator)
+                    .withLayer()
+                    .start()
+            }
+        }
     }
 
     private fun observeData() {
@@ -224,6 +339,7 @@ class SettingsActivity : AppCompatActivity() {
     private fun showSemesterEditor(existing: Semester?) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_semester, null)
         val nameLayout = dialogView.findViewById<TextInputLayout>(R.id.tilSemesterName)
+        val dateLayout = dialogView.findViewById<TextInputLayout>(R.id.tilSemesterStartDate)
         val nameInput = dialogView.findViewById<TextInputEditText>(R.id.etSemesterName)
         val dateInput = dialogView.findViewById<TextInputEditText>(R.id.etSemesterStartDate)
         val weeksDropdown = dialogView.findViewById<AutoCompleteTextView>(R.id.dropdownTotalWeeks)
@@ -238,7 +354,7 @@ class SettingsActivity : AppCompatActivity() {
             getString(R.string.week_count_format, existing?.totalWeeks?.coerceIn(12, 30) ?: 20),
             false
         )
-        dateInput.setOnClickListener {
+        val showDatePicker = View.OnClickListener {
             val calendar = Calendar.getInstance().apply { timeInMillis = selectedStartDate }
             DatePickerDialog(
                 this,
@@ -253,6 +369,8 @@ class SettingsActivity : AppCompatActivity() {
                 calendar.get(Calendar.DAY_OF_MONTH)
             ).show()
         }
+        dateInput.setOnClickListener(showDatePicker)
+        dateLayout.setEndIconOnClickListener(showDatePicker)
 
         val dialog = MaterialAlertDialogBuilder(this)
             .setTitle(if (existing == null) R.string.add_semester else R.string.edit_semester)
@@ -270,7 +388,10 @@ class SettingsActivity : AppCompatActivity() {
                 val totalWeeks = Regex("\\d+").find(weeksDropdown.text.toString())
                     ?.value?.toIntOrNull() ?: 20
                 dialog.dismiss()
-                saveSemester(existing, name, selectedStartDate, totalWeeks)
+                val displayedStartDate = runCatching {
+                    dateFormat.parse(dateInput.text?.toString().orEmpty())?.time
+                }.getOrNull() ?: selectedStartDate
+                saveSemester(existing, name, mondayStart(displayedStartDate), totalWeeks)
             }
         }
         dialog.show()
@@ -292,6 +413,7 @@ class SettingsActivity : AppCompatActivity() {
                 val courses = courseViewModel.getSemesterCourses(existing.id)
                 manager.cancelAllReminders(courses)
                 semesterViewModel.updateSemesterNow(updated)
+                semesters = semesters.map { if (it.id == updated.id) updated else it }
                 if (existing.isCurrent && preferences.reminderEnabled) {
                     manager.rescheduleReminders(courses, updated)
                 }
@@ -410,8 +532,26 @@ class SettingsActivity : AppCompatActivity() {
         MaterialAlertDialogBuilder(this)
             .setTitle(R.string.about_course_schedule)
             .setMessage(getString(R.string.about_message, versionName))
+            .setNeutralButton(R.string.open_source_view_project) { _, _ -> openProjectRepository() }
             .setPositiveButton(R.string.ok, null)
             .show()
+    }
+
+    private fun openProjectRepository() {
+        try {
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.project_repository_url)))
+                .addCategory(Intent.CATEGORY_BROWSABLE))
+        } catch (_: ActivityNotFoundException) {
+            // A device without a browser can still share/open the public address elsewhere.
+            copyProjectAddress()
+        }
+    }
+
+    private fun copyProjectAddress() {
+        getSystemService(ClipboardManager::class.java).setPrimaryClip(
+            ClipData.newPlainText(getString(R.string.app_name), getString(R.string.project_repository_url))
+        )
+        Toast.makeText(this, R.string.open_source_address_copied, Toast.LENGTH_SHORT).show()
     }
 
     private fun mondayStart(timestamp: Long): Long {
@@ -437,11 +577,12 @@ class SettingsActivity : AppCompatActivity() {
 
     private fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == android.R.id.home) {
-            finish()
-            return true
+    override fun onResume() {
+        super.onResume()
+        if (binding.bottomNavigation.selectedItemId != R.id.nav_settings) {
+            suppressBottomNavigationMotion = true
+            binding.bottomNavigation.selectedItemId = R.id.nav_settings
+            suppressBottomNavigationMotion = false
         }
-        return super.onOptionsItemSelected(item)
     }
 }
