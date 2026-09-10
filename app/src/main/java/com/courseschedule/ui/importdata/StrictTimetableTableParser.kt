@@ -10,7 +10,13 @@ internal class StrictTimetableTableParser(
     private val totalWeeks: Int,
     private val label: String,
     private val selectors: List<String>,
-    private val rejectImageOnly: Boolean = false
+    private val rejectImageOnly: Boolean = false,
+    private val orderedRowsAreSections: Boolean = false,
+    private val splitDoubleBreaks: Boolean = false,
+    private val splitBoldBlocks: Boolean = false,
+    private val splitLeafCourseDivs: Boolean = false,
+    private val compactBraceFormat: Boolean = false,
+    private val defaultAllWeeks: Boolean = false
 ) {
     fun matches(document: Document): Boolean = selectors.any { selector ->
         runCatching { document.select(selector).isNotEmpty() }.getOrDefault(false)
@@ -173,8 +179,14 @@ internal class StrictTimetableTableParser(
                 if (spannedDays.size != 1) {
                     throw ImportFormatException("$label 课程跨星期单元格无法确认", AcademicImportErrorCode.MISSING_DAY)
                 }
-                val fallbackSections = (slot.originRow until slot.originRow + slot.rowSpan)
+                val explicitSections = (slot.originRow until slot.originRow + slot.rowSpan)
                     .flatMap { rowSections.getOrElse(it) { emptyList() } }.distinct().sorted()
+                val fallbackSections = explicitSections.ifEmpty {
+                    if (!orderedRowsAreSections) emptyList() else {
+                        val start = slot.originRow - headerIndex
+                        (start until start + slot.rowSpan).toList()
+                    }
+                }
                 val blocks = splitBlocks(slot.cell)
                 blocks.forEach { block ->
                     result += parseCourseBlock(block, day, fallbackSections)
@@ -192,7 +204,22 @@ internal class StrictTimetableTableParser(
                 parent.`is`(".kbcontent,.kbcontent1,.course,.courseInfo,.kb-item,[data-course]") }
         }
         if (preferred.isNotEmpty()) return preferred
-        return cell.html().split(Regex("<hr\\b[^>]*>|[-─—]{5,}", RegexOption.IGNORE_CASE))
+        if (splitLeafCourseDivs) {
+            val leafDivs = cell.select("div").toList().filter { candidate ->
+                WEEK_TOKEN.containsMatchIn(candidate.text()) && candidate.select("div").none { nested ->
+                    nested !== candidate && WEEK_TOKEN.containsMatchIn(nested.text())
+                }
+            }
+            if (leafDivs.isNotEmpty()) return leafDivs
+        }
+        val separators = buildList {
+            if (splitDoubleBreaks) add("(?:<br\\b[^>]*>\\s*){2,}")
+            if (splitBoldBlocks) add("(?=<b\\b)")
+            if (compactBraceFormat) add("[;；]")
+            add("<hr\\b[^>]*>")
+            add("[-─—]{5,}")
+        }.joinToString("|")
+        return cell.html().split(Regex(separators, RegexOption.IGNORE_CASE))
             .map { Jsoup.parseBodyFragment(it).body() }
             .filter { it.text().trim().isNotBlank() && it.text().trim() !in EMPTY_CELLS }
     }
@@ -200,17 +227,27 @@ internal class StrictTimetableTableParser(
     private fun parseCourseBlock(block: Element, day: Int, fallbackSections: List<Int>): List<Course> {
         val text = block.wholeText().replace('\u00a0', ' ').trim()
         val lines = text.lineSequence().map(String::trim).filter(String::isNotBlank).toList()
-        val name = block.select("[title=课程名称],[title=课程名],[data-field=course]").firstOrNull()?.text()?.trim()
+        val rawName = block.select("[title=课程名称],[title=课程名],[data-field=course]").firstOrNull()?.text()?.trim()
             ?: extractLabel(text, "课程(?:名称|名)?")
-            ?: lines.firstOrNull { line ->
-                !WEEK_TOKEN.containsMatchIn(line) && !SECTION_TOKEN.containsMatchIn(line) &&
-                    !LABEL_ONLY.containsMatchIn(line) && !isCourseCode(line)
-            }.orEmpty()
+            ?: if (compactBraceFormat) lines.firstOrNull().orEmpty() else {
+                lines.firstOrNull { line ->
+                    !WEEK_TOKEN.containsMatchIn(line) && !SECTION_TOKEN.containsMatchIn(line) &&
+                        !LABEL_ONLY.containsMatchIn(line) && !isCourseCode(line)
+                }.orEmpty()
+            }
+        val name = if (compactBraceFormat) rawName.substringBefore('{').substringBefore('｛')
+            .substringBefore('(').substringBefore('（').trim() else rawName
         if (name.isBlank()) {
             throw ImportFormatException("$label 课程名称缺失", AcademicImportErrorCode.PARTIAL_PARSE)
         }
-        val teacher = extractLabel(text, "(?:任课|授课)?(?:教师|老师)").orEmpty()
-        val room = extractLabel(text, "(?:上课)?(?:地点|教室)").orEmpty()
+        val compactDetails = if (compactBraceFormat) {
+            Regex("[（(]([^）)]+)[）)]").find(text)?.groupValues?.get(1)
+                ?.trim()?.split(Regex("\\s+"))
+        } else null
+        val teacher = extractLabel(text, "(?:任课|授课)?(?:教师|老师)")
+            ?: compactDetails?.firstOrNull().orEmpty()
+        val room = extractLabel(text, "(?:上课)?(?:地点|教室)")
+            ?: compactDetails?.lastOrNull().orEmpty()
         val meetings = parseMeetingPairs(text, fallbackSections)
         return buildCourses(name, teacher, room, day, meetings)
     }
@@ -231,12 +268,17 @@ internal class StrictTimetableTableParser(
             }
         }
         if (result.isNotEmpty()) return result.distinct()
-        val week = WEEK_TOKEN.find(normalize(text))?.value
-            ?: throw ImportFormatException("$label 课程周次缺失", AcademicImportErrorCode.MISSING_WEEK)
+        val weekValues = WEEK_TOKEN.findAll(normalize(text)).flatMap { match ->
+            parseWeeks(match.value).asSequence()
+        }.distinct().toList().ifEmpty {
+            if (defaultAllWeeks) (1..totalWeeks).toList() else {
+                throw ImportFormatException("$label 课程周次缺失", AcademicImportErrorCode.MISSING_WEEK)
+            }
+        }
         val sections = SECTION_TOKEN.find(normalize(text))?.value?.let(::parseSections)
             ?: fallbackSections.takeIf(List<Int>::isNotEmpty)
             ?: throw ImportFormatException("$label 课程节次缺失", AcademicImportErrorCode.MISSING_SECTION)
-        return listOf(sections to parseWeeks(week))
+        return listOf(sections to weekValues)
     }
 
     private fun buildCourses(
@@ -299,7 +341,8 @@ internal class StrictTimetableTableParser(
     }
 
     private fun extractLabel(text: String, label: String): String? =
-        Regex("(?:$label)\\s*[:：]\\s*([^\\n,，;；]+)").find(text)?.groupValues?.get(1)?.trim()
+        Regex("(?:$label)\\s*[:：]\\s*([^\\n,，;；]+)").find(text)?.groupValues?.get(1)
+            ?.trim()?.trimEnd(']', '}', '｝', ')', '）')
 
     private fun normalize(value: String): String = value.replace('（', '(').replace('）', ')')
         .replace('【', '[').replace('】', ']').replace(Regex("[~～—–－至]"), "-")

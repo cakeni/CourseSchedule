@@ -9,6 +9,7 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.TextView
+import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.ViewModelProvider
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso.onView
@@ -22,6 +23,7 @@ import com.courseschedule.R
 import com.courseschedule.ui.settings.SettingsActivity
 import com.courseschedule.viewmodel.CourseViewModel
 import com.google.gson.JsonParser
+import org.hamcrest.Matchers.allOf
 import org.json.JSONObject
 import org.json.JSONTokener
 import org.junit.Assert.*
@@ -121,6 +123,8 @@ class GenericImportUiTest {
         // The built-in NUAA graduate route replaces its adapter-required catalog row.
         assertEquals(2_682, entries.count { it.canImport })
         assertEquals(884, entries.count { !it.canImport })
+        assertEquals(764, entries.count { it.needsUserUrl })
+        assertEquals(120, entries.count { !it.canImport && !it.needsUserUrl })
         assertEquals(1_088, entries.count { it.isCloudOnly })
         // The built-in SDUFE route upgrades the catalog's HTTP entry to WebVPN HTTPS.
         assertEquals(934, entries.count { it.allowCleartext })
@@ -143,6 +147,26 @@ class GenericImportUiTest {
         assertEquals("nuaa_graduate", nuaaGraduate.builtInSchoolId)
         assertEquals("graduate.nuaa.edu.cn", nuaaGraduate.host)
         assertTrue(nuaaGraduate.canImport)
+    }
+
+    @Test fun genericSystemRowsAskForTheSchoolUrlInsteadOfClaimingTheyNeedAnAdapter() {
+        AcademicSchoolDirectory.entries(InstrumentationRegistry.getInstrumentation().targetContext)
+        ActivityScenario.launch(SchoolPickerActivity::class.java).use { scenario ->
+            val loaded = CountDownLatch(1)
+            scenario.onActivity { activity ->
+                val count = activity.findViewById<TextView>(R.id.tvSchoolCount)
+                val loading = activity.getString(R.string.academic_school_loading)
+                if (count.text.toString() != loading) loaded.countDown()
+                count.doAfterTextChanged { if (it.toString() != loading) loaded.countDown() }
+            }
+            assertTrue("school directory did not finish loading", loaded.await(10, TimeUnit.SECONDS))
+            onView(withId(R.id.chipCommonSystem)).perform(click())
+            onView(withId(R.id.etSchoolSearch)).perform(replaceText("强智教务"), closeSoftKeyboard())
+            onView(allOf(withId(R.id.tvSchoolName), withText("强智教务"))).perform(click())
+            onView(withId(R.id.etGenericUrl)).check(matches(isDisplayed()))
+            onView(withText(R.string.academic_trust_and_open)).check(matches(isDisplayed()))
+            onView(withText(R.string.academic_adapter_required_title)).check(doesNotExist())
+        }
     }
 
     @Test fun genericHtmlCaptureCopiesOnlyScheduleMarkupAndParsesTheSnapshot() {

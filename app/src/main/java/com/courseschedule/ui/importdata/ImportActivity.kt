@@ -64,15 +64,16 @@ class ImportActivity : AppCompatActivity() {
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode != Activity.RESULT_OK) return@registerForActivityResult
+        val data = result.data ?: return@registerForActivityResult
         val entry = AcademicSchoolDirectory.find(
             this,
-            result.data?.getStringExtra(SchoolPickerActivity.EXTRA_DIRECTORY_ID)
+            data.getStringExtra(SchoolPickerActivity.EXTRA_DIRECTORY_ID)
         ) ?: return@registerForActivityResult
         val totalWeeks = courseViewModel.currentSemester.value?.totalWeeks ?: run {
             Toast.makeText(this, R.string.semester_loading, Toast.LENGTH_SHORT).show()
             return@registerForActivityResult
         }
-        val school = entry.toAcademicSchool() ?: run {
+        val school = AcademicWebImportActivity.schoolFromIntent(data) ?: entry.toAcademicSchool() ?: run {
             Toast.makeText(this, R.string.academic_directory_entry_invalid, Toast.LENGTH_SHORT).show()
             return@registerForActivityResult
         }

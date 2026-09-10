@@ -61,6 +61,7 @@ internal data class AcademicSchoolDirectoryEntry(
     val profile: GenericAcademicProfile? get() = GenericAcademicImport.profile(profileId)
     val host: String get() = academicWebUri(url, allowCleartext, allowNonDefaultPort = true)?.host.orEmpty()
     val canImport: Boolean get() = support != AcademicDirectorySupport.ADAPTER_REQUIRED && profile != null && host.isNotEmpty()
+    val needsUserUrl: Boolean get() = support == AcademicDirectorySupport.ADAPTER_REQUIRED && profile != null
     val verified: Boolean get() = support == AcademicDirectorySupport.VERIFIED
 
     /** WakeUp used its remote parser for this row; reviewed rows may also have a local fallback. */
@@ -77,6 +78,17 @@ internal data class AcademicSchoolDirectoryEntry(
                 ).copy(name = name)
             }.getOrNull()
         }
+
+    fun createUserConfiguredSchool(address: String): AcademicSchool {
+        val definition = profile?.takeIf { needsUserUrl }
+            ?: throw ImportFormatException("该条目没有可复用的本地解析器")
+        return GenericAcademicImport.createCatalog(
+            profile = definition,
+            address = address,
+            allowCleartext = address.trim().startsWith("http://", ignoreCase = true),
+            adapterId = adapterId
+        ).copy(name = name)
+    }
 
     fun matches(query: String): Boolean {
         val needle = normalizeSearch(query)

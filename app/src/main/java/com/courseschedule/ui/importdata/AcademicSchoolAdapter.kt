@@ -27,29 +27,34 @@ internal class AcademicSchoolAdapter(
             val profileLabel = entry.profile?.label
                 ?: root.context.getString(R.string.academic_adapter_required_label)
             val hostLabel = entry.host.ifBlank {
-                root.context.getString(R.string.academic_no_independent_address)
+                root.context.getString(
+                    if (entry.needsUserUrl) R.string.academic_enter_school_url
+                    else R.string.academic_no_independent_address
+                )
             }
             tvSchoolMeta.text = root.context.getString(
                 if (entry.allowCleartext) R.string.academic_school_meta_cleartext else R.string.academic_school_meta,
                 profileLabel,
                 hostLabel
             )
-            tvSchoolStatus.setText(when (entry.support) {
-                AcademicDirectorySupport.VERIFIED -> R.string.academic_status_verified
-                AcademicDirectorySupport.COMPATIBLE -> R.string.academic_status_compatible
-                AcademicDirectorySupport.EXPERIMENTAL -> R.string.academic_status_experimental
-                AcademicDirectorySupport.ADAPTER_REQUIRED -> R.string.academic_status_adapter_required
-            })
+            tvSchoolStatus.setText(
+                if (entry.needsUserUrl) R.string.academic_status_url_required else when (entry.support) {
+                    AcademicDirectorySupport.VERIFIED -> R.string.academic_status_verified
+                    AcademicDirectorySupport.COMPATIBLE -> R.string.academic_status_compatible
+                    AcademicDirectorySupport.EXPERIMENTAL -> R.string.academic_status_experimental
+                    AcademicDirectorySupport.ADAPTER_REQUIRED -> R.string.academic_status_adapter_required
+                }
+            )
             tvSchoolStatus.setTextColor(ContextCompat.getColor(
                 root.context,
-                when (entry.support) {
+                if (entry.needsUserUrl) R.color.secondary_variant else when (entry.support) {
                     AcademicDirectorySupport.VERIFIED,
                     AcademicDirectorySupport.COMPATIBLE -> R.color.primary
                     AcademicDirectorySupport.EXPERIMENTAL -> R.color.secondary_variant
                     AcademicDirectorySupport.ADAPTER_REQUIRED -> R.color.error
                 }
             ))
-            root.alpha = if (entry.canImport) 1f else 0.72f
+            root.alpha = if (entry.canImport || entry.needsUserUrl) 1f else 0.72f
             root.contentDescription = root.context.getString(
                 R.string.academic_school_accessibility,
                 entry.name,

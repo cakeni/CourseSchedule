@@ -141,7 +141,7 @@ internal object GenericAcademicImport {
             ?: throw ImportFormatException("无法确认教务地址的访问范围")
         val origin = "${uri.scheme.lowercase(Locale.ROOT)}://${academicAuthority(uri)}/"
         if (host.contains("vpn") && scope == origin) {
-            throw ImportFormatException("请粘贴 WebVPN 中具体教务资源的地址，而不是 VPN 门户登录地址；已列出的学校可直接选择学校")
+            throw ImportFormatException("请粘贴 WebVPN 中具体教务资源的地址，而不是 VPN 门户登录地址")
         }
         // Do not retain pasted tickets, query parameters or fragments in Activity extras/state.
         val cleanPath = uri.rawPath.orEmpty()

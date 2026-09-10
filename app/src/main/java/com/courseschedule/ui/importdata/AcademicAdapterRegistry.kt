@@ -51,6 +51,16 @@ internal object AcademicAdapterRegistry {
     const val KINGOSOFT_SELECTED = "kingosoft_selected"
     const val SOUTH_SOFT = "south_soft"
     const val EAMS_TABLE0 = "eams_table0"
+    const val SUDA_POST_GRID = "suda_post_grid"
+    const val ZJU_POST_GRID = "zju_post_grid"
+    const val XJU_POST_GRID = "xju_post_grid"
+    const val CUPL_POST_GRID = "cupl_post_grid"
+    const val SCAU_PRINT_GRID = "scau_print_grid"
+    const val HITSZ_CARD_GRID = "hitsz_card_grid"
+    const val HIT_PRINT_GRID = "hit_print_grid"
+    const val XHTD_BLOCK_GRID = "xhtd_block_grid"
+    const val UESTC_POST_GRID = "uestc_post_grid"
+    const val GDEI_NESTED_GRID = "gdei_nested_grid"
 
     private val specsById = listOf(
         AcademicAdapterSpec(
@@ -139,6 +149,56 @@ internal object AcademicAdapterRegistry {
             captureMode = AcademicCaptureMode.DOM
         ),
         AcademicAdapterSpec(
+            SUDA_POST_GRID, AcademicSystem.STRUCTURED_HTML,
+            selectors = listOf("#DataGrid1", "#MainWork_DataGrid1"),
+            captureMode = AcademicCaptureMode.DOM
+        ),
+        AcademicAdapterSpec(
+            ZJU_POST_GRID, AcademicSystem.STRUCTURED_HTML,
+            selectors = listOf("#kcbForm table"),
+            captureMode = AcademicCaptureMode.DOM
+        ),
+        AcademicAdapterSpec(
+            XJU_POST_GRID, AcademicSystem.STRUCTURED_HTML,
+            selectors = listOf("#ctl00_contentParent_dgData", "#contentParent_dgData"),
+            captureMode = AcademicCaptureMode.DOM
+        ),
+        AcademicAdapterSpec(
+            CUPL_POST_GRID, AcademicSystem.STRUCTURED_HTML,
+            selectors = listOf("#tabCT"),
+            captureMode = AcademicCaptureMode.DOM
+        ),
+        AcademicAdapterSpec(
+            SCAU_PRINT_GRID, AcademicSystem.STRUCTURED_HTML,
+            selectors = listOf("table[border=1]"),
+            captureMode = AcademicCaptureMode.DOM
+        ),
+        AcademicAdapterSpec(
+            HITSZ_CARD_GRID, AcademicSystem.STRUCTURED_HTML,
+            selectors = listOf(".ivu-table-tbody"),
+            captureMode = AcademicCaptureMode.DOM
+        ),
+        AcademicAdapterSpec(
+            HIT_PRINT_GRID, AcademicSystem.STRUCTURED_HTML,
+            selectors = listOf(".xfyq_con", "#xszp"),
+            captureMode = AcademicCaptureMode.DOM
+        ),
+        AcademicAdapterSpec(
+            XHTD_BLOCK_GRID, AcademicSystem.STRUCTURED_HTML,
+            selectors = listOf("#kbtable div[id]"),
+            captureMode = AcademicCaptureMode.DOM
+        ),
+        AcademicAdapterSpec(
+            UESTC_POST_GRID, AcademicSystem.STRUCTURED_HTML,
+            selectors = listOf("#tbl"),
+            captureMode = AcademicCaptureMode.DOM
+        ),
+        AcademicAdapterSpec(
+            GDEI_NESTED_GRID, AcademicSystem.STRUCTURED_HTML,
+            selectors = listOf("tbody"),
+            captureMode = AcademicCaptureMode.DOM
+        ),
+        AcademicAdapterSpec(
             EAMS_TABLE0, AcademicSystem.EAMS,
             globals = listOf("table0", "unitCount"),
             captureMode = AcademicCaptureMode.PAGE_GLOBAL
@@ -161,7 +221,19 @@ internal object AcademicAdapterRegistry {
         "kingo_new" to KINGOSOFT_NEW,
         "kg_zx" to KINGOSOFT_SELECTED,
         "qingguo" to KINGOSOFT_SELECTED,
-        "south_soft" to SOUTH_SOFT
+        "south_soft" to SOUTH_SOFT,
+        "suda_post" to SUDA_POST_GRID,
+        "zju_post" to ZJU_POST_GRID,
+        "xju_post" to XJU_POST_GRID,
+        "cupl_post" to CUPL_POST_GRID,
+        "scau" to SCAU_PRINT_GRID,
+        "hitsz" to HITSZ_CARD_GRID,
+        "hit" to HIT_PRINT_GRID,
+        "xhtd" to XHTD_BLOCK_GRID,
+        "uestc_post" to UESTC_POST_GRID,
+        "gdei" to GDEI_NESTED_GRID,
+        "swjtu_post" to WISEDU_AUTO,
+        "jlict_qz_old" to QIANGZHI_STANDARD
     )
 
     private val profileAdapters = mapOf(
@@ -241,6 +313,57 @@ internal object AcademicAdapterRegistry {
             KINGOSOFT_SELECTED -> withHtmlSnapshot(
                 school, payload, listOf("#kbDiv", "#mytable", ".pageRpt", "#reportArea")
             ) { html -> KingosoftScheduleParser(totalWeeks, selectedResults = true).parse(html) }
+            SUDA_POST_GRID -> withHtmlSnapshot(
+                school, payload, listOf("#DataGrid1", "#MainWork_DataGrid1")
+            ) { html ->
+                StrictTimetableTableParser(
+                    totalWeeks, "苏大研究生教务", listOf("#DataGrid1", "#MainWork_DataGrid1"),
+                    orderedRowsAreSections = true, splitDoubleBreaks = true
+                ).parse(html)
+            }
+            ZJU_POST_GRID -> withHtmlSnapshot(school, payload, listOf("#kcbForm table")) { html ->
+                StrictTimetableTableParser(
+                    totalWeeks, "浙大研究生教务", listOf("#kcbForm table"),
+                    orderedRowsAreSections = true,
+                    splitLeafCourseDivs = true
+                ).parse(html)
+            }
+            XJU_POST_GRID -> withHtmlSnapshot(
+                school, payload, listOf("#ctl00_contentParent_dgData", "#contentParent_dgData")
+            ) { html ->
+                StrictTimetableTableParser(
+                    totalWeeks, "新疆大学研究生教务",
+                    listOf("#ctl00_contentParent_dgData", "#contentParent_dgData"),
+                    orderedRowsAreSections = true,
+                    compactBraceFormat = true,
+                    defaultAllWeeks = true
+                ).parse(html)
+            }
+            CUPL_POST_GRID -> withHtmlSnapshot(school, payload, listOf("#tabCT")) { html ->
+                StrictTimetableTableParser(
+                    totalWeeks, "法大研究生教务", listOf("#tabCT"),
+                    orderedRowsAreSections = true,
+                    splitBoldBlocks = true
+                ).parse(html)
+            }
+            SCAU_PRINT_GRID -> withHtmlSnapshot(school, payload, listOf("table[border=1]")) { html ->
+                ScauScheduleParser(totalWeeks).parse(html)
+            }
+            HITSZ_CARD_GRID -> withHtmlSnapshot(school, payload, listOf(".ivu-table-tbody")) { html ->
+                HitszScheduleParser(totalWeeks).parse(html)
+            }
+            HIT_PRINT_GRID -> withHtmlSnapshot(school, payload, listOf(".xfyq_con", "#xszp")) { html ->
+                HitScheduleParser(totalWeeks).parse(html)
+            }
+            XHTD_BLOCK_GRID -> withHtmlSnapshot(school, payload, listOf("#kbtable div[id]")) { html ->
+                XhtdScheduleParser(totalWeeks).parse(html)
+            }
+            UESTC_POST_GRID -> withHtmlSnapshot(school, payload, listOf("#tbl")) { html ->
+                UestcPostScheduleParser(totalWeeks).parse(html)
+            }
+            GDEI_NESTED_GRID -> withHtmlSnapshot(school, payload, listOf("tbody")) { html ->
+                GdeiScheduleParser(totalWeeks).parse(html)
+            }
             ZHENGFANG_LEGACY -> parseZhengfang(school, payload, totalWeeks, legacy = true)
             ZHENGFANG_JWGLXT -> parseZhengfang(school, payload, totalWeeks, legacy = false)
             ZHENGFANG_AUTO -> parseZhengfangAuto(school, payload, totalWeeks)

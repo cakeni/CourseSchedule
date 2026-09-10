@@ -20,9 +20,48 @@ class AcademicSchoolDirectoryTest {
 
         assertEquals(3_566, entries.size)
         assertEquals(2_681, entries.count { it.canImport })
+        assertEquals(765, entries.count { it.needsUserUrl })
+        assertEquals(120, entries.count { !it.canImport && !it.needsUserUrl })
         assertEquals(984, entries.count { it.sourceType == "ziyan" && it.canImport })
         assertEquals(104, entries.count { it.sourceType == "ziyan" && !it.canImport })
         assertEquals(935, entries.count { it.allowCleartext })
+
+        val sudaPost = entries.first { it.sourceType == "suda_post" && it.needsUserUrl }
+        assertEquals("structured", sudaPost.profile!!.id)
+        assertEquals(AcademicAdapterRegistry.SUDA_POST_GRID, sudaPost.adapterId)
+        assertTrue(sudaPost.needsUserUrl)
+
+        val zjuPost = entries.first { it.sourceType == "zju_post" && it.needsUserUrl }
+        assertEquals(AcademicAdapterRegistry.ZJU_POST_GRID, zjuPost.adapterId)
+        assertTrue(zjuPost.needsUserUrl)
+
+        val swjtuPost = entries.first { it.sourceType == "swjtu_post" }
+        assertEquals("wisedu", swjtuPost.profile!!.id)
+        assertEquals(AcademicAdapterRegistry.WISEDU_AUTO, swjtuPost.adapterId)
+
+        val xjuPost = entries.first { it.sourceType == "xju_post" && it.needsUserUrl }
+        assertEquals(AcademicAdapterRegistry.XJU_POST_GRID, xjuPost.adapterId)
+
+        val cuplPost = entries.first { it.sourceType == "cupl_post" && it.needsUserUrl }
+        assertEquals(AcademicAdapterRegistry.CUPL_POST_GRID, cuplPost.adapterId)
+
+        val scau = entries.first { it.sourceType == "scau" && it.needsUserUrl }
+        assertEquals(AcademicAdapterRegistry.SCAU_PRINT_GRID, scau.adapterId)
+
+        val hitsz = entries.first { it.sourceType == "hitsz" && it.needsUserUrl }
+        assertEquals(AcademicAdapterRegistry.HITSZ_CARD_GRID, hitsz.adapterId)
+
+        val hit = entries.first { it.sourceType == "hit" && it.needsUserUrl }
+        assertEquals(AcademicAdapterRegistry.HIT_PRINT_GRID, hit.adapterId)
+
+        val xhtd = entries.first { it.sourceType == "xhtd" && it.needsUserUrl }
+        assertEquals(AcademicAdapterRegistry.XHTD_BLOCK_GRID, xhtd.adapterId)
+
+        val uestcPost = entries.first { it.sourceType == "uestc_post" && it.needsUserUrl }
+        assertEquals(AcademicAdapterRegistry.UESTC_POST_GRID, uestcPost.adapterId)
+
+        val gdei = entries.first { it.sourceType == "gdei" && it.needsUserUrl }
+        assertEquals(AcademicAdapterRegistry.GDEI_NESTED_GRID, gdei.adapterId)
     }
 
     @Test fun bundledV3MapsAdaptersAndLeavesAll578UnverifiedFamilyRowsBlocked() {
@@ -157,6 +196,7 @@ class AcademicSchoolDirectoryTest {
 
         val noUrl = entries.first { it.id == "no-url" }
         assertFalse(noUrl.canImport)
+        assertTrue(noUrl.needsUserUrl)
         assertNull(noUrl.toAcademicSchool())
         assertEquals("zhengfang", noUrl.profile!!.id)
         assertEquals("http://10.0.0.1/jwglxt/xtgl/login_slogin.html", noUrl.referenceUrl)
@@ -164,15 +204,23 @@ class AcademicSchoolDirectoryTest {
 
         val cloud = entries.first { it.id == "cloud" }
         assertTrue(cloud.isCloudOnly)
+        assertFalse(cloud.needsUserUrl)
         assertNull(cloud.profile)
         assertEquals("https://jw.cloud.edu.cn/", cloud.referenceUrl)
 
         val custom = entries.first { it.id == "custom" }
         assertFalse(custom.isCloudOnly)
-        assertNull(custom.profile)
+        assertTrue(custom.needsUserUrl)
+        assertEquals("structured", custom.profile!!.id)
+        assertEquals(AcademicAdapterRegistry.SUDA_POST_GRID, custom.adapterId)
 
         val withProfile = entries.first { it.id == "with-profile" }
         assertEquals("qiangzhi", withProfile.profile!!.id)
+        assertTrue(withProfile.needsUserUrl)
+        val configured = withProfile.createUserConfiguredSchool("https://jw.example.edu.cn/login?ticket=private")
+        assertEquals("带型大学", configured.name)
+        assertEquals("https://jw.example.edu.cn/login", configured.loginUrl)
+        assertEquals(AcademicAdapterRegistry.QIANGZHI_STANDARD, configured.adapterId)
 
         val noteSchool = entries.first { it.id == "note-school" }
         assertTrue(noteSchool.importHint!!.contains("个人课表"))

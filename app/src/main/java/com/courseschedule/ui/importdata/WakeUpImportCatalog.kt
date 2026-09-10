@@ -6,8 +6,8 @@ package com.courseschedule.ui.importdata
  * per-type usage notes adapted from WakeUp's public import instructions.
  *
  * Only entries with a bundled, validated login URL are directly openable.
- * Entries without one remain adapter requests; manual URLs stay in the separate
- * advanced generic-import entry instead of being required in the school picker.
+ * Entries with a known local parser but no usable URL ask for a school-official
+ * address in the picker.
  */
 internal object WakeUpImportCatalog {
 
@@ -33,6 +33,17 @@ internal object WakeUpImportCatalog {
         "kg_zx" to "kingosoft_selected",
         "qingguo" to "kingosoft_selected",
         "south_soft" to "south_soft",
+        "suda_post" to "structured",
+        "zju_post" to "structured",
+        "xju_post" to "structured",
+        "cupl_post" to "structured",
+        "scau" to "structured",
+        "hitsz" to "structured",
+        "hit" to "structured",
+        "xhtd" to "structured",
+        "uestc_post" to "structured",
+        "gdei" to "structured",
+        "swjtu_post" to "wisedu",
         "urp_new" to "urp_new",
         "urp" to "urp",
         "yl" to "yilian",

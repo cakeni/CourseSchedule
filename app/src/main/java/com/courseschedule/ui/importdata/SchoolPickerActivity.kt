@@ -11,6 +11,7 @@ import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.courseschedule.R
+import com.courseschedule.databinding.DialogAcademicAddressBinding
 import com.courseschedule.databinding.ActivitySchoolPickerBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
@@ -75,20 +76,67 @@ class SchoolPickerActivity : AppCompatActivity() {
     }
 
     private fun selectSchool(entry: AcademicSchoolDirectoryEntry) {
+        if (entry.needsUserUrl) {
+            showAddressInput(entry)
+            return
+        }
         if (!entry.canImport) {
             showAdapterRequired(entry)
             return
         }
         if (entry.allowCleartext) {
-            MaterialAlertDialogBuilder(this)
-                .setTitle(R.string.academic_cleartext_title)
-                .setMessage(getString(R.string.academic_cleartext_detail, entry.name, entry.host))
-                .setPositiveButton(R.string.academic_cleartext_continue) { _, _ -> finishSelection(entry) }
-                .setNegativeButton(R.string.cancel, null)
-                .show()
+            confirmCleartext(entry.name, entry.host) { finishSelection(entry) }
             return
         }
         finishSelection(entry)
+    }
+
+    private fun showAddressInput(entry: AcademicSchoolDirectoryEntry) {
+        val profile = entry.profile ?: return showAdapterRequired(entry)
+        val content = DialogAcademicAddressBinding.inflate(layoutInflater)
+        content.tvGenericDescription.text = getString(
+            R.string.academic_generic_profile_dialog_hint,
+            profile.instructions
+        )
+        content.tvWakeupReference.visibility = if (entry.referenceUrl.isBlank()) View.GONE else View.VISIBLE
+        content.tvWakeupReference.text = getString(R.string.academic_wakeup_reference, entry.referenceUrl)
+
+        val dialog = MaterialAlertDialogBuilder(this)
+            .setTitle(getString(R.string.academic_generic_configure_title, entry.name))
+            .setView(content.root)
+            .setPositiveButton(R.string.academic_trust_and_open, null)
+            .setNegativeButton(R.string.cancel, null)
+            .create()
+        dialog.setOnShowListener {
+            dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).setOnClickListener {
+                content.tilGenericUrl.error = null
+                val school = runCatching {
+                    entry.createUserConfiguredSchool(content.etGenericUrl.text?.toString().orEmpty())
+                }.getOrElse { error ->
+                    content.tilGenericUrl.error = error.message ?: getString(R.string.academic_directory_entry_invalid)
+                    return@setOnClickListener
+                }
+                val finish = {
+                    dialog.dismiss()
+                    finishSelection(entry, school)
+                }
+                if (school.allowCleartext) {
+                    confirmCleartext(entry.name, school.trustedHosts.first(), finish)
+                } else {
+                    finish()
+                }
+            }
+        }
+        dialog.show()
+    }
+
+    private fun confirmCleartext(name: String, host: String, onContinue: () -> Unit) {
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.academic_cleartext_title)
+            .setMessage(getString(R.string.academic_cleartext_detail, name, host))
+            .setPositiveButton(R.string.academic_cleartext_continue) { _, _ -> onContinue() }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
     }
 
     private fun showAdapterRequired(entry: AcademicSchoolDirectoryEntry) {
@@ -111,6 +159,15 @@ class SchoolPickerActivity : AppCompatActivity() {
 
     private fun finishSelection(entry: AcademicSchoolDirectoryEntry) {
         setResult(Activity.RESULT_OK, Intent().putExtra(EXTRA_DIRECTORY_ID, entry.id))
+        finish()
+    }
+
+    private fun finishSelection(entry: AcademicSchoolDirectoryEntry, school: AcademicSchool) {
+        setResult(
+            Activity.RESULT_OK,
+            AcademicWebImportActivity.schoolIntent(this, school)
+                .putExtra(EXTRA_DIRECTORY_ID, entry.id)
+        )
         finish()
     }
 
