@@ -145,7 +145,7 @@ internal object AcademicAdapterRegistry {
         ),
         AcademicAdapterSpec(
             SOUTH_SOFT, AcademicSystem.SOUTH_SOFT_HTML,
-            selectors = listOf("#kb", "table.kb", ".kb"),
+            selectors = listOf("table.tb_kcb", "#kbtable", "#kb", "table.kb", ".kb"),
             captureMode = AcademicCaptureMode.DOM
         ),
         AcademicAdapterSpec(

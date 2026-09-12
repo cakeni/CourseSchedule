@@ -57,7 +57,18 @@ class ImportActivity : AppCompatActivity() {
         val json = result.data?.getStringExtra(AcademicWebImportActivity.EXTRA_SCHEDULE_JSON)
             ?.takeIf(String::isNotBlank)
             ?: return@registerForActivityResult
-        importParsed { totalWeeks -> AcademicSchools.parse(school, json, totalWeeks) }
+        val aiResult = result.data?.getBooleanExtra(
+            AcademicWebImportActivity.EXTRA_AI_RESULT,
+            false
+        ) == true
+        val aiSourceLabel = getString(R.string.academic_ai_source)
+        importParsed { totalWeeks ->
+            if (aiResult) {
+                ImportParser(totalWeeks).parseJson(json).copy(sourceLabel = aiSourceLabel)
+            } else {
+                AcademicSchools.parse(school, json, totalWeeks)
+            }
+        }
     }
 
     private val schoolPickerLauncher = registerForActivityResult(

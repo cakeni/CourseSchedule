@@ -85,6 +85,7 @@
                     android:visibility="gone" />
 
                 <TextView
+                    android:id="@+id/tvPrivacyHint"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
@@ -120,6 +121,33 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/displayModeGroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            app:chipSpacingHorizontal="8dp"
+            app:singleLine="true">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipDesktopMode"
+                style="@style/CourseScheduleChoiceChip"
+                android:checkable="true"
+                android:minHeight="48dp"
+                android:text="@string/academic_desktop_mode"
+                app:checkedIconVisible="true"
+                app:ensureMinTouchTargetSize="true" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipLandscapeMode"
+                style="@style/CourseScheduleChoiceChip"
+                android:checkable="true"
+                android:minHeight="48dp"
+                android:text="@string/academic_landscape_mode"
+                app:checkedIconVisible="true"
+                app:ensureMinTouchTargetSize="true" />
+        </com.google.android.material.chip.ChipGroup>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnOpenSchool"

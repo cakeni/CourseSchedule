@@ -235,6 +235,12 @@ class ReportScheduleParserTest {
         val course = SouthSoftScheduleParser(20).parse(valid).courses.single()
         assertEquals(1, course.dayOfWeek)
         assertEquals(1 to 4, course.startSection to course.endSection)
+        assertEquals(
+            "操作系统",
+            SouthSoftScheduleParser(20)
+                .parse(valid.replace("id=\"kb\"", "class=\"tb_kcb\""))
+                .courses.single().courseName
+        )
 
         val error = assertThrows(ImportFormatException::class.java) {
             SouthSoftScheduleParser(20).parse(valid.replace("1-8周", "时间待定"))

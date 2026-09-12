@@ -26,6 +26,11 @@ internal class AcademicSchoolAdapter(
             tvSchoolName.text = entry.name
             val profileLabel = entry.profile?.label
                 ?: root.context.getString(R.string.academic_adapter_required_label)
+            val categoryLabel = root.context.getString(when (entry.category) {
+                AcademicDirectoryCategory.UNDERGRADUATE -> R.string.academic_category_undergraduate
+                AcademicDirectoryCategory.GRADUATE -> R.string.academic_category_graduate
+                AcademicDirectoryCategory.COMMON -> R.string.academic_category_common
+            })
             val hostLabel = entry.host.ifBlank {
                 root.context.getString(
                     if (entry.needsUserUrl) R.string.academic_enter_school_url
@@ -34,7 +39,7 @@ internal class AcademicSchoolAdapter(
             }
             tvSchoolMeta.text = root.context.getString(
                 if (entry.allowCleartext) R.string.academic_school_meta_cleartext else R.string.academic_school_meta,
-                profileLabel,
+                "$categoryLabel · $profileLabel",
                 hostLabel
             )
             tvSchoolStatus.setText(

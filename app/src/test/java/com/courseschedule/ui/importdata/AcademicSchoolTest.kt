@@ -12,6 +12,8 @@ class AcademicSchoolTest {
         assertFalse(AcademicSchools.SDUFE.verified)
         assertFalse(AcademicSchools.NUAA.verified)
         assertFalse(AcademicSchools.NUAA_GRADUATE.verified)
+        assertFalse(AcademicSchools.NUAA.isGraduate)
+        assertTrue(AcademicSchools.NUAA_GRADUATE.isGraduate)
         assertNull(AcademicSchools.find("made-up-school"))
         assertNull(AcademicSchools.find(null))
         AcademicSchools.all.forEach {
@@ -20,7 +22,7 @@ class AcademicSchoolTest {
         }
     }
 
-    @Test fun onlyHttpsExactHostsAndExpectedPortsAreTrusted() {
+    @Test fun onlyConfiguredSchemesExactHostsAndExpectedPortsAreTrusted() {
         val representatives = mapOf(
             AcademicSchools.SWPU to "deanservices.swpu.edu.cn",
             AcademicSchools.SDUFE to "jw.sdufe.edu.cn",
@@ -30,7 +32,9 @@ class AcademicSchoolTest {
         for ((school, host) in representatives) {
             assertTrue(school.allowsNavigation("https://$host/"))
             assertTrue(school.allowsNavigation("HTTPS://${host.uppercase()}:443/"))
-            for (url in listOf(null, "", "http://$host/", "https://$host.evil.example/",
+            val cleartextAllowed = school.allowCleartext && host in school.cleartextHosts
+            assertEquals(cleartextAllowed, school.allowsNavigation("http://$host/"))
+            for (url in listOf(null, "", "https://$host.evil.example/",
                 "https://$host@evil.example/", "https://user@$host/", "https://$host:8443/", "file:///etc/passwd",
                 "javascript:alert(1)", "intent://$host/", "https://$host./", "https://$host\\@evil.example/",
                 "https://$host/a/../http/evil", "https://$host/%2e%2e/http/evil")) {
@@ -42,19 +46,26 @@ class AcademicSchoolTest {
     @Test fun nuaaUndergraduateAllowsOnlyItsObservedCasAndTimetableCallbackChain() {
         val school = AcademicSchools.NUAA
         assertEquals(AcademicSystem.EAMS, school.system)
-        assertEquals("https://aao-eas.nuaa.edu.cn/eams/login.action", school.loginUrl)
+        assertEquals("https://aao-eas.nuaa.edu.cn/eams/homeExt.action", school.loginUrl)
+        assertEquals(
+            "https://aao-eas.nuaa.edu.cn/eams/courseTableForStd.action",
+            school.timetableUrl
+        )
         assertTrue(school.allowsTimetable("https://aao-eas.nuaa.edu.cn/eams/courseTableForStd.action"))
+        assertTrue(school.allowsTimetable("http://aao-eas.nuaa.edu.cn/eams/courseTableForStd.action"))
         assertTrue(school.allowsNavigation(
             "https://authserver.nuaa.edu.cn/authserver/login?service=http%3A%2F%2Faao-eas.nuaa.edu.cn%2Feams%2FlocalLogin.action"
         ))
         assertFalse(school.allowsTimetable("https://authserver.nuaa.edu.cn/authserver/login"))
         val callback = "http://aao-eas.nuaa.edu.cn/eams/localLogin.action?ticket=hidden%2Fvalue"
-        assertFalse(school.allowsNavigation(callback))
+        assertTrue(school.allowsNavigation(callback))
+        assertTrue(school.allowsTimetable(callback))
         assertEquals(
             "https://aao-eas.nuaa.edu.cn/eams/localLogin.action?ticket=hidden%2Fvalue",
             upgradedAcademicHttpsUrl(school, callback)
         )
-        assertFalse(school.allowsNavigation("http://authserver.nuaa.edu.cn/authserver/login"))
+        assertTrue(school.allowsNavigation("http://authserver.nuaa.edu.cn/authserver/login"))
+        assertFalse(school.allowsTimetable("http://authserver.nuaa.edu.cn/authserver/login"))
         assertEquals(
             "https://authserver.nuaa.edu.cn/authserver/login?service=http%3A%2F%2Faao-eas.nuaa.edu.cn%2Feams%2F",
             upgradedAcademicHttpsUrl(school,
@@ -63,6 +74,10 @@ class AcademicSchoolTest {
         assertTrue(school.allowsNavigation("https://other.nuaa.edu.cn/"))
         assertFalse(school.allowsTimetable("https://other.nuaa.edu.cn/"))
         assertFalse(school.allowsNavigation("https://aao-eas.nuaa.edu.cn.evil.example/eams/"))
+        assertFalse(school.allowsNavigation("http://other.nuaa.edu.cn/eams/"))
+        val captureScript = AcademicCaptureScript.create(school)
+        assertTrue(captureScript.contains("http://aao-eas.nuaa.edu.cn/eams/"))
+        assertFalse(captureScript.contains("http://authserver.nuaa.edu.cn/authserver/"))
         assertEquals("https://other.nuaa.edu.cn/", upgradedAcademicHttpsUrl(school, "http://other.nuaa.edu.cn/"))
     }
 
