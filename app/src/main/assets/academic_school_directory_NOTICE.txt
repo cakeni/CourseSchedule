@@ -5,7 +5,7 @@ https://www.wakeup.fun/
 Directory versionTimeLine: 1763017986
 
 No WakeUp implementation code, credentials, cookies, or timetable responses are
-included. CourseSchedule independently implements its parsers. Entries that depend
+included. The parsers in 晴课表 are independently implemented. Entries that depend
 on a private/school-specific adapter remain visible as "adapter required" instead
 of being presented as functional. Numeric IP addresses, private-network hosts,
 malformed URLs, credentials, query tickets, fragments, and session IDs are excluded.
@@ -20,7 +20,7 @@ trusted by the app; users must paste their own address, which passes the normal
 generic-import validation.
 
 Per-school "operation guidance" strings shown during import are short factual
-navigation steps (menu and page names) adapted in CourseSchedule's own wording
+navigation steps (menu and page names) adapted to the wording used in 晴课表
 from WakeUp's published import instructions for those schools.
 
 Additional or replacement public entries are derived from the MIT-licensed project:

@@ -1,4 +1,4 @@
-# CourseSchedule 课程表
+# 晴课表
 
 [![Android](https://img.shields.io/badge/Android-8.0%2B-176B5B)](https://developer.android.com/)
 [![Kotlin](https://img.shields.io/badge/Kotlin-1.9.10-7F52FF)](https://kotlinlang.org/)
@@ -8,7 +8,7 @@
 一款专注于日常查看、导入和管理课程的 Android 应用。课程数据保存在本机，不依赖账号或自建服务器。
 
 <p align="center">
-  <img src="docs/screenshots/schedule-week.png" width="360" alt="CourseSchedule 周课表界面">
+  <img src="docs/screenshots/schedule-week.png" width="360" alt="晴课表周课表界面">
 </p>
 
 ## 功能

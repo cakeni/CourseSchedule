@@ -2,7 +2,7 @@
 
 来源：WakeUp 课程表 6.1.20（2025-11 快照）与早期构建（2025-09，majorVersion 53）
 的拆包分析。本手册只记录**行为事实**（页面路径、接口地址、参数名、数据形态、
-操作步骤），不含任何 WakeUp 代码；CourseSchedule 的实现均为独立编写。
+操作步骤），不含任何 WakeUp 代码；晴课表的实现均为独立编写。
 当前核对的拆包产物在本地 `apk_unpack_20260907_182908`，反编译审计副本在
 `analysis/unpacked-adapter-audit-20260907`（不随应用打包）。
 
@@ -44,7 +44,7 @@
 
 ### 金智 Wisedu（jz，约 128 所；另有研究生 gsapp）
 - 本科 jwapp：接口 `sys/xkjglapp/modules/xskcb/xsjxrwcx.do?XNXQDM=<学期>`
-  返回 JSON（CourseSchedule 已实现原生 bridge 抓取）。
+  返回 JSON（晴课表已实现原生 bridge 抓取）。
 - 研究生 gsapp：`gsapp/sys/wdkbapp/modules/xskcb/xsjxrwcx.do?XNXQDM=<学期>`。
 - 移动端 homeapp：`sys/homeapp/api/home/student/getMyScheduleDetail.do`，
   body `termCode=<2024-2025-2>&campusCode=&type=term`，从页面 JS 上下文内
@@ -98,7 +98,7 @@
 5. **学期码自动识别**：正则 `20\d\d-20\d\d-\d` + 「学年/学期」中文兜底
    （normalizeWiseduTerm 已实现）。
 6. **PC 模式视口**：注入 viewport 强制桌面宽度，避免移动版页面出现
-   （set_meta 思路；CourseSchedule 用普通 WebView 未做，暂不需要）。
+   （set_meta 思路；晴课表用普通 WebView 未做，暂不需要）。
 7. **失败文案分层**：解析失败时按「页面没有课程信息 / 选错页面 / 教务未
    适配」三种提示（导入页已有类似文案，可再细化）。
 
