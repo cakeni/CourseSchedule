@@ -78,6 +78,8 @@
     <!-- 节次 -->
     <string name="section_format">第%d节</string>
     <string name="section_range_format">第%1$d-%2$d节</string>
+    <string name="quick_add_course_accessibility">快速添加%1$s%2$s课程</string>
+    <string name="quick_add_selection_announcement">%1$s，点击加号继续</string>
     <string name="week_range_format">第%1$d-%2$d周</string>
     <string name="week_range_with_type_format">第%1$d-%2$d周(%3$s)</string>
 

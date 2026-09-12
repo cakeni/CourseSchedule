@@ -15,6 +15,7 @@ import android.text.TextPaint
 import android.text.TextUtils
 import android.util.AttributeSet
 import android.util.TypedValue
+import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
@@ -46,6 +47,9 @@ class CourseTableView @JvmOverloads constructor(
         private const val TOTAL_SECTIONS = 12
         private const val PRESS_IN_DURATION_MS = 88L
         private const val PRESS_OUT_DURATION_MS = 165L
+        private const val QUICK_ADD_REVEAL_DURATION_MS = 180L
+        private const val QUICK_ADD_SNAP_DURATION_MS = 140L
+        private const val QUICK_ADD_VIRTUAL_ID = Int.MAX_VALUE
         private const val PRESSED_SCALE_X = 0.97f
         private const val PRESSED_SCALE_Y = 0.985f
         private val PRESS_INTERPOLATOR = PathInterpolator(0.2f, 0f, 0f, 1f)
@@ -120,6 +124,36 @@ class CourseTableView @JvmOverloads constructor(
         style = Paint.Style.STROKE
     }
 
+    private val quickAddPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = ContextCompat.getColor(context, R.color.primary)
+        style = Paint.Style.FILL
+    }
+
+    private val quickAddStrokePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.WHITE
+        strokeWidth = dp(1.5f)
+        style = Paint.Style.STROKE
+    }
+
+    private val quickAddButtonPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = ContextCompat.getColor(context, R.color.surface)
+        style = Paint.Style.FILL
+    }
+
+    private val quickAddPlusPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = ContextCompat.getColor(context, R.color.primary)
+        strokeCap = Paint.Cap.ROUND
+        strokeWidth = dp(2.2f)
+        style = Paint.Style.STROKE
+    }
+
+    private val quickAddGripPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.WHITE
+        strokeCap = Paint.Cap.ROUND
+        strokeWidth = dp(1.8f)
+        style = Paint.Style.STROKE
+    }
+
     private val courseNamePaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
         color = ContextCompat.getColor(context, R.color.on_primary)
         textSize = sp(12f)
@@ -164,7 +198,11 @@ class CourseTableView @JvmOverloads constructor(
     private var highlightedDay: Int? = null
     private var onCourseClickListener: ((Course, View, RectF) -> Unit)? = null
     private var onEmptySlotClickListener: ((dayOfWeek: Int, section: Int) -> Unit)? = null
+    private var onQuickAddCourseListener:
+        ((dayOfWeek: Int, startSection: Int, endSection: Int) -> Unit)? = null
+    private var onQuickAddSelectionChangedListener: ((active: Boolean) -> Unit)? = null
     private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
+    private val longPressTimeout = ViewConfiguration.getLongPressTimeout().toLong()
     private var pressedCourse: Course? = null
     private val coursePressMotion = CoursePressMotion()
     private var pagerOffset = 0f
@@ -177,6 +215,32 @@ class CourseTableView @JvmOverloads constructor(
     private val courseBoundsCache = mutableMapOf<Course, RectF>()
     private val courseTextLayoutCache = mutableMapOf<CourseTextLayoutKey, CourseTextLayout>()
     private val cardDrawBounds = RectF()
+
+    private data class QuickAddSelection(
+        val dayOfWeek: Int,
+        val anchorSection: Int,
+        var startSection: Int,
+        var endSection: Int
+    )
+
+    private var quickAddSelection: QuickAddSelection? = null
+    private var pendingLongPressSlot: Pair<Int, Int>? = null
+    private var quickAddDragging = false
+    private var quickAddButtonTracking = false
+    private var quickAddButtonPressed = false
+    private var dismissSelectionOnUp = false
+    private var quickAddRevealProgress = 0f
+    private var quickAddVisualTop = 0f
+    private var quickAddVisualBottom = 0f
+    private var quickAddRevealAnimator: ValueAnimator? = null
+    private var quickAddBoundsAnimator: ValueAnimator? = null
+    private val quickAddDrawBounds = RectF()
+    private val quickAddButtonBounds = RectF()
+    private val longPressRunnable = Runnable {
+        val slot = pendingLongPressSlot ?: return@Runnable
+        pendingLongPressSlot = null
+        if (!touchMoved && pressedCourse == null) beginQuickAdd(slot.first, slot.second)
+    }
 
     private var dayWidth = 0f
     private var totalWidth = 0f
@@ -244,6 +308,9 @@ class CourseTableView @JvmOverloads constructor(
 
     private val accessibilityHelper = object : ExploreByTouchHelper(this) {
         override fun getVirtualViewAt(x: Float, y: Float): Int {
+            if (quickAddSelection != null && quickAddButtonBounds.contains(x, y)) {
+                return QUICK_ADD_VIRTUAL_ID
+            }
             return visibleCourses().indexOfFirst { course -> courseBounds(course).contains(x, y) }
                 .takeIf { it >= 0 }
                 ?: INVALID_ID
@@ -251,12 +318,29 @@ class CourseTableView @JvmOverloads constructor(
 
         override fun getVisibleVirtualViews(virtualViewIds: MutableList<Int>) {
             visibleCourses().indices.forEach(virtualViewIds::add)
+            if (quickAddSelection != null) virtualViewIds += QUICK_ADD_VIRTUAL_ID
         }
 
         override fun onPopulateNodeForVirtualView(
             virtualViewId: Int,
             node: AccessibilityNodeInfoCompat
         ) {
+            if (virtualViewId == QUICK_ADD_VIRTUAL_ID) {
+                val selection = quickAddSelection ?: return
+                node.setBoundsInParent(
+                    Rect(
+                        quickAddButtonBounds.left.toInt(),
+                        quickAddButtonBounds.top.toInt(),
+                        quickAddButtonBounds.right.toInt(),
+                        quickAddButtonBounds.bottom.toInt()
+                    )
+                )
+                node.className = android.widget.Button::class.java.name
+                node.contentDescription = quickAddDescription(selection)
+                node.isClickable = true
+                node.addAction(AccessibilityNodeInfoCompat.ACTION_CLICK)
+                return
+            }
             val course = visibleCourses().getOrNull(virtualViewId) ?: return
             val bounds = courseBounds(course)
             node.setBoundsInParent(
@@ -274,6 +358,13 @@ class CourseTableView @JvmOverloads constructor(
             arguments: android.os.Bundle?
         ): Boolean {
             if (action != AccessibilityNodeInfoCompat.ACTION_CLICK) return false
+            if (virtualViewId == QUICK_ADD_VIRTUAL_ID) {
+                sendEventForVirtualView(
+                    virtualViewId,
+                    android.view.accessibility.AccessibilityEvent.TYPE_VIEW_CLICKED
+                )
+                return confirmQuickAdd()
+            }
             val course = visibleCourses().getOrNull(virtualViewId) ?: return false
             onCourseClickListener?.invoke(course, this@CourseTableView, RectF(courseBounds(course)))
             sendEventForVirtualView(virtualViewId, android.view.accessibility.AccessibilityEvent.TYPE_VIEW_CLICKED)
@@ -283,6 +374,8 @@ class CourseTableView @JvmOverloads constructor(
 
     init {
         setBackgroundColor(Color.TRANSPARENT)
+        isClickable = true
+        isLongClickable = true
         importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_YES
         ViewCompat.setAccessibilityDelegate(this, accessibilityHelper)
     }
@@ -322,6 +415,7 @@ class CourseTableView @JvmOverloads constructor(
         drawGrid(canvas)
         drawTimeColumn(canvas)
         drawCourses(canvas)
+        drawQuickAddSelection(canvas)
     }
 
     private fun drawHighlightedDay(canvas: Canvas) {
@@ -420,6 +514,87 @@ class CourseTableView @JvmOverloads constructor(
             drawCourse(canvas, course, alpha, isCurrentWeek, pressProgress)
             canvas.restoreToCount(saveCount)
         }
+    }
+
+    private fun drawQuickAddSelection(canvas: Canvas) {
+        if (quickAddSelection == null || quickAddRevealProgress <= 0f) return
+        val day = quickAddSelection?.dayOfWeek ?: return
+        val left = timeColumnWidth + (day - 1) * dayWidth + courseInset
+        val right = timeColumnWidth + day * dayWidth - courseInset
+        if (right <= left || quickAddVisualBottom <= quickAddVisualTop) return
+
+        quickAddDrawBounds.set(left, quickAddVisualTop, right, quickAddVisualBottom)
+        val centerX = quickAddDrawBounds.centerX()
+        val centerY = quickAddDrawBounds.centerY()
+        val revealScale = 0.88f + 0.12f * quickAddRevealProgress
+        val alpha = (quickAddRevealProgress * 255f).roundToInt().coerceIn(0, 255)
+        val saveCount = canvas.save()
+        canvas.scale(revealScale, revealScale, centerX, centerY)
+
+        quickAddPaint.alpha = 225 * alpha / 255
+        quickAddStrokePaint.alpha = 220 * alpha / 255
+        canvas.drawRoundRect(
+            quickAddDrawBounds,
+            courseCornerRadius,
+            courseCornerRadius,
+            quickAddPaint
+        )
+        canvas.drawRoundRect(
+            quickAddDrawBounds,
+            courseCornerRadius,
+            courseCornerRadius,
+            quickAddStrokePaint
+        )
+
+        val gripHalfWidth = minOf(dp(5f), quickAddDrawBounds.width() * 0.18f)
+        quickAddGripPaint.alpha = 165 * alpha / 255
+        canvas.drawLine(
+            centerX - gripHalfWidth,
+            quickAddDrawBounds.top + dp(6f),
+            centerX + gripHalfWidth,
+            quickAddDrawBounds.top + dp(6f),
+            quickAddGripPaint
+        )
+        canvas.drawLine(
+            centerX - gripHalfWidth,
+            quickAddDrawBounds.bottom - dp(6f),
+            centerX + gripHalfWidth,
+            quickAddDrawBounds.bottom - dp(6f),
+            quickAddGripPaint
+        )
+
+        val buttonRadius = minOf(dp(15f), quickAddDrawBounds.width() * 0.38f)
+        val buttonScale = if (quickAddButtonPressed) 0.9f else 1f
+        val drawnButtonRadius = buttonRadius * buttonScale
+        quickAddButtonPaint.alpha = (if (quickAddButtonPressed) 235 else 250) * alpha / 255
+        canvas.drawCircle(centerX, centerY, drawnButtonRadius, quickAddButtonPaint)
+
+        val plusHalfSize = drawnButtonRadius * 0.42f
+        quickAddPlusPaint.alpha = alpha
+        canvas.drawLine(
+            centerX - plusHalfSize,
+            centerY,
+            centerX + plusHalfSize,
+            centerY,
+            quickAddPlusPaint
+        )
+        canvas.drawLine(
+            centerX,
+            centerY - plusHalfSize,
+            centerX,
+            centerY + plusHalfSize,
+            quickAddPlusPaint
+        )
+        canvas.restoreToCount(saveCount)
+
+        val hitHalfWidth = maxOf(dp(24f), quickAddDrawBounds.width() / 2f)
+        val hitHalfHeight = dp(24f)
+        quickAddButtonBounds.set(
+            (centerX - hitHalfWidth).coerceAtLeast(timeColumnWidth),
+            (centerY - hitHalfHeight).coerceAtLeast(0f),
+            (centerX + hitHalfWidth).coerceAtMost(totalWidth),
+            (centerY + hitHalfHeight).coerceAtMost(totalHeight)
+        )
     }
 
     private fun drawCourse(
@@ -591,6 +766,22 @@ class CourseTableView @JvmOverloads constructor(
     override fun onTouchEvent(event: MotionEvent): Boolean {
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
+                cancelPendingLongPress()
+                quickAddButtonTracking = false
+                quickAddButtonPressed = false
+                dismissSelectionOnUp = false
+
+                if (quickAddSelection != null) {
+                    if (quickAddButtonBounds.contains(event.x, event.y)) {
+                        quickAddButtonTracking = true
+                        quickAddButtonPressed = true
+                        invalidate()
+                        return true
+                    }
+                    clearQuickAddSelection()
+                    dismissSelectionOnUp = true
+                }
+
                 resetCoursePress()
                 touchDownX = event.x
                 touchDownY = event.y
@@ -600,9 +791,28 @@ class CourseTableView @JvmOverloads constructor(
                     pressPivotX = event.x
                     pressPivotY = event.y
                     coursePressMotion.animateTo(1f, PRESS_IN_DURATION_MS)
+                } else {
+                    pendingLongPressSlot = emptySlotAt(event.x, event.y)?.takeUnless { (day, section) ->
+                        visibleCourses().any { course ->
+                            course.dayOfWeek == day && section in course.startSection..course.endSection
+                        }
+                    }
+                    if (pendingLongPressSlot != null) {
+                        postDelayed(longPressRunnable, longPressTimeout)
+                    }
                 }
             }
             MotionEvent.ACTION_MOVE -> {
+                if (quickAddButtonTracking) {
+                    quickAddButtonPressed = quickAddButtonBounds.contains(event.x, event.y)
+                    invalidate()
+                    return true
+                }
+                if (quickAddDragging) {
+                    updateQuickAddDrag(event.y)
+                    return true
+                }
+
                 val course = pressedCourse
                 val movedPastSlop = abs(event.x - touchDownX) > touchSlop ||
                     abs(event.y - touchDownY) > touchSlop
@@ -613,20 +823,40 @@ class CourseTableView @JvmOverloads constructor(
                         event.y < bounds.top - touchSlop ||
                         event.y > bounds.bottom + touchSlop
                     )
-                if (!touchMoved && movedPastSlop) touchMoved = true
+                if (!touchMoved && movedPastSlop) {
+                    touchMoved = true
+                    cancelPendingLongPress()
+                }
                 if (course != null && (movedPastSlop || outsideCourse)) {
                     touchMoved = true
                     releaseCoursePress()
                 }
             }
             MotionEvent.ACTION_UP -> {
+                cancelPendingLongPress()
+                if (quickAddButtonTracking) {
+                    val shouldConfirm = quickAddButtonPressed &&
+                        quickAddButtonBounds.contains(event.x, event.y)
+                    quickAddButtonTracking = false
+                    quickAddButtonPressed = false
+                    invalidate()
+                    if (shouldConfirm) confirmQuickAdd()
+                    return true
+                }
+                if (quickAddDragging) {
+                    finishQuickAddDrag()
+                    return true
+                }
+
                 val course = pressedCourse
                 val isClick = !touchMoved && course != null && courseBounds(course).contains(
                     event.x,
                     event.y
                 )
                 releaseCoursePress()
-                if (isClick && course != null) {
+                if (dismissSelectionOnUp) {
+                    dismissSelectionOnUp = false
+                } else if (isClick && course != null) {
                     val sourceBounds = RectF(courseBounds(course))
                     performClick()
                     onCourseClickListener?.invoke(course, this, sourceBounds)
@@ -638,9 +868,16 @@ class CourseTableView @JvmOverloads constructor(
                 }
             }
             MotionEvent.ACTION_CANCEL -> {
-                if (!touchMoved) {
+                cancelPendingLongPress()
+                quickAddButtonTracking = false
+                quickAddButtonPressed = false
+                dismissSelectionOnUp = false
+                if (quickAddDragging) {
+                    finishQuickAddDrag()
+                } else {
                     touchMoved = true
                     releaseCoursePress()
+                    invalidate()
                 }
             }
         }
@@ -661,6 +898,157 @@ class CourseTableView @JvmOverloads constructor(
         val day = ((x - timeColumnWidth) / dayWidth).toInt() + 1
         val section = (y / sectionHeight).toInt() + 1
         return (day to section).takeIf { day in 1..visibleDaysCount && section in 1..TOTAL_SECTIONS }
+    }
+
+    private fun beginQuickAdd(dayOfWeek: Int, section: Int) {
+        if (dayOfWeek !in 1..visibleDaysCount || section !in 1..TOTAL_SECTIONS) return
+        resetCoursePress()
+        val selection = QuickAddSelection(dayOfWeek, section, section, section)
+        quickAddSelection = selection
+        quickAddVisualTop = (section - 1) * sectionHeight + courseInset
+        quickAddVisualBottom = section * sectionHeight - courseInset
+        quickAddDragging = true
+        touchMoved = true
+        dismissSelectionOnUp = false
+        onQuickAddSelectionChangedListener?.invoke(true)
+        parent?.requestDisallowInterceptTouchEvent(true)
+        performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+
+        quickAddRevealAnimator?.cancel()
+        quickAddRevealProgress = 0f
+        quickAddRevealAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
+            duration = QUICK_ADD_REVEAL_DURATION_MS
+            interpolator = PRESS_INTERPOLATOR
+            addUpdateListener { animator ->
+                quickAddRevealProgress = animator.animatedValue as Float
+                ViewCompat.postInvalidateOnAnimation(this@CourseTableView)
+            }
+            start()
+        }
+        accessibilityHelper.invalidateRoot()
+        announceForAccessibility(quickAddAnnouncement(selection))
+        invalidate()
+    }
+
+    private fun updateQuickAddDrag(y: Float) {
+        val selection = quickAddSelection ?: return
+        quickAddBoundsAnimator?.cancel()
+        quickAddBoundsAnimator = null
+        val clampedY = y.coerceIn(0f, totalHeight - 0.001f)
+        val section = ((clampedY / sectionHeight).toInt() + 1).coerceIn(1, TOTAL_SECTIONS)
+        val newStart = minOf(selection.anchorSection, section)
+        val newEnd = maxOf(selection.anchorSection, section)
+        if (selection.startSection != newStart || selection.endSection != newEnd) {
+            selection.startSection = newStart
+            selection.endSection = newEnd
+            performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+            accessibilityHelper.invalidateRoot()
+        }
+
+        val anchorTop = (selection.anchorSection - 1) * sectionHeight + courseInset
+        val anchorBottom = selection.anchorSection * sectionHeight - courseInset
+        quickAddVisualTop = if (clampedY < anchorTop) {
+            clampedY.coerceAtLeast(courseInset)
+        } else {
+            anchorTop
+        }
+        quickAddVisualBottom = if (clampedY > anchorBottom) {
+            clampedY.coerceAtMost(totalHeight - courseInset)
+        } else {
+            anchorBottom
+        }
+        ViewCompat.postInvalidateOnAnimation(this)
+    }
+
+    private fun finishQuickAddDrag() {
+        quickAddDragging = false
+        parent?.requestDisallowInterceptTouchEvent(false)
+        val selection = quickAddSelection ?: return
+        val targetTop = (selection.startSection - 1) * sectionHeight + courseInset
+        val targetBottom = selection.endSection * sectionHeight - courseInset
+        animateQuickAddBounds(targetTop, targetBottom)
+        announceForAccessibility(quickAddAnnouncement(selection))
+    }
+
+    private fun animateQuickAddBounds(targetTop: Float, targetBottom: Float) {
+        quickAddBoundsAnimator?.cancel()
+        val startTop = quickAddVisualTop
+        val startBottom = quickAddVisualBottom
+        if (abs(startTop - targetTop) < 0.5f && abs(startBottom - targetBottom) < 0.5f) {
+            quickAddVisualTop = targetTop
+            quickAddVisualBottom = targetBottom
+            invalidate()
+            return
+        }
+        quickAddBoundsAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
+            duration = QUICK_ADD_SNAP_DURATION_MS
+            interpolator = PRESS_INTERPOLATOR
+            addUpdateListener { animator ->
+                val progress = animator.animatedValue as Float
+                quickAddVisualTop = startTop + (targetTop - startTop) * progress
+                quickAddVisualBottom = startBottom + (targetBottom - startBottom) * progress
+                ViewCompat.postInvalidateOnAnimation(this@CourseTableView)
+            }
+            start()
+        }
+    }
+
+    private fun confirmQuickAdd(): Boolean {
+        val selection = quickAddSelection ?: return false
+        val listener = onQuickAddCourseListener ?: return false
+        val dayOfWeek = selection.dayOfWeek
+        val startSection = selection.startSection
+        val endSection = selection.endSection
+        clearQuickAddSelection()
+        performClick()
+        listener(dayOfWeek, startSection, endSection)
+        return true
+    }
+
+    private fun quickAddDescription(selection: QuickAddSelection): String {
+        val day = resources.getStringArray(R.array.weekdays)
+            .getOrElse(selection.dayOfWeek - 1) { "" }
+        val sections = if (selection.startSection == selection.endSection) {
+            resources.getString(R.string.section_format, selection.startSection)
+        } else {
+            resources.getString(
+                R.string.section_range_format,
+                selection.startSection,
+                selection.endSection
+            )
+        }
+        return resources.getString(R.string.quick_add_course_accessibility, day, sections)
+    }
+
+    private fun quickAddAnnouncement(selection: QuickAddSelection): String {
+        return resources.getString(
+            R.string.quick_add_selection_announcement,
+            quickAddDescription(selection)
+        )
+    }
+
+    private fun cancelPendingLongPress() {
+        removeCallbacks(longPressRunnable)
+        pendingLongPressSlot = null
+    }
+
+    private fun clearQuickAddSelection() {
+        val hadSelection = quickAddSelection != null
+        cancelPendingLongPress()
+        quickAddRevealAnimator?.cancel()
+        quickAddBoundsAnimator?.cancel()
+        quickAddRevealAnimator = null
+        quickAddBoundsAnimator = null
+        quickAddSelection = null
+        quickAddDragging = false
+        quickAddButtonTracking = false
+        quickAddButtonPressed = false
+        quickAddRevealProgress = 0f
+        quickAddButtonBounds.setEmpty()
+        parent?.requestDisallowInterceptTouchEvent(false)
+        if (hadSelection) onQuickAddSelectionChangedListener?.invoke(false)
+        accessibilityHelper.invalidateRoot()
+        invalidate()
     }
 
     private fun resetCoursePress() {
@@ -685,11 +1073,13 @@ class CourseTableView @JvmOverloads constructor(
     }
 
     override fun onDetachedFromWindow() {
+        clearQuickAddSelection()
         resetCoursePress()
         super.onDetachedFromWindow()
     }
 
     fun setCourses(courses: List<Course>) {
+        clearQuickAddSelection()
         resetCoursePress()
         this.courses = courses
         rebuildVisibleCourses()
@@ -701,6 +1091,7 @@ class CourseTableView @JvmOverloads constructor(
     fun setPagerOffset(position: Float) {
         val newOffset = position.coerceIn(-1f, 1f)
         if (abs(pagerOffset - newOffset) < 0.001f) return
+        if (quickAddSelection != null && abs(newOffset) > 0.001f) clearQuickAddSelection()
         pagerOffset = newOffset
         ViewCompat.postInvalidateOnAnimation(this)
     }
@@ -730,6 +1121,7 @@ class CourseTableView @JvmOverloads constructor(
         sectionHeightDp: Int,
         sectionTimes: List<String>
     ) {
+        clearQuickAddSelection()
         visibleDaysCount = if (showWeekend) 7 else 5
         this.showTimes = showTimes
         this.sectionTimes = sectionTimes.takeIf { it.size == TOTAL_SECTIONS }
@@ -748,6 +1140,16 @@ class CourseTableView @JvmOverloads constructor(
 
     fun setOnEmptySlotClickListener(listener: (dayOfWeek: Int, section: Int) -> Unit) {
         onEmptySlotClickListener = listener
+    }
+
+    fun setOnQuickAddCourseListener(
+        listener: (dayOfWeek: Int, startSection: Int, endSection: Int) -> Unit
+    ) {
+        onQuickAddCourseListener = listener
+    }
+
+    fun setOnQuickAddSelectionChangedListener(listener: (active: Boolean) -> Unit) {
+        onQuickAddSelectionChangedListener = listener
     }
 
     private fun rebuildVisibleCourses() {

@@ -32,7 +32,8 @@ data class WeekPageSettings(
 
 class WeekPagerAdapter(
     private val onCourseClick: (Course, View, RectF) -> Unit,
-    private val onAddCourse: (dayOfWeek: Int?, section: Int?) -> Unit
+    private val onAddCourse: (dayOfWeek: Int?, section: Int?) -> Unit,
+    private val onQuickAddCourse: (dayOfWeek: Int, startSection: Int, endSection: Int) -> Unit
 ) : RecyclerView.Adapter<WeekPagerAdapter.WeekViewHolder>() {
 
     private var semester: Semester? = null
@@ -150,6 +151,14 @@ class WeekPagerAdapter(
             binding.courseTableView.setOnCourseClickListener(onCourseClick)
             binding.courseTableView.setOnEmptySlotClickListener { day, section ->
                 onAddCourse(day, section)
+            }
+            binding.courseTableView.setOnQuickAddCourseListener(onQuickAddCourse)
+            binding.courseTableView.setOnQuickAddSelectionChangedListener { active ->
+                binding.emptyState.visibility = if (visibleCourses.isEmpty() && !active) {
+                    View.VISIBLE
+                } else {
+                    View.GONE
+                }
             }
             binding.emptyState.visibility = if (visibleCourses.isEmpty()) View.VISIBLE else View.GONE
             binding.btnEmptyAdd.setOnClickListener { onAddCourse(null, null) }

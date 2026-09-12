@@ -130,7 +130,10 @@ class MainActivity : AppCompatActivity() {
     private fun initViews() {
         weekPagerAdapter = WeekPagerAdapter(
             onCourseClick = ::showCourseDetails,
-            onAddCourse = { day, section -> openNewCourse(day, section) }
+            onAddCourse = { day, section -> openNewCourse(day, section) },
+            onQuickAddCourse = { day, startSection, endSection ->
+                openNewCourse(day, startSection, endSection)
+            }
         )
         binding.weekPager.adapter = weekPagerAdapter
         binding.weekPager.visibility = View.INVISIBLE
@@ -425,10 +428,15 @@ class MainActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
-    private fun openNewCourse(dayOfWeek: Int? = null, section: Int? = null) {
+    private fun openNewCourse(
+        dayOfWeek: Int? = null,
+        startSection: Int? = null,
+        endSection: Int? = null
+    ) {
         val intent = Intent(this, AddCourseActivity::class.java).apply {
             dayOfWeek?.let { putExtra(AddCourseActivity.EXTRA_DAY_OF_WEEK, it) }
-            section?.let { putExtra(AddCourseActivity.EXTRA_SECTION, it) }
+            startSection?.let { putExtra(AddCourseActivity.EXTRA_SECTION, it) }
+            endSection?.let { putExtra(AddCourseActivity.EXTRA_END_SECTION, it) }
         }
         startActivity(intent)
     }
