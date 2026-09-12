@@ -25,6 +25,7 @@ class AddCourseActivity : AppCompatActivity() {
     companion object {
         const val EXTRA_DAY_OF_WEEK = "day_of_week"
         const val EXTRA_SECTION = "section"
+        const val EXTRA_END_SECTION = "end_section"
     }
 
     private lateinit var binding: ActivityAddCourseBinding
@@ -116,9 +117,11 @@ class AddCourseActivity : AppCompatActivity() {
     }
 
     private fun initDropdowns() {
-        val selectedSection = intent.getIntExtra(EXTRA_SECTION, 0).takeIf { it in 1..12 }
-        setupDropdown(binding.spinnerStartSection, sectionOptions, (selectedSection ?: 1) - 1)
-        setupDropdown(binding.spinnerEndSection, sectionOptions, (selectedSection ?: 2) - 1)
+        val startSection = intent.getIntExtra(EXTRA_SECTION, 0).takeIf { it in 1..12 }
+        val endSection = intent.getIntExtra(EXTRA_END_SECTION, 0).takeIf { it in 1..12 }
+            ?: startSection
+        setupDropdown(binding.spinnerStartSection, sectionOptions, (startSection ?: 1) - 1)
+        setupDropdown(binding.spinnerEndSection, sectionOptions, (endSection ?: 2) - 1)
     }
 
     private fun configureWeekDropdowns(totalWeeks: Int) {

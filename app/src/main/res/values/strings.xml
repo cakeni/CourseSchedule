@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">课程表</string>
+    <string name="app_name">晴课表</string>
     <string name="my_schedule">我的课表</string>
     <string name="schedule">课表</string>
 
@@ -78,6 +78,8 @@
     <!-- 节次 -->
     <string name="section_format">第%d节</string>
     <string name="section_range_format">第%1$d-%2$d节</string>
+    <string name="quick_add_course_accessibility">快速添加%1$s%2$s课程</string>
+    <string name="quick_add_selection_announcement">%1$s，点击加号继续</string>
     <string name="week_range_format">第%1$d-%2$d周</string>
     <string name="week_range_with_type_format">第%1$d-%2$d周(%3$s)</string>
 
@@ -173,11 +175,11 @@
     <string name="academic_qiangzhi_no_table">未找到可读取的强智课表。请登录 WebVPN，点击「打开教务」，进入「我的课表 → 学期理论课表」并查询。也可返回后从课表 HTML 文件导入。</string>
     <string name="academic_frame_unavailable">课表位于暂时无法读取的网页框架中。请将学期课表在当前窗口打开后重试，或返回后使用课表 HTML 文件导入。</string>
     <string name="academic_generic_no_table">未找到所选系统可读取的完整课表。请按页面提示进入学期课表并等待加载；若学校改过页面格式，可返回后导入 HTML 文件并反馈脱敏样本。</string>
-    <string name="open_source_notice_title">项目公告 · CourseSchedule 已开源</string>
+    <string name="open_source_notice_title">项目公告 · 晴课表已开源</string>
     <string name="open_source_notice_detail">采用 MIT 许可证。点击查看源码、反馈问题或参与贡献；长按可复制项目地址。</string>
     <string name="project_repository_url" translatable="false">https://github.com/cakeni/CourseSchedule</string>
     <string name="project_repository_short" translatable="false">github.com/cakeni/CourseSchedule</string>
-    <string name="open_source_header_link">打开 CourseSchedule 开源项目</string>
+    <string name="open_source_header_link">打开晴课表开源项目</string>
     <string name="open_source_view_project">查看开源项目</string>
     <string name="open_source_address_copied">项目地址已复制</string>
     <string name="other_import_methods">其他方式</string>
@@ -336,6 +338,6 @@
     <string name="app_version">版本 %s</string>
     <string name="app_description">一款简洁美观的课程表应用</string>
     <string name="github_link">GitHub</string>
-    <string name="about_course_schedule">关于课程表</string>
-    <string name="about_message">课程表 v%1$s\n\n专注于日常排课与查看，支持周视图、课程提醒、Excel 与文本文件导入，以及 JSON 数据导出。</string>
+    <string name="about_course_schedule">关于晴课表</string>
+    <string name="about_message">晴课表 v%1$s\n\n专注于日常排课与查看，支持周视图、课程提醒、Excel 与文本文件导入，以及 JSON 数据导出。</string>
 </resources>

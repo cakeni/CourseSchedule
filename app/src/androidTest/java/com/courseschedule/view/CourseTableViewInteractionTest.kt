@@ -1,15 +1,23 @@
 package com.courseschedule.view
 
+import android.content.Intent
 import android.os.SystemClock
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewConfiguration
 import android.view.ViewGroup
+import android.widget.AutoCompleteTextView
 import androidx.test.core.app.ActivityScenario
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
+import com.courseschedule.R
 import com.courseschedule.data.entity.Course
 import com.courseschedule.domain.ScheduleRules
+import com.courseschedule.ui.addcourse.AddCourseActivity
 import com.courseschedule.ui.importdata.ImportActivity
 import com.courseschedule.utils.SchedulePreferences
+import com.google.android.material.chip.Chip
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
@@ -68,6 +76,79 @@ class CourseTableViewInteractionTest {
         }
     }
 
+    @Test fun longPressDragThenPlusReportsSelectedRange() {
+        lateinit var view: CourseTableView
+        var selected: Triple<Int, Int, Int>? = null
+        var downTime = 0L
+        ActivityScenario.launch(ImportActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                view = attachedTable(activity.findViewById(android.R.id.content))
+                view.setOnQuickAddCourseListener { day, start, end ->
+                    selected = Triple(day, start, end)
+                }
+                downTime = SystemClock.uptimeMillis()
+                send(
+                    view,
+                    MotionEvent.ACTION_DOWN,
+                    day = 4,
+                    section = 5,
+                    downTime = downTime,
+                    eventTime = downTime
+                )
+            }
+
+            SystemClock.sleep(ViewConfiguration.getLongPressTimeout().toLong() + 100L)
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+            scenario.onActivity {
+                send(
+                    view,
+                    MotionEvent.ACTION_MOVE,
+                    day = 4,
+                    section = 3,
+                    downTime = downTime,
+                    eventTime = SystemClock.uptimeMillis()
+                )
+                send(
+                    view,
+                    MotionEvent.ACTION_UP,
+                    day = 4,
+                    section = 3,
+                    downTime = downTime,
+                    eventTime = SystemClock.uptimeMillis()
+                )
+            }
+
+            SystemClock.sleep(200L)
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+            scenario.onActivity {
+                tap(view, day = 4, section = 4)
+                assertEquals(Triple(4, 3, 5), selected)
+            }
+        }
+    }
+
+    @Test fun rangeExtrasPrefillExistingCourseEditor() {
+        val context = ApplicationProvider.getApplicationContext<android.content.Context>()
+        val intent = Intent(context, AddCourseActivity::class.java).apply {
+            putExtra(AddCourseActivity.EXTRA_DAY_OF_WEEK, 4)
+            putExtra(AddCourseActivity.EXTRA_SECTION, 3)
+            putExtra(AddCourseActivity.EXTRA_END_SECTION, 5)
+        }
+        ActivityScenario.launch<AddCourseActivity>(intent).use { scenario ->
+            scenario.onActivity { activity ->
+                assertEquals(true, activity.findViewById<Chip>(R.id.chipThu).isChecked)
+                assertEquals(
+                    activity.getString(R.string.section_format, 3),
+                    activity.findViewById<AutoCompleteTextView>(R.id.spinnerStartSection).text.toString()
+                )
+                assertEquals(
+                    activity.getString(R.string.section_format, 5),
+                    activity.findViewById<AutoCompleteTextView>(R.id.spinnerEndSection).text.toString()
+                )
+            }
+        }
+    }
+
     private fun attachedTable(parent: ViewGroup): CourseTableView {
         val density = parent.resources.displayMetrics.density
         val height = (64f * density * 12).toInt()
@@ -84,21 +165,29 @@ class CourseTableViewInteractionTest {
     }
 
     private fun tap(view: CourseTableView, day: Int, section: Int) {
+        val downTime = SystemClock.uptimeMillis()
+        send(view, MotionEvent.ACTION_DOWN, day, section, downTime, downTime)
+        send(view, MotionEvent.ACTION_UP, day, section, downTime, downTime + 10L)
+    }
+
+    private fun send(
+        view: CourseTableView,
+        action: Int,
+        day: Int,
+        section: Int,
+        downTime: Long,
+        eventTime: Long
+    ) {
         val density = view.resources.displayMetrics.density
         val timeColumnWidth = 48f * density
         val dayWidth = (view.width - timeColumnWidth) / 7f
         val x = timeColumnWidth + (day - 0.5f) * dayWidth
         val y = (section - 0.5f) * 64f * density
-        val downTime = SystemClock.uptimeMillis()
-        listOf(
-            MotionEvent.obtain(downTime, downTime, MotionEvent.ACTION_DOWN, x, y, 0),
-            MotionEvent.obtain(downTime, downTime + 10L, MotionEvent.ACTION_UP, x, y, 0)
-        ).forEach { event ->
-            try {
-                view.onTouchEvent(event)
-            } finally {
-                event.recycle()
-            }
+        val event = MotionEvent.obtain(downTime, eventTime, action, x, y, 0)
+        try {
+            view.onTouchEvent(event)
+        } finally {
+            event.recycle()
         }
     }
 

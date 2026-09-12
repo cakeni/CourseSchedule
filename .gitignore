@@ -16,6 +16,7 @@ captures/
 # Local runtimes and Codex working files
 .jdk*/
 .codex-tmp/
+.playwright-cli/
 
 # Local reverse-engineering and research caches
 /apk_unpack_*/
