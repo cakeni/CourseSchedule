@@ -198,7 +198,9 @@ internal object AcademicSchoolDirectory {
                 builtInSchoolId = school.id,
                 adapterId = school.adapterId,
                 support = if (school.verified) AcademicDirectorySupport.VERIFIED
-                    else AcademicDirectorySupport.COMPATIBLE
+                    else AcademicDirectorySupport.COMPATIBLE,
+                category = if (school.isGraduate) AcademicDirectoryCategory.GRADUATE
+                    else AcademicDirectoryCategory.UNDERGRADUATE
             ).withRomanizedName()
         }
         val bundled = runCatching {

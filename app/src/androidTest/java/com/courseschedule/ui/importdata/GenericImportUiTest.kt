@@ -6,6 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
+import android.webkit.CookieManager
+import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.TextView
@@ -20,6 +22,7 @@ import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.courseschedule.R
+import com.courseschedule.domain.ScheduleRules
 import com.courseschedule.ui.settings.SettingsActivity
 import com.courseschedule.viewmodel.CourseViewModel
 import com.google.gson.JsonParser
@@ -44,13 +47,21 @@ class GenericImportUiTest {
     }
 
     @Suppress("DEPRECATION")
-    @Test fun academicWebViewAllowsCrossDomainWebLinksAndConfirmsSpecialSchemes() {
+    @Test fun academicWebViewUsesBrowserCompatibilityAndConfirmsSpecialSchemes() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val intent = AcademicWebImportActivity.schoolIntent(context, AcademicSchools.SWPU)
         ActivityScenario.launch<AcademicWebImportActivity>(intent).use { scenario ->
             scenario.onActivity { activity ->
                 val web = activity.findViewById<WebView>(R.id.webView)
                 web.stopLoading()
+                assertEquals(
+                    WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE,
+                    web.settings.mixedContentMode
+                )
+                assertTrue(web.settings.javaScriptCanOpenWindowsAutomatically)
+                assertFalse(web.settings.supportMultipleWindows())
+                assertTrue(CookieManager.getInstance().acceptCookie())
+                assertTrue(CookieManager.getInstance().acceptThirdPartyCookies(web))
                 val client = web.webViewClient
                 assertFalse(client.shouldOverrideUrlLoading(
                     web, "https://login.vendor.example/sso"
@@ -186,6 +197,27 @@ class GenericImportUiTest {
             val courses = AcademicSchools.parse(school, payload.toString(), 20).courses
             assertEquals(listOf(1 to 2, 5 to 6), courses.map { it.startWeek to it.endWeek })
             assertTrue(courses.all { it.dayOfWeek == 2 && it.startSection == 3 && it.endSection == 4 })
+        }
+    }
+
+    @Test fun eamsCaptureInfersDailySectionsFromItsSevenDayGrid() {
+        val school = AcademicSchools.NUAA
+        withFixtureWebView(school) { web ->
+            evaluate(web, """
+                window.unitCount = 13;
+                window.table0 = {unitCounts: 91, activities: Array.from({length: 91}, function () { return []; })};
+                window.table0.activities[0] = [{courseName:'测试课程', teacherName:'测试教师',
+                    roomName:'测试教室', vaildWeeks:'011000'}];
+            """.trimIndent())
+            val payload = JSONObject(evaluate(web, AcademicCaptureScript.create(school)) as String)
+            assertFalse(payload.has("error"))
+            assertEquals(13, payload.getJSONObject("data").getInt("unitCount"))
+            val courses = AcademicSchools.parse(school, payload.toString(), 20).courses
+            assertEquals(1, courses.single().dayOfWeek)
+            assertEquals(1, courses.single().startSection)
+            assertEquals(listOf(1, 2), (1..20).filter { week ->
+                ScheduleRules.isCourseInWeek(courses.single(), week)
+            })
         }
     }
 

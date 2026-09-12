@@ -34,6 +34,7 @@ data class AcademicSchool(
     val loginUrl: String,
     val trustedHosts: Set<String>,
     val verified: Boolean,
+    val isGraduate: Boolean = false,
     val timetableUrl: String = loginUrl,
     val loginPrefixes: List<String> = emptyList(),
     val timetablePrefixes: List<String> = emptyList(),
@@ -205,13 +206,26 @@ object AcademicSchools {
         id = "nuaa",
         name = "南京航空航天大学",
         system = AcademicSystem.EAMS,
-        loginUrl = "https://aao-eas.nuaa.edu.cn/eams/login.action",
+        loginUrl = "https://aao-eas.nuaa.edu.cn/eams/homeExt.action",
         trustedHosts = setOf("aao-eas.nuaa.edu.cn", "authserver.nuaa.edu.cn"),
         verified = false,
         adapterId = AcademicAdapterRegistry.EAMS_TABLE0,
-        loginPrefixes = listOf("https://aao-eas.nuaa.edu.cn/"),
-        timetablePrefixes = listOf("https://aao-eas.nuaa.edu.cn/eams/"),
-        authenticationPrefixes = listOf("https://authserver.nuaa.edu.cn/authserver/")
+        timetableUrl = "https://aao-eas.nuaa.edu.cn/eams/courseTableForStd.action",
+        loginPrefixes = listOf(
+            "https://aao-eas.nuaa.edu.cn/",
+            "http://aao-eas.nuaa.edu.cn/"
+        ),
+        timetablePrefixes = listOf(
+            "https://aao-eas.nuaa.edu.cn/eams/",
+            "http://aao-eas.nuaa.edu.cn/eams/"
+        ),
+        authenticationPrefixes = listOf(
+            "https://authserver.nuaa.edu.cn/authserver/",
+            "http://authserver.nuaa.edu.cn/authserver/"
+        ),
+        // The official HTTPS entry currently redirects through these two exact HTTP hosts.
+        allowCleartext = true,
+        cleartextHosts = setOf("aao-eas.nuaa.edu.cn", "authserver.nuaa.edu.cn")
     )
 
     val NUAA_GRADUATE = AcademicSchool(
@@ -221,6 +235,7 @@ object AcademicSchools {
         loginUrl = "https://graduate.nuaa.edu.cn/gmis5/home/stulogin",
         trustedHosts = setOf("graduate.nuaa.edu.cn", "authserver.nuaa.edu.cn"),
         verified = false,
+        isGraduate = true,
         adapterId = AcademicAdapterRegistry.SOUTH_SOFT,
         loginPrefixes = listOf("https://graduate.nuaa.edu.cn/"),
         timetablePrefixes = listOf("https://graduate.nuaa.edu.cn/gmis5/"),

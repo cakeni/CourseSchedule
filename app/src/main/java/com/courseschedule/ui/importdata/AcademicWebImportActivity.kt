@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ActivityInfo
+import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Typeface
 import android.net.Uri
@@ -20,8 +22,11 @@ import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceError
 import android.webkit.WebResourceResponse
+import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.widget.LinearLayout
+import android.widget.RadioGroup
 import android.widget.Toast
 import android.widget.ScrollView
 import android.widget.TextView
@@ -30,7 +35,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.courseschedule.R
 import com.courseschedule.databinding.ActivityAcademicWebImportBinding
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -51,6 +59,7 @@ class AcademicWebImportActivity : AppCompatActivity() {
 
     companion object {
         const val EXTRA_SCHEDULE_JSON = "schedule_json"
+        const val EXTRA_AI_RESULT = "ai_result"
         const val EXTRA_TOTAL_WEEKS = "total_weeks"
         const val EXTRA_SCHOOL_ID = "school_id"
         private const val EXTRA_GENERIC_SYSTEM = "generic_system"
@@ -67,9 +76,43 @@ class AcademicWebImportActivity : AppCompatActivity() {
         private const val MIN_PARSING_DISPLAY_MILLIS = 360L
         private const val SUCCESS_DISPLAY_MILLIS = 1_100L
         private const val REQUEST_TIMEOUT_MILLIS = 45_000L
+        private const val AI_REQUEST_TIMEOUT_MILLIS = 105_000L
+        private const val MAX_BROWSER_DOCUMENT_BYTES = 2_000_000
+        private const val INCOMPLETE_DOCUMENT_CHECK = """
+            (function () {
+              const body = document.body;
+              const head = document.head;
+              return !!(body && body.children.length && (!head || head.children.length === 0) &&
+                document.styleSheets.length === 0 &&
+                document.querySelectorAll('link[rel="stylesheet"],script[src]').length === 0);
+            })();
+        """
+        private const val STATE_DESKTOP_MODE = "desktop_mode"
+        private const val STATE_LANDSCAPE_MODE = "landscape_mode"
+        private val ANDROID_USER_AGENT_PLATFORM = Regex("\\([^)]*Android[^)]*\\)")
         private val SAFE_REPLAY_HEADERS = setOf(
             "accept", "accept-language", "user-agent", "x-requested-with"
         )
+        private val SAFE_DOCUMENT_HEADERS = setOf(
+            "accept", "accept-language", "referer", "upgrade-insecure-requests", "user-agent"
+        )
+        private val OMITTED_DOCUMENT_RESPONSE_HEADERS = setOf(
+            "connection", "content-encoding", "content-length", "set-cookie", "set-cookie2",
+            "transfer-encoding"
+        )
+
+        internal fun desktopUserAgent(userAgent: String): String = userAgent
+            .replace(ANDROID_USER_AGENT_PLATFORM, "(X11; Linux x86_64)")
+            .replace(" Version/4.0", "")
+            .replace(" Mobile", "")
+
+        internal fun shouldReplayMainDocument(
+            school: AcademicSchool,
+            url: String?,
+            method: String?,
+            isForMainFrame: Boolean
+        ): Boolean = isForMainFrame && method.equals("GET", ignoreCase = true) &&
+            school.allowsTimetable(url)
 
         internal fun schoolFromIntent(intent: Intent): AcademicSchool? {
             val id = intent.getStringExtra(EXTRA_SCHOOL_ID)
@@ -135,6 +178,14 @@ class AcademicWebImportActivity : AppCompatActivity() {
     private val acceptedSslHosts = mutableSetOf<String>()
     private var pageHadError = false
     private var pendingDiagnostic: String? = null
+    private var defaultUserAgent = ""
+    @Volatile private var currentUserAgent = ""
+    private var desktopMode = false
+    private var landscapeMode = false
+    private var observedDocumentUrl: String? = null
+    private var checkingIncompleteUrl: String? = null
+    private var retriedIncompleteUrl: String? = null
+    private var showSchoolHint = false
     private val diagnosticExporter = registerForActivityResult(
         ActivityResultContracts.CreateDocument("application/json")
     ) { uri ->
@@ -165,6 +216,8 @@ class AcademicWebImportActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        desktopMode = savedInstanceState?.getBoolean(STATE_DESKTOP_MODE) ?: false
+        landscapeMode = savedInstanceState?.getBoolean(STATE_LANDSCAPE_MODE) ?: false
         val selectedSchool = schoolFromIntent(intent)
         if (selectedSchool == null) {
             finish()
@@ -179,9 +232,13 @@ class AcademicWebImportActivity : AppCompatActivity() {
             school.allowCleartext,
             school.allowNonDefaultPort
         )?.host
-        binding.toolbar.title = if (!school.isGeneric || school.name != genericHost) {
-            getString(R.string.academic_school_title, school.name)
-        } else getString(R.string.academic_generic_title)
+        binding.toolbar.title = when (school.id) {
+            AcademicSchools.NUAA.id -> getString(R.string.academic_nuaa_undergraduate_title)
+            AcademicSchools.NUAA_GRADUATE.id -> getString(R.string.academic_nuaa_graduate_title)
+            else -> if (!school.isGeneric || school.name != genericHost) {
+                getString(R.string.academic_school_title, school.name)
+            } else getString(R.string.academic_generic_title)
+        }
         if (school.isGeneric) binding.toolbar.subtitle = school.name
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -191,12 +248,16 @@ class AcademicWebImportActivity : AppCompatActivity() {
 
         configureWebView()
         val readsDisplayedPage = school.system != AcademicSystem.WISEDU
-        binding.tvSchoolHint.visibility = if (readsDisplayedPage || school.isGeneric) View.VISIBLE else View.GONE
+        showSchoolHint = readsDisplayedPage || school.isGeneric
+        binding.tvSchoolHint.visibility = if (showSchoolHint) View.VISIBLE else View.GONE
         binding.btnOpenSchool.visibility = if (readsDisplayedPage || school.isGeneric) View.VISIBLE else View.GONE
         if (!school.isGeneric) {
             when (school.id) {
                 AcademicSchools.NUAA.id -> binding.tvSchoolHint.setText(R.string.academic_nuaa_hint)
-                AcademicSchools.NUAA_GRADUATE.id -> binding.tvSchoolHint.setText(R.string.academic_nuaa_graduate_hint)
+                AcademicSchools.NUAA_GRADUATE.id -> {
+                    binding.tvSchoolHint.setText(R.string.academic_nuaa_graduate_hint)
+                    binding.btnOpenSchool.setText(R.string.academic_open_student_timetable)
+                }
             }
         } else {
             val profile = GenericAcademicImport.profile(school.genericProfileId)
@@ -219,27 +280,48 @@ class AcademicWebImportActivity : AppCompatActivity() {
             }
         }
         binding.btnOpenSchool.setOnClickListener {
-            binding.webView.loadUrl(school.timetableUrl)
+            if (school.id == AcademicSchools.NUAA_GRADUATE.id) {
+                openNuaaGraduateTimetable()
+            } else {
+                binding.webView.loadUrl(school.timetableUrl)
+            }
         }
         if (readsDisplayedPage) binding.btnFetchSchedule.setText(R.string.academic_read_displayed_term)
         binding.btnFetchSchedule.setOnClickListener { fetchCurrentSchedule() }
+        configureDisplayModes()
+        updateResponsiveLayout(resources.configuration.orientation)
         setImportStatus(false, getString(R.string.academic_waiting_login))
         binding.webView.loadUrl(school.loginUrl)
     }
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun configureWebView() {
+        if (school.id == AcademicSchools.NUAA_GRADUATE.id) {
+            binding.webView.clearCache(true)
+        }
         binding.webView.settings.apply {
+            defaultUserAgent = userAgentString
+            if (school.id == AcademicSchools.NUAA_GRADUATE.id) cacheMode = WebSettings.LOAD_NO_CACHE
             javaScriptEnabled = true
             domStorageEnabled = true
             allowFileAccess = false
             allowContentAccess = false
-            mixedContentMode = android.webkit.WebSettings.MIXED_CONTENT_NEVER_ALLOW
-            javaScriptCanOpenWindowsAutomatically = false
+            // Legacy teaching systems commonly combine an HTTPS shell with HTTP assets.
+            // Compatibility mode follows normal browser behavior while capture remains
+            // restricted to the selected school's exact timetable routes.
+            mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
+            javaScriptCanOpenWindowsAutomatically = true
+            // With multi-window disabled, WebView routes target=_blank/window.open
+            // into this same visible page instead of losing it in a hidden popup.
             setSupportMultipleWindows(false)
             @Suppress("DEPRECATION")
             saveFormData = false
         }
+        CookieManager.getInstance().apply {
+            setAcceptCookie(true)
+            setAcceptThirdPartyCookies(binding.webView, true)
+        }
+        applyDesktopMode(reload = false)
         binding.webView.webChromeClient = WebChromeClient()
         binding.webView.importantForAutofill = View.IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS
         binding.webView.webViewClient = object : WebViewClient() {
@@ -253,6 +335,14 @@ class AcademicWebImportActivity : AppCompatActivity() {
             }
 
             override fun shouldInterceptRequest(view: WebView?, request: WebResourceRequest?): WebResourceResponse? {
+                if (request != null && shouldReplayMainDocument(
+                        school,
+                        request.url.toString(),
+                        request.method,
+                        request.isForMainFrame
+                    )) {
+                    replayMainDocumentWithoutRequestedWith(request)?.let { return it }
+                }
                 if (request != null && school.isGeneric && school.system == AcademicSystem.SHUWEI &&
                     AcademicAdapterRegistry.allowsReplay(
                         school, request.method, request.url.toString()
@@ -317,6 +407,7 @@ class AcademicWebImportActivity : AppCompatActivity() {
 
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                 super.onPageStarted(view, url, favicon)
+                observeDocumentNavigation(url)
                 shuweiStash = null
                 pageHadError = false
                 invalidateRequest()
@@ -324,8 +415,24 @@ class AcademicWebImportActivity : AppCompatActivity() {
                 setImportStatus(false, getString(R.string.academic_waiting_login))
             }
 
+            override fun doUpdateVisitedHistory(view: WebView?, url: String?, isReload: Boolean) {
+                super.doUpdateVisitedHistory(view, url, isReload)
+                observeDocumentNavigation(url)
+                if (view != null && url != null) {
+                    view.post { retryIncompleteMainDocument(view, url) }
+                }
+            }
+
+            override fun onPageCommitVisible(view: WebView?, url: String?) {
+                super.onPageCommitVisible(view, url)
+                observeDocumentNavigation(url)
+                if (view != null && url != null) retryIncompleteMainDocument(view, url)
+            }
+
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
+                observeDocumentNavigation(url)
+                if (view != null && url != null) retryIncompleteMainDocument(view, url)
                 if (!pageHadError && activeRequestToken == null && isWebNavigationUrl(url)) {
                     setImportStatus(false, getString(R.string.academic_open_timetable_hint))
                 }
@@ -355,6 +462,173 @@ class AcademicWebImportActivity : AppCompatActivity() {
                 handleSslError(handler, error)
             }
         }
+    }
+
+    private fun observeDocumentNavigation(url: String?) {
+        if (url == null || observedDocumentUrl == url) return
+        observedDocumentUrl = url
+        checkingIncompleteUrl = null
+        retriedIncompleteUrl = null
+    }
+
+    private fun retryIncompleteMainDocument(view: WebView, url: String) {
+        if (!school.allowsTimetable(url) || checkingIncompleteUrl == url ||
+            isFinishing || isDestroyed || view.url != url) return
+        checkingIncompleteUrl = url
+        view.evaluateJavascript(INCOMPLETE_DOCUMENT_CHECK) { incomplete ->
+            if (checkingIncompleteUrl == url) checkingIncompleteUrl = null
+            if (isFinishing || isDestroyed || view.url != url) return@evaluateJavascript
+            if (incomplete != "true") {
+                if (retriedIncompleteUrl == url) retriedIncompleteUrl = null
+                return@evaluateJavascript
+            }
+            if (retriedIncompleteUrl == url) return@evaluateJavascript
+            retriedIncompleteUrl = url
+            view.reload()
+        }
+    }
+
+    /**
+     * Android WebView adds the app package as X-Requested-With after shouldInterceptRequest.
+     * Several older teaching systems mistake any value for an AJAX navigation and return only a
+     * body fragment. Replaying trusted top-level GETs here makes them match a regular browser;
+     * subresource/XHR requests keep their normal WebView behavior.
+     */
+    private fun replayMainDocumentWithoutRequestedWith(
+        request: WebResourceRequest
+    ): WebResourceResponse? {
+        val url = request.url.toString()
+        val connection = runCatching { URL(url).openConnection() as HttpURLConnection }
+            .getOrNull() ?: return null
+        return try {
+            connection.connectTimeout = 10_000
+            connection.readTimeout = 20_000
+            connection.instanceFollowRedirects = false
+            connection.requestMethod = "GET"
+            request.requestHeaders.forEach { (name, value) ->
+                if (name.lowercase(Locale.ROOT) in SAFE_DOCUMENT_HEADERS) {
+                    connection.setRequestProperty(name, value)
+                }
+            }
+            if (connection.getRequestProperty("User-Agent").isNullOrBlank()) {
+                currentUserAgent.takeIf(String::isNotBlank)?.let {
+                    connection.setRequestProperty("User-Agent", it)
+                }
+            }
+            CookieManager.getInstance().getCookie(url)
+                ?.takeIf(String::isNotBlank)
+                ?.let { connection.setRequestProperty("Cookie", it) }
+            connection.connect()
+            if (connection.responseCode != HttpURLConnection.HTTP_OK) return null
+
+            val output = ByteArrayOutputStream()
+            connection.inputStream.use { input ->
+                val buffer = ByteArray(16_384)
+                var total = 0
+                while (true) {
+                    val read = input.read(buffer)
+                    if (read < 0) break
+                    total += read
+                    if (total > MAX_BROWSER_DOCUMENT_BYTES) return null
+                    output.write(buffer, 0, read)
+                }
+            }
+            connection.headerFields.entries
+                .filter { it.key.equals("Set-Cookie", ignoreCase = true) }
+                .flatMap { it.value.orEmpty() }
+                .forEach { CookieManager.getInstance().setCookie(url, it) }
+            val responseHeaders = connection.headerFields.entries.mapNotNull { (name, values) ->
+                name?.takeUnless {
+                    it.lowercase(Locale.ROOT) in OMITTED_DOCUMENT_RESPONSE_HEADERS
+                }?.let { it to values.orEmpty().joinToString(", ") }
+            }.toMap()
+            val (mime, encoding) = ShuweiPrintDataCapture.splitContentType(
+                connection.contentType ?: "text/html; charset=utf-8"
+            )
+            WebResourceResponse(
+                mime,
+                encoding,
+                HttpURLConnection.HTTP_OK,
+                connection.responseMessage?.takeIf(String::isNotBlank) ?: "OK",
+                responseHeaders,
+                ByteArrayInputStream(output.toByteArray())
+            )
+        } catch (_: Exception) {
+            null
+        } finally {
+            connection.disconnect()
+        }
+    }
+
+    private fun configureDisplayModes() {
+        binding.chipDesktopMode.isChecked = desktopMode
+        binding.chipLandscapeMode.isChecked = landscapeMode
+        binding.chipDesktopMode.setOnCheckedChangeListener { _, checked ->
+            if (desktopMode == checked) return@setOnCheckedChangeListener
+            desktopMode = checked
+            applyDesktopMode(reload = true)
+        }
+        binding.chipLandscapeMode.setOnCheckedChangeListener { _, checked ->
+            landscapeMode = checked
+            requestedOrientation = if (checked) {
+                ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+            } else {
+                ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+            }
+        }
+        if (landscapeMode) {
+            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+        }
+    }
+
+    private fun applyDesktopMode(reload: Boolean) {
+        binding.webView.settings.apply {
+            currentUserAgent = if (desktopMode) desktopUserAgent(defaultUserAgent) else defaultUserAgent
+            userAgentString = currentUserAgent
+            useWideViewPort = desktopMode
+            loadWithOverviewMode = false
+            builtInZoomControls = desktopMode
+            displayZoomControls = false
+        }
+        binding.webView.setInitialScale(if (desktopMode) 100 else 0)
+        if (reload && binding.webView.url != null) binding.webView.reload()
+    }
+
+    private fun updateResponsiveLayout(orientation: Int) {
+        val landscape = orientation == Configuration.ORIENTATION_LANDSCAPE
+        binding.tvSchoolHint.visibility = if (!landscape && showSchoolHint) View.VISIBLE else View.GONE
+        binding.tvPrivacyHint.visibility = if (landscape) View.GONE else View.VISIBLE
+        binding.actionContainer.orientation = if (landscape) {
+            LinearLayout.HORIZONTAL
+        } else {
+            LinearLayout.VERTICAL
+        }
+        binding.displayModeGroup.layoutParams = LinearLayout.LayoutParams(
+            if (landscape) ViewGroup.LayoutParams.WRAP_CONTENT else ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+        binding.btnOpenSchool.layoutParams = LinearLayout.LayoutParams(
+            if (landscape) ViewGroup.LayoutParams.WRAP_CONTENT else ViewGroup.LayoutParams.MATCH_PARENT,
+            binding.btnOpenSchool.layoutParams.height
+        )
+        binding.btnFetchSchedule.layoutParams = LinearLayout.LayoutParams(
+            if (landscape) 0 else ViewGroup.LayoutParams.MATCH_PARENT,
+            binding.btnFetchSchedule.layoutParams.height,
+            if (landscape) 1f else 0f
+        )
+    }
+
+    private fun openNuaaGraduateTimetable() {
+        binding.webView.evaluateJavascript(ScriptHolder.nuaaGraduateTimetableScript()) { result ->
+            if (result == JSONObject.quote("missing") && !isFinishing && !isDestroyed) {
+                Toast.makeText(this, R.string.academic_nuaa_timetable_menu_missing, Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        updateResponsiveLayout(newConfig.orientation)
     }
 
     private fun handleSslError(handler: SslErrorHandler?, error: SslError?) {
@@ -727,11 +1001,13 @@ class AcademicWebImportActivity : AppCompatActivity() {
     private fun showFetchError(
         message: String,
         payload: String? = null,
-        error: Throwable? = null
+        error: Throwable? = null,
+        allowAiFallback: Boolean = true
     ) {
         invalidateRequest()
         setImportStatus(false, getString(R.string.academic_fetch_failed))
         val currentUrl = binding.webView.url
+        val canUseAi = allowAiFallback && !pageHadError && school.allowsTimetable(currentUrl)
         lifecycleScope.launch {
             val diagnostic = withContext(Dispatchers.Default) {
                 AcademicImportDiagnostics.create(
@@ -744,14 +1020,154 @@ class AcademicWebImportActivity : AppCompatActivity() {
             }
             if (isFinishing || isDestroyed) return@launch
             pendingDiagnostic = diagnostic
-            MaterialAlertDialogBuilder(this@AcademicWebImportActivity)
+            val builder = MaterialAlertDialogBuilder(this@AcademicWebImportActivity)
                 .setTitle(R.string.academic_fetch_failed)
                 .setMessage(message.take(240).ifBlank { getString(R.string.academic_fetch_failed_detail) })
                 .setNeutralButton(R.string.academic_view_diagnostic) { _, _ ->
                     showDiagnosticPreview(diagnostic)
                 }
-                .setPositiveButton(R.string.ok, null)
-                .show()
+            if (canUseAi) {
+                builder
+                    .setNegativeButton(R.string.cancel, null)
+                    .setPositiveButton(R.string.academic_ai_fallback) { _, _ ->
+                        showAiWebImportDialog()
+                    }
+            } else {
+                builder.setPositiveButton(R.string.ok, null)
+            }
+            builder.show()
+        }
+    }
+
+    private fun showAiWebImportDialog() {
+        if (isFinishing || isDestroyed || pageHadError ||
+            !school.allowsTimetable(binding.webView.url)) return
+        val dialogView = layoutInflater.inflate(R.layout.dialog_ai_schedule_import, null)
+        val providerGroup = dialogView.findViewById<RadioGroup>(R.id.groupAiProvider)
+        val keyLayout = dialogView.findViewById<TextInputLayout>(R.id.inputAiApiKey)
+        val keyInput = dialogView.findViewById<TextInputEditText>(R.id.etAiApiKey)
+        fun selectedProvider() = if (providerGroup.checkedRadioButtonId == R.id.radioAiOpenAi) {
+            AiWebProvider.OPENAI
+        } else {
+            AiWebProvider.DEEPSEEK
+        }
+        fun updateKeyHint() {
+            keyLayout.hint = getString(R.string.ai_api_key_hint_format, selectedProvider().displayName)
+            keyLayout.error = null
+        }
+        providerGroup.setOnCheckedChangeListener { _, _ -> updateKeyHint() }
+        updateKeyHint()
+        val dialog = MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.academic_ai_dialog_title)
+            .setView(dialogView)
+            .setPositiveButton(R.string.ai_start_recognition, null)
+            .setNegativeButton(R.string.cancel, null)
+            .create()
+        dialog.setOnShowListener {
+            dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).setOnClickListener {
+                val provider = selectedProvider()
+                val apiKey = keyInput.text?.toString()?.trim().orEmpty()
+                if (apiKey.isBlank()) {
+                    keyLayout.error = getString(
+                        R.string.ai_api_key_required_format,
+                        provider.displayName
+                    )
+                    return@setOnClickListener
+                }
+                keyInput.text?.clear()
+                dialog.dismiss()
+                startAiWebRecognition(apiKey, provider)
+            }
+        }
+        dialog.show()
+    }
+
+    private fun startAiWebRecognition(apiKey: String, provider: AiWebProvider) {
+        if (activeRequestToken != null) return
+        if (pageHadError || !school.allowsTimetable(binding.webView.url)) {
+            showFetchError(
+                getString(R.string.academic_ai_no_schedule),
+                allowAiFallback = false
+            )
+            return
+        }
+        val requestToken = UUID.randomUUID().toString()
+        activeRequestToken = requestToken
+        timeoutJob?.cancel()
+        timeoutJob = lifecycleScope.launch {
+            delay(AI_REQUEST_TIMEOUT_MILLIS)
+            if (isActiveRequest(requestToken)) {
+                showFetchError(
+                    getString(R.string.academic_ai_request_timeout),
+                    allowAiFallback = false
+                )
+            }
+        }
+        setImportStatus(true, getString(R.string.academic_ai_capturing))
+        binding.webView.evaluateJavascript(AcademicAiCaptureScript.SCRIPT) { encoded ->
+            if (!isActiveRequest(requestToken)) return@evaluateJavascript
+            val snapshot = runCatching {
+                JSONTokener(encoded).nextValue() as? String
+            }.getOrNull()
+            val snapshotError = runCatching {
+                JSONObject(snapshot.orEmpty()).optString("error")
+            }.getOrNull()
+            if (snapshot.isNullOrBlank() || snapshotError == null || snapshotError.isNotEmpty()) {
+                showFetchError(
+                    getString(R.string.academic_ai_no_schedule),
+                    payload = snapshot,
+                    error = ImportFormatException(
+                        getString(R.string.academic_ai_no_schedule),
+                        AcademicImportErrorCode.CAPTURE_MISS
+                    ),
+                    allowAiFallback = false
+                )
+                return@evaluateJavascript
+            }
+            setImportStatus(
+                true,
+                getString(R.string.academic_ai_recognizing_format, provider.displayName)
+            )
+            lifecycleScope.launch {
+                val result = runCatching {
+                    withContext(Dispatchers.IO) {
+                        AiWebScheduleRecognizer().recognize(
+                            snapshot,
+                            apiKey,
+                            totalWeeks,
+                            provider
+                        )
+                    }
+                }
+                if (!isActiveRequest(requestToken)) return@launch
+                result.onSuccess { receiveAiSchedule(requestToken, it) }
+                    .onFailure { failure ->
+                        showFetchError(
+                            failure.message ?: getString(R.string.academic_fetch_failed_detail),
+                            error = failure,
+                            allowAiFallback = false
+                        )
+                    }
+            }
+        }
+    }
+
+    private fun receiveAiSchedule(token: String, parsed: ParsedImport) {
+        if (!isActiveRequest(token)) return
+        val courseCount = parsed.courses.map { it.courseName.trim() }.distinct().size
+        setImportStatus(false, getString(R.string.academic_courses_ready, courseCount), success = true)
+        lifecycleScope.launch {
+            delay(SUCCESS_DISPLAY_MILLIS)
+            if (!isActiveRequest(token)) return@launch
+            val scheduleJson = Gson().toJson(parsed.courses)
+            invalidateRequest()
+            setResult(
+                Activity.RESULT_OK,
+                schoolIntent(this@AcademicWebImportActivity, school)
+                    .putExtra(EXTRA_SCHEDULE_JSON, scheduleJson)
+                    .putExtra(EXTRA_AI_RESULT, true)
+            )
+            finish()
         }
     }
 
@@ -824,6 +1240,12 @@ class AcademicWebImportActivity : AppCompatActivity() {
         }
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putBoolean(STATE_DESKTOP_MODE, desktopMode)
+        outState.putBoolean(STATE_LANDSCAPE_MODE, landscapeMode)
+        super.onSaveInstanceState(outState)
+    }
+
     override fun onDestroy() {
         invalidateRequest()
         externalNavigationDialog?.dismiss()
@@ -838,6 +1260,8 @@ class AcademicWebImportActivity : AppCompatActivity() {
 
     internal object ScriptHolder {
         fun termProbeScript(): String = TERM_PROBE_SCRIPT
+
+        fun nuaaGraduateTimetableScript(): String = NUAA_GRADUATE_TIMETABLE_SCRIPT
 
         fun zhengfangFetchScript(requestToken: String): String = ZHENGFANG_FETCH_SCRIPT
             .replace("__REQUEST_TOKEN__", JSONObject.quote(requestToken))
@@ -914,6 +1338,57 @@ class AcademicWebImportActivity : AppCompatActivity() {
               }
               collect(document, 0);
               return values.join('\n').slice(0, 20000);
+            })();
+        """.trimIndent()
+
+        private val NUAA_GRADUATE_TIMETABLE_SCRIPT = """
+            (function () {
+              const documents = [];
+              function collect(doc, depth) {
+                if (!doc || depth > 4 || documents.includes(doc)) return;
+                documents.push(doc);
+                doc.querySelectorAll('iframe,frame').forEach(function (frame) {
+                  try { collect(frame.contentDocument, depth + 1); } catch (_) {}
+                });
+              }
+              function label(node) {
+                return (node.innerText || node.textContent || '').replace(/\s+/g, '').trim();
+              }
+              function find(pattern) {
+                for (const doc of documents) {
+                  const nodes = doc.querySelectorAll('a,button,[role="menuitem"],[onclick]');
+                  for (const node of nodes) {
+                    const text = label(node);
+                    if (text.length <= 16 && pattern.test(text)) return node;
+                  }
+                }
+                return null;
+              }
+              function activate(node) {
+                try {
+                  if (node.target === '_blank') node.target = '_self';
+                  const win = node.ownerDocument.defaultView;
+                  const originalOpen = win.open;
+                  win.open = function (url) {
+                    if (url) win.location.href = url;
+                    return win;
+                  };
+                  node.click();
+                  setTimeout(function () { win.open = originalOpen; }, 1000);
+                  return true;
+                } catch (_) { return false; }
+              }
+              function openCourse() {
+                documents.length = 0;
+                collect(document, 0);
+                const course = find(/^(?:学生课表(?:查询)?|我的课表)$/);
+                return course ? activate(course) : false;
+              }
+              if (openCourse()) return 'opened';
+              const training = find(/^培养(?:管理|信息)$/);
+              if (!training || !activate(training)) return 'missing';
+              setTimeout(openCourse, 400);
+              return 'opening';
             })();
         """.trimIndent()
 

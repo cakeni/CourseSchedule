@@ -170,7 +170,10 @@ internal object AcademicCaptureScript {
                   weekIndexes: array(source.weekIndexes).slice(0, 52).map(integer).filter(function (week) { return week !== null; })};
               })};
             }
-            const units = integer(holder.unitCount) || array(holder.courseUnits).length;
+            const cells = array(holder.activities);
+            const totalCells = integer(holder.unitCounts) || cells.length;
+            const inferredUnits = totalCells > 0 && totalCells % 7 === 0 ? totalCells / 7 : 0;
+            const units = integer(holder.unitCount) || inferredUnits || array(holder.courseUnits).length;
             return {unitCount: units, activities: holder.activities.slice(0, 240).map(function (cell) {
               return array(cell).slice(0, 30).map(function (item) {
                 return {courseName: text(item && item.courseName), teacherName: text(item && item.teacherName),
