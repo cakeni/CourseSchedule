@@ -26,6 +26,7 @@ class AddCourseActivity : AppCompatActivity() {
         const val EXTRA_DAY_OF_WEEK = "day_of_week"
         const val EXTRA_SECTION = "section"
         const val EXTRA_END_SECTION = "end_section"
+        const val EXTRA_WEEK = "week"
     }
 
     private lateinit var binding: ActivityAddCourseBinding
@@ -127,12 +128,15 @@ class AddCourseActivity : AppCompatActivity() {
     private fun configureWeekDropdowns(totalWeeks: Int) {
         val previousStart = selectedNumber(binding.spinnerStartWeek)
         val previousEnd = selectedNumber(binding.spinnerEndWeek)
+        val requestedWeek = intent.getIntExtra(EXTRA_WEEK, 0)
+            .takeIf { it > 0 }
+            ?.coerceAtMost(totalWeeks)
         weekOptions = Array(totalWeeks.coerceAtLeast(1)) { getString(R.string.week_format, it + 1) }
-        setupDropdown(binding.spinnerStartWeek, weekOptions, (previousStart ?: 1) - 1)
+        setupDropdown(binding.spinnerStartWeek, weekOptions, (previousStart ?: requestedWeek ?: 1) - 1)
         setupDropdown(
             binding.spinnerEndWeek,
             weekOptions,
-            ((previousEnd ?: minOf(16, totalWeeks)) - 1).coerceAtLeast(0)
+            ((previousEnd ?: requestedWeek ?: minOf(16, totalWeeks)) - 1).coerceAtLeast(0)
         )
     }
 

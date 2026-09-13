@@ -197,7 +197,6 @@ class CourseTableView @JvmOverloads constructor(
     private var showTimes = true
     private var highlightedDay: Int? = null
     private var onCourseClickListener: ((Course, View, RectF) -> Unit)? = null
-    private var onEmptySlotClickListener: ((dayOfWeek: Int, section: Int) -> Unit)? = null
     private var onQuickAddCourseListener:
         ((dayOfWeek: Int, startSection: Int, endSection: Int) -> Unit)? = null
     private var onQuickAddSelectionChangedListener: ((active: Boolean) -> Unit)? = null
@@ -860,11 +859,6 @@ class CourseTableView @JvmOverloads constructor(
                     val sourceBounds = RectF(courseBounds(course))
                     performClick()
                     onCourseClickListener?.invoke(course, this, sourceBounds)
-                } else if (!touchMoved && course == null) {
-                    emptySlotAt(event.x, event.y)?.let { (day, section) ->
-                        performClick()
-                        onEmptySlotClickListener?.invoke(day, section)
-                    }
                 }
             }
             MotionEvent.ACTION_CANCEL -> {
@@ -1136,10 +1130,6 @@ class CourseTableView @JvmOverloads constructor(
 
     fun setOnCourseClickListener(listener: (Course, View, RectF) -> Unit) {
         onCourseClickListener = listener
-    }
-
-    fun setOnEmptySlotClickListener(listener: (dayOfWeek: Int, section: Int) -> Unit) {
-        onEmptySlotClickListener = listener
     }
 
     fun setOnQuickAddCourseListener(

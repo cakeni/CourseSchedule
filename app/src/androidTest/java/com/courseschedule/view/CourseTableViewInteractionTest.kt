@@ -52,26 +52,23 @@ class CourseTableViewInteractionTest {
                 assertEquals(near, selected)
 
                 selected = null
-                var emptySlot: Pair<Int, Int>? = null
-                view.setOnEmptySlotClickListener { day, section -> emptySlot = day to section }
                 view.setCourses(ScheduleRules.selectCoursesForWeek(listOf(past), 5, true))
                 tap(view, day = 1, section = 1)
                 assertNull(selected)
-                assertEquals(1 to 1, emptySlot)
             }
         }
     }
 
-    @Test fun blankSlotReportsItsDayAndSection() {
+    @Test fun blankSlotTapDoesNothing() {
         ActivityScenario.launch(ImportActivity::class.java).use { scenario ->
             scenario.onActivity { activity ->
                 val view = attachedTable(activity.findViewById(android.R.id.content))
-                var selected: Pair<Int, Int>? = null
-                view.setOnEmptySlotClickListener { day, section -> selected = day to section }
+                var clicks = 0
+                view.setOnClickListener { clicks++ }
 
                 tap(view, day = 4, section = 3)
 
-                assertEquals(4 to 3, selected)
+                assertEquals(0, clicks)
             }
         }
     }
@@ -127,12 +124,13 @@ class CourseTableViewInteractionTest {
         }
     }
 
-    @Test fun rangeExtrasPrefillExistingCourseEditor() {
+    @Test fun quickAddExtrasPrefillRangeAndCurrentWeek() {
         val context = ApplicationProvider.getApplicationContext<android.content.Context>()
         val intent = Intent(context, AddCourseActivity::class.java).apply {
             putExtra(AddCourseActivity.EXTRA_DAY_OF_WEEK, 4)
             putExtra(AddCourseActivity.EXTRA_SECTION, 3)
             putExtra(AddCourseActivity.EXTRA_END_SECTION, 5)
+            putExtra(AddCourseActivity.EXTRA_WEEK, 7)
         }
         ActivityScenario.launch<AddCourseActivity>(intent).use { scenario ->
             scenario.onActivity { activity ->
@@ -144,6 +142,14 @@ class CourseTableViewInteractionTest {
                 assertEquals(
                     activity.getString(R.string.section_format, 5),
                     activity.findViewById<AutoCompleteTextView>(R.id.spinnerEndSection).text.toString()
+                )
+                assertEquals(
+                    activity.getString(R.string.week_format, 7),
+                    activity.findViewById<AutoCompleteTextView>(R.id.spinnerStartWeek).text.toString()
+                )
+                assertEquals(
+                    activity.getString(R.string.week_format, 7),
+                    activity.findViewById<AutoCompleteTextView>(R.id.spinnerEndWeek).text.toString()
                 )
             }
         }
