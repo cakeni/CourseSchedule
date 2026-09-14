@@ -177,8 +177,16 @@ class CourseTableView @JvmOverloads constructor(
 
     private val timePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = ContextCompat.getColor(context, R.color.text_tertiary)
-        textSize = sp(9.5f)
+        textSize = sp(9f)
         textAlign = Paint.Align.CENTER
+    }
+
+    private val endTimePaint = Paint(timePaint).apply { alpha = 190 }
+
+    private val timeDividerPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = ContextCompat.getColor(context, R.color.divider)
+        strokeWidth = dp(1f)
+        strokeCap = Paint.Cap.ROUND
     }
 
     private val sectionPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -246,6 +254,7 @@ class CourseTableView @JvmOverloads constructor(
     private var totalHeight = 0f
 
     private var sectionTimes = SchedulePreferences.DEFAULT_SECTION_TIMES
+    private var sectionEndTimes = SchedulePreferences.DEFAULT_SECTION_END_TIMES
 
     private data class CourseTextLayoutKey(
         val course: Course,
@@ -428,17 +437,37 @@ class CourseTableView @JvmOverloads constructor(
         for (section in 0 until TOTAL_SECTIONS) {
             val top = section * sectionHeight
             if (showTimes) {
+                val centerY = top + sectionHeight / 2f
+                val sectionBaseline = centerY -
+                    (sectionPaint.descent() + sectionPaint.ascent()) / 2f
+                val startBaseline = centerY - dp(8f) -
+                    (timePaint.descent() + timePaint.ascent()) / 2f
+                val endBaseline = centerY + dp(8f) -
+                    (endTimePaint.descent() + endTimePaint.ascent()) / 2f
                 canvas.drawText(
                     (section + 1).toString(),
-                    timeColumnWidth / 2f,
-                    top + sectionHeight / 2f - dp(5f),
+                    dp(9.5f),
+                    sectionBaseline,
                     sectionPaint
+                )
+                canvas.drawLine(
+                    dp(18f),
+                    centerY - dp(10f),
+                    dp(18f),
+                    centerY + dp(10f),
+                    timeDividerPaint
                 )
                 canvas.drawText(
                     sectionTimes[section],
-                    timeColumnWidth / 2f,
-                    top + sectionHeight / 2f + dp(14f),
+                    dp(32.5f),
+                    startBaseline,
                     timePaint
+                )
+                canvas.drawText(
+                    sectionEndTimes[section],
+                    dp(32.5f),
+                    endBaseline,
+                    endTimePaint
                 )
             } else {
                 val baseline = top + sectionHeight / 2f -
@@ -1113,13 +1142,19 @@ class CourseTableView @JvmOverloads constructor(
         showWeekend: Boolean,
         showTimes: Boolean,
         sectionHeightDp: Int,
-        sectionTimes: List<String>
+        sectionTimes: List<String>,
+        sectionEndTimes: List<String> = SchedulePreferences.inferSectionEndTimes(sectionTimes)
     ) {
         clearQuickAddSelection()
         visibleDaysCount = if (showWeekend) 7 else 5
         this.showTimes = showTimes
-        this.sectionTimes = sectionTimes.takeIf { it.size == TOTAL_SECTIONS }
-            ?: SchedulePreferences.DEFAULT_SECTION_TIMES
+        if (SchedulePreferences.areValidSectionTimes(sectionTimes, sectionEndTimes)) {
+            this.sectionTimes = sectionTimes
+            this.sectionEndTimes = sectionEndTimes
+        } else {
+            this.sectionTimes = SchedulePreferences.DEFAULT_SECTION_TIMES
+            this.sectionEndTimes = SchedulePreferences.DEFAULT_SECTION_END_TIMES
+        }
         sectionHeight = dp(sectionHeightDp.coerceIn(56, 104).toFloat())
         rebuildVisibleCourses()
         clearCourseRenderCaches()

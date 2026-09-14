@@ -66,6 +66,28 @@ class ImportParserTest {
     }
 
     @Test
+    fun previousBackupWithoutEndTimesRemainsImportable() {
+        val json = """
+            {
+              "schemaVersion": 2,
+              "semester": {"name": "秋季", "startDate": 123, "totalWeeks": 18},
+              "settings": {
+                "sectionTimes": [
+                  "08:00", "08:50", "09:50", "10:40", "11:30", "14:30",
+                  "15:20", "16:20", "17:10", "19:00", "19:50", "20:40"
+                ]
+              },
+              "courses": []
+            }
+        """.trimIndent()
+
+        val settings = parser.parseJson(json).settings
+
+        assertEquals(12, settings?.sectionTimes?.size)
+        assertEquals(emptyList<String>(), settings?.sectionEndTimes)
+    }
+
+    @Test
     fun schoolTimetableGridRemovesCodesAndSplitsDiscontinuousWeeks() {
         val cell = """
             5621003035-操作系统[2001]

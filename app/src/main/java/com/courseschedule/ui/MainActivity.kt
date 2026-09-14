@@ -602,7 +602,8 @@ class MainActivity : AppCompatActivity() {
             showTimes = prefs.showTime,
             showInactiveCourses = prefs.showInactiveCourses,
             sectionHeightDp = prefs.sectionHeightDp,
-            sectionTimes = prefs.sectionTimes
+            sectionTimes = prefs.sectionTimes,
+            sectionEndTimes = prefs.sectionEndTimes
         )
     }
 

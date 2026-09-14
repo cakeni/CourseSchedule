@@ -442,23 +442,51 @@ class SettingsActivity : AppCompatActivity() {
     private fun showSectionTimesDialog() {
         val dialogView = layoutInflater.inflate(R.layout.dialog_section_times, null)
         val container = dialogView.findViewById<LinearLayout>(R.id.sectionTimesContainer)
-        val inputs = preferences.sectionTimes.mapIndexed { index, time ->
+        fun addTimeInput(
+            row: LinearLayout,
+            hintText: String,
+            value: String,
+            marginStart: Int = 0
+        ): TextInputEditText {
             val layout = TextInputLayout(this).apply {
-                hint = getString(R.string.section_start_time, index + 1)
+                hint = hintText
                 boxBackgroundMode = TextInputLayout.BOX_BACKGROUND_OUTLINE
                 layoutParams = LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-                ).apply { if (index > 0) topMargin = dp(8) }
+                    0,
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    1f
+                ).apply { this.marginStart = dp(marginStart) }
             }
             val input = TextInputEditText(layout.context).apply {
-                setText(time)
+                setText(value)
                 inputType = InputType.TYPE_CLASS_DATETIME
                 maxLines = 1
             }
             layout.addView(input)
-            container.addView(layout)
-            input
+            row.addView(layout)
+            return input
+        }
+
+        val inputs = preferences.sectionTimes.zip(preferences.sectionEndTimes)
+            .mapIndexed { index, (start, end) ->
+                val row = LinearLayout(this).apply {
+                    orientation = LinearLayout.HORIZONTAL
+                    layoutParams = LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT
+                    ).apply { if (index > 0) topMargin = dp(8) }
+                }
+                container.addView(row)
+                addTimeInput(
+                    row,
+                    getString(R.string.section_start_time, index + 1),
+                    start
+                ) to addTimeInput(
+                    row,
+                    getString(R.string.section_end_time, index + 1),
+                    end,
+                    marginStart = 8
+                )
         }
         val dialog = MaterialAlertDialogBuilder(this)
             .setTitle(R.string.section_time_settings)
@@ -469,20 +497,19 @@ class SettingsActivity : AppCompatActivity() {
             .create()
         dialog.setOnShowListener {
             dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_NEUTRAL).setOnClickListener {
-                inputs.zip(SchedulePreferences.DEFAULT_SECTION_TIMES).forEach { (input, value) ->
-                    input.setText(value)
+                inputs.forEachIndexed { index, (startInput, endInput) ->
+                    startInput.setText(SchedulePreferences.DEFAULT_SECTION_TIMES[index])
+                    endInput.setText(SchedulePreferences.DEFAULT_SECTION_END_TIMES[index])
                 }
             }
             dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-                val times = inputs.map { it.text?.toString()?.trim().orEmpty() }
-                val minutes = times.map(::timeToMinutes)
-                val valid = times.all(SchedulePreferences::isValidTime) &&
-                    minutes.zipWithNext().all { (first, second) -> first < second }
-                if (!valid) {
+                val startTimes = inputs.map { it.first.text?.toString()?.trim().orEmpty() }
+                val endTimes = inputs.map { it.second.text?.toString()?.trim().orEmpty() }
+                if (!SchedulePreferences.areValidSectionTimes(startTimes, endTimes)) {
                     Toast.makeText(this, R.string.invalid_section_times, Toast.LENGTH_SHORT).show()
                     return@setOnClickListener
                 }
-                preferences.sectionTimes = times
+                preferences.setSectionTimes(startTimes, endTimes)
                 updateSectionTimesSummary()
                 updateReminderScheduling(preferences.reminderEnabled)
                 dialog.dismiss()
@@ -492,11 +519,14 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun updateSectionTimesSummary() {
-        val times = preferences.sectionTimes
+        val startTimes = preferences.sectionTimes
+        val endTimes = preferences.sectionEndTimes
         binding.tvSectionTimesSummary.text = getString(
             R.string.section_times_summary,
-            times.first(),
-            times.last()
+            startTimes.first(),
+            endTimes.first(),
+            startTimes.last(),
+            endTimes.last()
         )
     }
 
@@ -567,12 +597,6 @@ class SettingsActivity : AppCompatActivity() {
             }
             add(Calendar.DAY_OF_MONTH, offset)
         }.timeInMillis
-    }
-
-    private fun timeToMinutes(value: String): Int {
-        val parts = value.split(':')
-        return (parts.getOrNull(0)?.toIntOrNull() ?: 0) * 60 +
-            (parts.getOrNull(1)?.toIntOrNull() ?: 0)
     }
 
     private fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()

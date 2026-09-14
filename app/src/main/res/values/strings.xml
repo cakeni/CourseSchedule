@@ -324,11 +324,12 @@
     <string name="course_reminders">课程提醒</string>
     <string name="enable_reminders">启用课程提醒</string>
     <string name="default_reminder_time">默认提前时间</string>
-    <string name="section_time_settings">每节课开始时间</string>
-    <string name="section_start_time">第 %d 节开始时间</string>
-    <string name="section_times_summary">第1节 %1$s · 第12节 %2$s</string>
+    <string name="section_time_settings">每节课时间</string>
+    <string name="section_start_time">第 %d 节开始</string>
+    <string name="section_end_time">第 %d 节结束</string>
+    <string name="section_times_summary">第1节 %1$s–%2$s · 第12节 %3$s–%4$s</string>
     <string name="restore_defaults">恢复默认</string>
-    <string name="invalid_section_times">请使用 24 小时制，并保证时间依次递增</string>
+    <string name="invalid_section_times">请使用 24 小时制，确保结束时间晚于开始时间且各节不重叠</string>
     <string name="data_management">数据管理</string>
     <string name="export_full_backup">导出当前学期完整备份</string>
     <string name="import_or_restore">导入或恢复数据</string>

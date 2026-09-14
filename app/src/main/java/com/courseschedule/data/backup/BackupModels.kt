@@ -24,7 +24,8 @@ data class SettingsSnapshot(
     val sectionHeightDp: Int = 72,
     val reminderEnabled: Boolean = true,
     val defaultReminderMinutes: Int = 15,
-    val sectionTimes: List<String> = emptyList()
+    val sectionTimes: List<String> = emptyList(),
+    val sectionEndTimes: List<String> = emptyList()
 )
 
 data class ScheduleBackup(

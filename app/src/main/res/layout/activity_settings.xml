@@ -268,7 +268,7 @@
                                 android:layout_marginTop="2dp"
                                 android:textColor="@color/text_secondary"
                                 android:textSize="12sp"
-                                tools:text="第1节 08:00 · 第12节 21:45" />
+                                tools:text="第1节 08:00–08:45 · 第12节 20:40–21:25" />
                         </LinearLayout>
                         <ImageView
                             android:layout_width="20dp"

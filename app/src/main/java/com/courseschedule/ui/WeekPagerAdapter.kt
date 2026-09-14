@@ -27,7 +27,8 @@ data class WeekPageSettings(
     val showTimes: Boolean = true,
     val showInactiveCourses: Boolean = true,
     val sectionHeightDp: Int = 64,
-    val sectionTimes: List<String> = SchedulePreferences.DEFAULT_SECTION_TIMES
+    val sectionTimes: List<String> = SchedulePreferences.DEFAULT_SECTION_TIMES,
+    val sectionEndTimes: List<String> = SchedulePreferences.DEFAULT_SECTION_END_TIMES
 )
 
 class WeekPagerAdapter(
@@ -145,7 +146,8 @@ class WeekPagerAdapter(
                 showWeekend = settings.showWeekend,
                 showTimes = settings.showTimes,
                 sectionHeightDp = settings.sectionHeightDp,
-                sectionTimes = settings.sectionTimes
+                sectionTimes = settings.sectionTimes,
+                sectionEndTimes = settings.sectionEndTimes
             )
             binding.courseTableView.setCurrentWeek(week)
             binding.courseTableView.setCourses(displayCourses)
