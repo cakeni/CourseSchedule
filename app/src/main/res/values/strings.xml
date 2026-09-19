@@ -313,6 +313,9 @@
     <string name="course_accessibility_description">%1$s，%2$s，第%3$d到%4$d节，第%5$d到%6$d周，%7$s，教师%8$s，地点%9$s</string>
 
     <!-- 设置 -->
+    <string name="appearance">外观</string>
+    <string name="dark_mode">深色模式</string>
+    <string name="dark_mode_summary">在暗光环境下使用低亮度界面</string>
     <string name="schedule_display">课表显示</string>
     <string name="show_weekend">显示周末</string>
     <string name="show_inactive_courses">显示非本周课程</string>

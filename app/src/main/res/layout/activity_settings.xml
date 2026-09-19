@@ -75,6 +75,58 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <TextView
+                style="@style/CourseScheduleSettingsSection"
+                android:text="@string/appearance" />
+
+            <com.google.android.material.card.MaterialCardView style="@style/CourseScheduleSettingsCard">
+                <LinearLayout
+                    android:id="@+id/rowDarkMode"
+                    style="@style/CourseScheduleSettingsRow"
+                    android:layout_height="72dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/dark_mode"
+                            android:textColor="@color/text_primary"
+                            android:textSize="15sp" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="3dp"
+                            android:text="@string/dark_mode_summary"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/switchDarkMode"
+                        style="@style/Widget.Material3.CompoundButton.MaterialSwitch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:contentDescription="@string/dark_mode"
+                        android:textOff=""
+                        android:textOn=""
+                        app:showText="false"
+                        app:thumbIcon="@drawable/theme_switch_thumb_icon"
+                        app:thumbIconSize="16dp"
+                        app:thumbIconTint="@color/on_primary"
+                        app:thumbTint="@color/switch_thumb_color"
+                        app:trackTint="@color/switch_track_color" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
             <TextView style="@style/CourseScheduleSettingsSection" android:text="@string/semester_management" />
 
             <com.google.android.material.card.MaterialCardView

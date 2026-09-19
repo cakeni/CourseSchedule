@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- GPT-like dark theme: neutral blacks first, blue only for interaction. -->
+    <color name="primary">#2874D0</color>
+    <color name="primary_variant">#8AB8F5</color>
+    <color name="primary_container">#202020</color>
+    <color name="secondary">#D2A05C</color>
+    <color name="secondary_variant">#E6B56E</color>
+
+    <color name="background">#000000</color>
+    <color name="surface">#171717</color>
+    <color name="surface_variant">#222222</color>
+    <color name="navigation_surface">#FA121212</color>
+    <color name="navigation_outline">#FF323232</color>
+    <color name="schedule_background_start">#050505</color>
+    <color name="schedule_background_end">#000000</color>
+    <color name="toolbar_divider">#262626</color>
+    <color name="progress_track">#333333</color>
+    <color name="error">#FF6B6B</color>
+
+    <color name="on_primary">#FFFFFF</color>
+    <color name="on_secondary">#342100</color>
+    <color name="on_background">#F2F2F2</color>
+    <color name="on_surface">#F2F2F2</color>
+    <color name="text_primary">#F2F2F2</color>
+    <color name="text_secondary">#B8B8B8</color>
+    <color name="text_tertiary">#858585</color>
+
+    <!-- Course blocks stay colorful, but deep enough for high-contrast white labels. -->
+    <color name="course_red">#A84F58</color>
+    <color name="course_pink">#9B4F70</color>
+    <color name="course_purple">#7657AE</color>
+    <color name="course_deep_purple">#61509E</color>
+    <color name="course_indicate">#5169A8</color>
+    <color name="course_blue">#3D73A0</color>
+    <color name="course_light_blue">#3E789B</color>
+    <color name="course_cyan">#3D7E82</color>
+    <color name="course_teal">#3E786D</color>
+    <color name="course_green">#4D7959</color>
+    <color name="course_light_green">#667844</color>
+    <color name="course_lime">#74783F</color>
+    <color name="course_yellow">#857238</color>
+    <color name="course_amber">#906837</color>
+    <color name="course_orange">#985844</color>
+    <color name="course_brown">#755B50</color>
+
+    <color name="divider">#343434</color>
+    <color name="today_highlight">#292929</color>
+    <color name="current_week_indicator">#2874D0</color>
+    <color name="detail_week">#52B8A7</color>
+    <color name="detail_time">#D8A35E</color>
+    <color name="detail_teacher">#6EA4E4</color>
+    <color name="detail_room">#E56E76</color>
+    <color name="switch_track_checked">#802874D0</color>
+    <color name="switch_track_unchecked">#80666666</color>
+    <color name="quick_add_fill">#07131F</color>
+    <color name="quick_add_outline">#0098FF</color>
+    <color name="quick_add_grip">#0098FF</color>
+    <color name="quick_add_button">#14A9F5</color>
+    <color name="quick_add_plus">#FFFFFF</color>
+</resources>

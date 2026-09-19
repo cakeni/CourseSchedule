@@ -42,6 +42,14 @@ class SchedulePreferences(context: Context) {
         get() = prefs.getInt(KEY_DEFAULT_REMINDER, 15)
         set(value) = prefs.edit().putInt(KEY_DEFAULT_REMINDER, value).apply()
 
+    var darkModeOverride: Boolean?
+        get() = if (prefs.contains(KEY_DARK_MODE)) prefs.getBoolean(KEY_DARK_MODE, false) else null
+        set(value) {
+            prefs.edit().apply {
+                if (value == null) remove(KEY_DARK_MODE) else putBoolean(KEY_DARK_MODE, value)
+            }.apply()
+        }
+
     val sectionTimes: List<String>
         get() {
             val stored = prefs.getString(KEY_SECTION_TIMES, null)
@@ -105,6 +113,7 @@ class SchedulePreferences(context: Context) {
         private const val KEY_COMPACT_DENSITY_MIGRATED = "compact_density_migrated_v2"
         private const val KEY_REMINDER_ENABLED = "reminder_enabled"
         private const val KEY_DEFAULT_REMINDER = "default_reminder_minutes"
+        private const val KEY_DARK_MODE = "dark_mode"
         private const val KEY_SECTION_TIMES = "section_times"
         private const val KEY_SECTION_END_TIMES = "section_end_times"
         private const val DEFAULT_SECTION_DURATION_MINUTES = 45

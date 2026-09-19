@@ -12,6 +12,11 @@
     <color name="surface">#FAFCFF</color>
     <color name="surface_variant">#F3F6FB</color>
     <color name="navigation_surface">#EBF4F7FC</color>
+    <color name="navigation_outline">#80FFFFFF</color>
+    <color name="schedule_background_start">#F3F3FB</color>
+    <color name="schedule_background_end">#DFE9F7</color>
+    <color name="toolbar_divider">#5CFFFFFF</color>
+    <color name="progress_track">#42FFFFFF</color>
     <color name="error">#B3261E</color>
 
     <!-- 文字颜色 -->
@@ -63,16 +68,19 @@
 
     <!-- 其他 -->
     <color name="divider">#DCE4EF</color>
-    <color name="grid_line">#DCE4EF</color>
     <color name="today_highlight">#DCE8F5</color>
-    <color name="today_column">#2ADCE8F5</color>
-    <color name="schedule_afternoon">#1AFFFFFF</color>
-    <color name="schedule_evening">#24D9E5F5</color>
     <color name="current_week_indicator">#3E628C</color>
     <color name="detail_week">#18A995</color>
     <color name="detail_time">#E19A3D</color>
     <color name="detail_teacher">#4F84C4</color>
     <color name="detail_room">#D65D64</color>
+    <color name="switch_track_checked">#66176B5B</color>
+    <color name="switch_track_unchecked">#3D8C9693</color>
+    <color name="quick_add_fill">@color/primary</color>
+    <color name="quick_add_outline">@color/on_primary</color>
+    <color name="quick_add_grip">@color/on_primary</color>
+    <color name="quick_add_button">@color/surface</color>
+    <color name="quick_add_plus">@color/primary</color>
 
     <!-- 应用图标背景色 -->
     <color name="ic_launcher_background">#151515</color>

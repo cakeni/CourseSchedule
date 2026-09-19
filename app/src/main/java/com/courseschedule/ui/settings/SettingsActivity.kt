@@ -5,6 +5,7 @@ import android.content.ActivityNotFoundException
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
+import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
 import android.text.InputType
@@ -18,6 +19,7 @@ import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.doOnPreDraw
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -82,6 +84,9 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun initSettingsControls() {
+        val systemIsDark = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK ==
+            Configuration.UI_MODE_NIGHT_YES
+        binding.switchDarkMode.isChecked = preferences.darkModeOverride ?: systemIsDark
         binding.switchShowWeekend.isChecked = preferences.showWeekend
         binding.switchShowInactiveCourses.isChecked = preferences.showInactiveCourses
         binding.switchShowTime.isChecked = preferences.showTime
@@ -101,6 +106,9 @@ class SettingsActivity : AppCompatActivity() {
         updateReminderControlState(preferences.reminderEnabled, animate = false)
         updateSectionTimesSummary()
 
+        binding.rowDarkMode.setOnClickListener {
+            binding.switchDarkMode.toggle()
+        }
         binding.rowShowWeekend.setOnClickListener {
             binding.switchShowWeekend.toggle()
         }
@@ -114,6 +122,12 @@ class SettingsActivity : AppCompatActivity() {
             binding.switchReminder.toggle()
         }
 
+        binding.switchDarkMode.setOnCheckedChangeListener { _, checked ->
+            preferences.darkModeOverride = checked
+            AppCompatDelegate.setDefaultNightMode(
+                if (checked) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
+            )
+        }
         binding.switchShowWeekend.setOnCheckedChangeListener { _, checked ->
             preferences.showWeekend = checked
         }
@@ -200,6 +214,7 @@ class SettingsActivity : AppCompatActivity() {
 
         listOf(
             binding.cardOpenSource,
+            binding.rowDarkMode,
             binding.cardSemester,
             binding.rowShowWeekend,
             binding.rowShowInactiveCourses,

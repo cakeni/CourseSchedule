@@ -306,7 +306,6 @@ class WeekPagerAdapter(
                 styleDay(textView, showToday && index == todayIndex, normalColor, highlightColor)
                 calendar.add(Calendar.DAY_OF_MONTH, 1)
             }
-            binding.courseTableView.setHighlightedDay(if (showToday) todayIndex + 1 else null)
         }
 
         private fun styleDay(

@@ -56,7 +56,7 @@
         android:id="@+id/toolbarDivider"
         android:layout_width="0dp"
         android:layout_height="1dp"
-        android:background="#5CFFFFFF"
+        android:background="@color/toolbar_divider"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/toolbar" />
@@ -139,7 +139,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/weekSelector"
-        app:trackColor="#42FFFFFF"
+        app:trackColor="@color/progress_track"
         app:trackThickness="2dp" />
 
     <androidx.viewpager2.widget.ViewPager2

@@ -35,6 +35,7 @@ import com.courseschedule.view.CourseTableView
 import com.courseschedule.viewmodel.CourseViewModel
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -539,7 +540,7 @@ class MainActivity : AppCompatActivity() {
         val semester = currentSemester ?: return
         val weeks = Array(semester.totalWeeks) { getString(R.string.week_format, it + 1) }
 
-        androidx.appcompat.app.AlertDialog.Builder(this)
+        MaterialAlertDialogBuilder(this)
             .setTitle(R.string.select_week)
             .setSingleChoiceItems(weeks, currentWeek - 1) { dialog, which ->
                 dialog.dismiss()

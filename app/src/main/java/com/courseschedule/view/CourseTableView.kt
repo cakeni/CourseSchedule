@@ -86,72 +86,51 @@ class CourseTableView @JvmOverloads constructor(
         style = Paint.Style.FILL
     }
 
-    private val todayColumnPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = ContextCompat.getColor(context, R.color.today_column)
-        style = Paint.Style.FILL
-    }
-
-    private val afternoonBandPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = ContextCompat.getColor(context, R.color.schedule_afternoon)
-        style = Paint.Style.FILL
-    }
-
-    private val eveningBandPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = ContextCompat.getColor(context, R.color.schedule_evening)
-        style = Paint.Style.FILL
-    }
-
-    private val gridPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = ContextCompat.getColor(context, R.color.grid_line)
-        strokeWidth = dp(0.5f)
-        style = Paint.Style.STROKE
-    }
-
-    private val groupDividerPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = ContextCompat.getColor(context, R.color.divider)
-        strokeWidth = dp(1.5f)
-        style = Paint.Style.STROKE
-    }
-
     private val coursePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.FILL
     }
 
+    private val showCourseOutline = resources.getBoolean(R.bool.show_course_outline)
+
     private val courseStrokePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.WHITE
+        color = ContextCompat.getColor(context, R.color.on_primary)
         alpha = 190
         strokeWidth = dp(1.25f)
         style = Paint.Style.STROKE
     }
 
     private val quickAddPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = ContextCompat.getColor(context, R.color.primary)
+        color = ContextCompat.getColor(context, R.color.quick_add_fill)
         style = Paint.Style.FILL
     }
 
     private val quickAddStrokePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.WHITE
+        color = ContextCompat.getColor(context, R.color.quick_add_outline)
         strokeWidth = dp(1.5f)
         style = Paint.Style.STROKE
     }
 
+    private val quickAddGlowPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = ContextCompat.getColor(context, R.color.quick_add_outline)
+        strokeWidth = dp(3.5f)
+        style = Paint.Style.STROKE
+    }
+
     private val quickAddButtonPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = ContextCompat.getColor(context, R.color.surface)
+        color = ContextCompat.getColor(context, R.color.quick_add_button)
         style = Paint.Style.FILL
     }
 
     private val quickAddPlusPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = ContextCompat.getColor(context, R.color.primary)
+        color = ContextCompat.getColor(context, R.color.quick_add_plus)
         strokeCap = Paint.Cap.ROUND
-        strokeWidth = dp(2.2f)
+        strokeWidth = dp(2.6f)
         style = Paint.Style.STROKE
     }
 
     private val quickAddGripPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.WHITE
-        strokeCap = Paint.Cap.ROUND
-        strokeWidth = dp(1.8f)
-        style = Paint.Style.STROKE
+        color = ContextCompat.getColor(context, R.color.quick_add_grip)
+        style = Paint.Style.FILL
     }
 
     private val courseNamePaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -183,12 +162,6 @@ class CourseTableView @JvmOverloads constructor(
 
     private val endTimePaint = Paint(timePaint).apply { alpha = 190 }
 
-    private val timeDividerPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = ContextCompat.getColor(context, R.color.divider)
-        strokeWidth = dp(1f)
-        strokeCap = Paint.Cap.ROUND
-    }
-
     private val sectionPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = ContextCompat.getColor(context, R.color.text_secondary)
         textSize = sp(11f)
@@ -203,7 +176,6 @@ class CourseTableView @JvmOverloads constructor(
     private var currentWeek = 1
     private var visibleDaysCount = 7
     private var showTimes = true
-    private var highlightedDay: Int? = null
     private var onCourseClickListener: ((Course, View, RectF) -> Unit)? = null
     private var onQuickAddCourseListener:
         ((dayOfWeek: Int, startSection: Int, endSection: Int) -> Unit)? = null
@@ -404,33 +376,10 @@ class CourseTableView @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        canvas.drawRect(
-            timeColumnWidth,
-            sectionHeight * 4,
-            totalWidth,
-            sectionHeight * 8,
-            afternoonBandPaint
-        )
-        canvas.drawRect(
-            timeColumnWidth,
-            sectionHeight * 8,
-            totalWidth,
-            totalHeight,
-            eveningBandPaint
-        )
         canvas.drawRect(0f, 0f, timeColumnWidth, totalHeight, backgroundPaint)
-        drawHighlightedDay(canvas)
-        drawGrid(canvas)
         drawTimeColumn(canvas)
         drawCourses(canvas)
         drawQuickAddSelection(canvas)
-    }
-
-    private fun drawHighlightedDay(canvas: Canvas) {
-        val day = highlightedDay ?: return
-        if (day !in 1..visibleDaysCount) return
-        val left = timeColumnWidth + (day - 1) * dayWidth
-        canvas.drawRect(left, 0f, left + dayWidth, totalHeight, todayColumnPaint)
     }
 
     private fun drawTimeColumn(canvas: Canvas) {
@@ -449,13 +398,6 @@ class CourseTableView @JvmOverloads constructor(
                     dp(9.5f),
                     sectionBaseline,
                     sectionPaint
-                )
-                canvas.drawLine(
-                    dp(18f),
-                    centerY - dp(10f),
-                    dp(18f),
-                    centerY + dp(10f),
-                    timeDividerPaint
                 )
                 canvas.drawText(
                     sectionTimes[section],
@@ -479,20 +421,6 @@ class CourseTableView @JvmOverloads constructor(
                     sectionPaint
                 )
             }
-        }
-    }
-
-    private fun drawGrid(canvas: Canvas) {
-        for (section in 0..TOTAL_SECTIONS) {
-            val y = section * sectionHeight
-            val paint = if (section == 4 || section == 8) groupDividerPaint else gridPaint
-            canvas.drawLine(timeColumnWidth, y, totalWidth, y, paint)
-        }
-
-        canvas.drawLine(timeColumnWidth, 0f, timeColumnWidth, totalHeight, groupDividerPaint)
-        for (day in 1 until visibleDaysCount) {
-            val x = timeColumnWidth + day * dayWidth
-            canvas.drawLine(x, 0f, x, totalHeight, gridPaint)
         }
     }
 
@@ -560,7 +488,8 @@ class CourseTableView @JvmOverloads constructor(
         canvas.scale(revealScale, revealScale, centerX, centerY)
 
         quickAddPaint.alpha = 225 * alpha / 255
-        quickAddStrokePaint.alpha = 220 * alpha / 255
+        quickAddGlowPaint.alpha = 52 * alpha / 255
+        quickAddStrokePaint.alpha = 245 * alpha / 255
         canvas.drawRoundRect(
             quickAddDrawBounds,
             courseCornerRadius,
@@ -571,25 +500,19 @@ class CourseTableView @JvmOverloads constructor(
             quickAddDrawBounds,
             courseCornerRadius,
             courseCornerRadius,
+            quickAddGlowPaint
+        )
+        canvas.drawRoundRect(
+            quickAddDrawBounds,
+            courseCornerRadius,
+            courseCornerRadius,
             quickAddStrokePaint
         )
 
-        val gripHalfWidth = minOf(dp(5f), quickAddDrawBounds.width() * 0.18f)
-        quickAddGripPaint.alpha = 165 * alpha / 255
-        canvas.drawLine(
-            centerX - gripHalfWidth,
-            quickAddDrawBounds.top + dp(6f),
-            centerX + gripHalfWidth,
-            quickAddDrawBounds.top + dp(6f),
-            quickAddGripPaint
-        )
-        canvas.drawLine(
-            centerX - gripHalfWidth,
-            quickAddDrawBounds.bottom - dp(6f),
-            centerX + gripHalfWidth,
-            quickAddDrawBounds.bottom - dp(6f),
-            quickAddGripPaint
-        )
+        quickAddGripPaint.alpha = 235 * alpha / 255
+        val gripRadius = dp(2.4f)
+        canvas.drawCircle(centerX, quickAddDrawBounds.top + dp(7f), gripRadius, quickAddGripPaint)
+        canvas.drawCircle(centerX, quickAddDrawBounds.bottom - dp(7f), gripRadius, quickAddGripPaint)
 
         val buttonRadius = minOf(dp(15f), quickAddDrawBounds.width() * 0.38f)
         val buttonScale = if (quickAddButtonPressed) 0.9f else 1f
@@ -642,9 +565,6 @@ class CourseTableView @JvmOverloads constructor(
         val baseColor = courseColors[Math.floorMod(course.colorIndex, courseColors.size)]
         coursePaint.color = ColorUtils.blendARGB(baseColor, Color.BLACK, 0.08f * pressProgress)
         coursePaint.alpha = alpha
-        courseStrokePaint.alpha = ((190f + 40f * pressProgress) * alpha / 255f)
-            .roundToInt()
-        courseStrokePaint.strokeWidth = dp(1.25f + 0.4f * pressProgress)
         val pressScaleX = 1f - (1f - PRESSED_SCALE_X) * pressProgress
         val pressScaleY = 1f - (1f - PRESSED_SCALE_Y) * pressProgress
         val pivotX = pressPivotX.coerceIn(left, right)
@@ -662,12 +582,17 @@ class CourseTableView @JvmOverloads constructor(
             courseCornerRadius,
             coursePaint
         )
-        canvas.drawRoundRect(
-            cardDrawBounds,
-            courseCornerRadius,
-            courseCornerRadius,
-            courseStrokePaint
-        )
+        if (showCourseOutline) {
+            courseStrokePaint.alpha = ((190f + 40f * pressProgress) * alpha / 255f)
+                .roundToInt()
+            courseStrokePaint.strokeWidth = dp(1.25f + 0.4f * pressProgress)
+            canvas.drawRoundRect(
+                cardDrawBounds,
+                courseCornerRadius,
+                courseCornerRadius,
+                courseStrokePaint
+            )
+        }
 
         val textLayout = courseTextLayoutCache.getOrPut(
             CourseTextLayoutKey(course, isCurrentWeek)
@@ -1130,11 +1055,6 @@ class CourseTableView @JvmOverloads constructor(
         rebuildVisibleCourses()
         courseTextLayoutCache.clear()
         accessibilityHelper.invalidateRoot()
-        invalidate()
-    }
-
-    fun setHighlightedDay(day: Int?) {
-        highlightedDay = day
         invalidate()
     }
 

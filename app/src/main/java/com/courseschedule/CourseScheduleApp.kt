@@ -4,6 +4,8 @@ import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Build
+import androidx.appcompat.app.AppCompatDelegate
+import com.courseschedule.utils.SchedulePreferences
 import app.rive.runtime.kotlin.core.Rive
 
 /**
@@ -17,6 +19,14 @@ class CourseScheduleApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+
+        AppCompatDelegate.setDefaultNightMode(
+            when (SchedulePreferences(this).darkModeOverride) {
+                true -> AppCompatDelegate.MODE_NIGHT_YES
+                false -> AppCompatDelegate.MODE_NIGHT_NO
+                null -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+            }
+        )
 
         runCatching { Rive.init(this) }
 
