@@ -164,6 +164,7 @@ class MainActivity : AppCompatActivity() {
         binding.btnPreviousWeek.installPressScale(0.97f)
         binding.btnNextWeek.installPressScale(0.97f)
 
+        binding.bottomNavigation.stabilizeActiveIndicatorSize()
         binding.bottomNavigation.setOnItemSelectedListener { item ->
             if (suppressBottomNavigationMotion) return@setOnItemSelectedListener true
             val itemView = binding.bottomNavigation.findViewById<View>(item.itemId)
@@ -583,7 +584,7 @@ class MainActivity : AppCompatActivity() {
             binding.bottomNavigation.selectedItemId != R.id.nav_home
         if (binding.bottomNavigation.selectedItemId != R.id.nav_home) {
             suppressBottomNavigationMotion = true
-            binding.bottomNavigation.selectedItemId = R.id.nav_home
+            binding.bottomNavigation.selectItemWithoutAnimation(R.id.nav_home)
             suppressBottomNavigationMotion = false
         }
         if (returningToHome) {

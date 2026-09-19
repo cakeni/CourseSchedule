@@ -2,9 +2,13 @@ package com.courseschedule.ui
 
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewGroup
 import android.view.animation.OvershootInterpolator
 import android.view.animation.PathInterpolator
+import androidx.annotation.IdRes
+import androidx.transition.TransitionManager
 import com.courseschedule.R
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.R as MaterialR
 
 private val pressReleaseInterpolator = PathInterpolator(0.22f, 1f, 0.36f, 1f)
@@ -24,6 +28,23 @@ fun View.installPressScale(pressedScale: Float = 0.98f) {
             .setInterpolator(pressReleaseInterpolator)
             .start()
         false
+    }
+}
+
+fun BottomNavigationView.selectItemWithoutAnimation(@IdRes itemId: Int) {
+    selectedItemId = itemId
+    (getChildAt(0) as? ViewGroup)?.let(TransitionManager::endTransitions)
+}
+
+fun BottomNavigationView.stabilizeActiveIndicatorSize() {
+    for (index in 0 until menu.size()) {
+        val indicator = findViewById<View>(menu.getItem(index).itemId)
+            ?.findViewById<View>(MaterialR.id.navigation_bar_item_active_indicator_view)
+            ?: continue
+        indicator.layoutParams = indicator.layoutParams.apply {
+            width = itemActiveIndicatorWidth
+            height = itemActiveIndicatorHeight
+        }
     }
 }
 

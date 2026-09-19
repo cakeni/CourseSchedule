@@ -32,6 +32,8 @@ import com.courseschedule.domain.ScheduleRules
 import com.courseschedule.domain.SemesterPhase
 import com.courseschedule.ui.installPressScale
 import com.courseschedule.ui.playNavigationMotion
+import com.courseschedule.ui.selectItemWithoutAnimation
+import com.courseschedule.ui.stabilizeActiveIndicatorSize
 import com.courseschedule.ui.importdata.ImportActivity
 import com.courseschedule.utils.ReminderManager
 import com.courseschedule.utils.SchedulePreferences
@@ -228,7 +230,8 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun initBottomNavigation() {
-        binding.bottomNavigation.selectedItemId = R.id.nav_settings
+        binding.bottomNavigation.stabilizeActiveIndicatorSize()
+        binding.bottomNavigation.selectItemWithoutAnimation(R.id.nav_settings)
         binding.bottomNavigation.setOnItemSelectedListener { item ->
             if (suppressBottomNavigationMotion) return@setOnItemSelectedListener true
             val itemView = binding.bottomNavigation.findViewById<View>(item.itemId)
@@ -620,7 +623,7 @@ class SettingsActivity : AppCompatActivity() {
         super.onResume()
         if (binding.bottomNavigation.selectedItemId != R.id.nav_settings) {
             suppressBottomNavigationMotion = true
-            binding.bottomNavigation.selectedItemId = R.id.nav_settings
+            binding.bottomNavigation.selectItemWithoutAnimation(R.id.nav_settings)
             suppressBottomNavigationMotion = false
         }
     }
