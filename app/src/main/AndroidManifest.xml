@@ -25,20 +25,12 @@
         <activity
             android:name=".ui.MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.CourseSchedule" />
-
-        <!-- Use a fresh launcher component so HyperOS cannot reuse the old icon cache entry. -->
-        <activity-alias
-            android:name=".ui.HomeLauncher"
-            android:exported="true"
-            android:icon="@mipmap/ic_launcher_home"
-            android:label="@string/app_name"
-            android:targetActivity=".ui.MainActivity">
+            android:theme="@style/Theme.CourseSchedule">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity-alias>
+        </activity>
 
         <!-- 添加/编辑课程 -->
         <activity
