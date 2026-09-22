@@ -55,6 +55,8 @@ class WeekPagerAdapter(
         status: SemesterWeekStatus?,
         settings: WeekPageSettings
     ) {
+        if (this.semester == semester && this.courses == courses &&
+            this.status == status && this.settings == settings) return
         val oldCount = itemCount
         val oldSemesterId = this.semester?.id
         this.semester = semester
@@ -65,7 +67,8 @@ class WeekPagerAdapter(
             scrollPositions.clear()
             notifyDataSetChanged()
         } else if (itemCount > 0) {
-            notifyItemRangeChanged(0, itemCount)
+            // Reuse the holder during state sync so its running entrance clock survives.
+            notifyItemRangeChanged(0, itemCount, Unit)
         }
     }
 
@@ -98,10 +101,15 @@ class WeekPagerAdapter(
         holder.boundWeek?.let { week ->
             scrollPositions[week] = holder.binding.scheduleScroll.scrollY
         }
+        holder.binding.courseTableView.cancelReturnEntrance()
         holder.resetSelectionMotion()
         holder.binding.courseTableView.resetPagerMotion()
         super.onViewRecycled(holder)
     }
+
+    fun currentHolder(pager: ViewPager2): WeekViewHolder? =
+        (pager.getChildAt(0) as? RecyclerView)
+            ?.findViewHolderForAdapterPosition(pager.currentItem) as? WeekViewHolder
 
     fun playSelectionMotion(pager: ViewPager2, position: Int, forward: Boolean): Boolean {
         val recyclerView = pager.getChildAt(0) as? RecyclerView ?: return false

@@ -51,6 +51,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var viewModel: CourseViewModel
     private lateinit var weekPagerAdapter: WeekPagerAdapter
 
+    private var returnPreDraw: android.view.ViewTreeObserver.OnPreDrawListener? = null
+    private var returnTable: CourseTableView? = null
+    private var returnDayHeader: View? = null
     private var currentWeek = 1
     private var currentSemester: Semester? = null
     private var currentCourses: List<Course> = emptyList()
@@ -71,6 +74,7 @@ class MainActivity : AppCompatActivity() {
 
     private val pageChangeCallback = object : ViewPager2.OnPageChangeCallback() {
         override fun onPageSelected(position: Int) {
+            if (position != lastPagerPosition) cancelScheduleReturnEntrance()
             val previousPosition = lastPagerPosition
             lastPagerPosition = position
             val week = position + 1
@@ -91,6 +95,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         override fun onPageScrollStateChanged(state: Int) {
+            if (state == ViewPager2.SCROLL_STATE_DRAGGING) cancelScheduleReturnEntrance()
             if (state != ViewPager2.SCROLL_STATE_IDLE || pendingPagerMotionPosition < 0) return
             playSelectedPageMotion(pendingPagerMotionPosition, pendingPagerMotionForward)
             pendingPagerMotionPosition = -1
@@ -203,6 +208,57 @@ class MainActivity : AppCompatActivity() {
                 .setInterpolator(headerInterpolator)
                 .start()
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        val source = intent.getStringExtra(EXTRA_SCHEDULE_RETURN_SOURCE)
+        intent.removeExtra(EXTRA_SCHEDULE_RETURN_SOURCE)
+        if (!ScheduleReturnMotion.accepts(source)) return
+        cancelScheduleReturnEntrance()
+        // Bind resumed data and measure before the first visible frame.
+        val listener = android.view.ViewTreeObserver.OnPreDrawListener {
+            if (!semesterDataLoaded || !coursesDataLoaded) {
+                false
+            } else {
+                val holder = weekPagerAdapter.currentHolder(binding.weekPager)
+                if (holder == null && weekPagerAdapter.itemCount > 0) {
+                    false
+                } else {
+                    returnPreDraw?.let { binding.root.viewTreeObserver.removeOnPreDrawListener(it) }
+                    returnPreDraw = null
+                    holder?.let {
+                        returnTable = it.binding.courseTableView
+                        returnDayHeader = it.binding.weekDayHeader
+                        returnTable?.playReturnEntrance { alpha ->
+                            binding.dateHeader.alpha = alpha
+                            binding.weekInfo.alpha = alpha
+                            returnDayHeader?.alpha = alpha
+                        }
+                    }
+                    true
+                }
+            }
+        }
+        returnPreDraw = listener
+        binding.root.viewTreeObserver.addOnPreDrawListener(listener)
+        binding.root.invalidate()
+    }
+
+    private fun cancelScheduleReturnEntrance() {
+        returnPreDraw?.let { binding.root.viewTreeObserver.removeOnPreDrawListener(it) }
+        returnPreDraw = null
+        returnTable?.cancelReturnEntrance()
+        returnTable = null
+        returnDayHeader?.alpha = 1f
+        returnDayHeader = null
+        binding.dateHeader.alpha = 1f
+        binding.weekInfo.alpha = 1f
+    }
+
+    override fun onPause() {
+        cancelScheduleReturnEntrance()
+        super.onPause()
     }
 
     private fun openTab(intent: Intent) {

@@ -4,6 +4,9 @@ import android.app.DatePickerDialog
 import android.content.ActivityNotFoundException
 import android.content.ClipData
 import android.content.ClipboardManager
+import androidx.activity.addCallback
+import com.courseschedule.ui.returnToSchedule
+import com.courseschedule.ui.ScheduleReturnSource
 import android.content.Intent
 import android.content.res.Configuration
 import android.net.Uri
@@ -70,6 +73,7 @@ class SettingsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        onBackPressedDispatcher.addCallback(this) { returnToSchedule(ScheduleReturnSource.SETTINGS) }
         binding = ActivitySettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -237,8 +241,7 @@ class SettingsActivity : AppCompatActivity() {
             val itemView = binding.bottomNavigation.findViewById<View>(item.itemId)
             when (item.itemId) {
                 R.id.nav_home -> {
-                    finish()
-                    overridePendingTransition(0, 0)
+                    returnToSchedule(ScheduleReturnSource.SETTINGS)
                     true
                 }
                 R.id.nav_import -> {

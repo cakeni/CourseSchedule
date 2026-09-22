@@ -3,6 +3,9 @@ package com.courseschedule.ui.importdata
 import android.app.Activity
 import android.content.ClipboardManager
 import android.content.Context
+import androidx.activity.addCallback
+import com.courseschedule.ui.returnToSchedule
+import com.courseschedule.ui.ScheduleReturnSource
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -95,6 +98,7 @@ class ImportActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        onBackPressedDispatcher.addCallback(this) { returnToSchedule(ScheduleReturnSource.IMPORT) }
         binding = ActivityImportBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -132,14 +136,7 @@ class ImportActivity : AppCompatActivity() {
             val itemView = binding.bottomNavigation.findViewById<View>(item.itemId)
             when (item.itemId) {
                 R.id.nav_home -> {
-                    startActivity(
-                        Intent(this, MainActivity::class.java).addFlags(
-                            Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-                        )
-                    )
-                    overridePendingTransition(0, 0)
-                    finish()
-                    overridePendingTransition(0, 0)
+                    returnToSchedule(ScheduleReturnSource.IMPORT)
                     true
                 }
                 R.id.nav_import -> {

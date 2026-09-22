@@ -25,6 +25,7 @@ import androidx.core.graphics.ColorUtils
 import androidx.core.view.ViewCompat
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import androidx.customview.widget.ExploreByTouchHelper
+import com.courseschedule.ui.ScheduleReturnMotion
 import com.courseschedule.R
 import com.courseschedule.data.entity.Course
 import com.courseschedule.domain.ScheduleRules
@@ -53,6 +54,48 @@ class CourseTableView @JvmOverloads constructor(
         private const val PRESSED_SCALE_X = 0.97f
         private const val PRESSED_SCALE_Y = 0.985f
         private val PRESS_INTERPOLATOR = PathInterpolator(0.2f, 0f, 0f, 1f)
+    }
+
+    // Only explicit navigation starts this clock; data binding never resets it.
+    private var returnAnimator: ValueAnimator? = null
+    private var returnElapsed = 560f
+    private var returnDelays: Map<Long, Long> = emptyMap()
+    private val returnInterpolator = PathInterpolator(0.22f, 0.65f, 0.3f, 1f)
+
+    fun playReturnEntrance(onFrame: (Float) -> Unit) {
+        cancelReturnEntrance()
+        if (!ValueAnimator.areAnimatorsEnabled()) {
+            onFrame(1f)
+            return
+        }
+        val viewport = Rect()
+        if (!getLocalVisibleRect(viewport)) return
+        returnDelays = visibleCourses().filter {
+            RectF.intersects(courseBounds(it), RectF(viewport))
+        }.sortedWith(compareBy<Course> { courseBounds(it).top }.thenBy { courseBounds(it).left })
+            .mapIndexed { index, course -> course.id to ScheduleReturnMotion.delay(index) }.toMap()
+        val total = ScheduleReturnMotion.duration(returnDelays.size)
+        returnElapsed = 0f
+        onFrame(0f)
+        returnAnimator = ValueAnimator.ofFloat(0f, total.toFloat()).apply {
+            duration = total
+            interpolator = android.view.animation.LinearInterpolator()
+            addUpdateListener {
+                returnElapsed = it.animatedValue as Float
+                onFrame(ScheduleReturnMotion.fraction(returnElapsed, ScheduleReturnMotion.HEADER_MS))
+                invalidate()
+            }
+            start()
+        }
+        invalidate()
+    }
+
+    fun cancelReturnEntrance() {
+        returnAnimator?.cancel()
+        returnAnimator = null
+        returnDelays = emptyMap()
+        returnElapsed = 560f
+        invalidate()
     }
 
     private val density = resources.displayMetrics.density
@@ -377,7 +420,14 @@ class CourseTableView @JvmOverloads constructor(
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         canvas.drawRect(0f, 0f, timeColumnWidth, totalHeight, backgroundPaint)
-        drawTimeColumn(canvas)
+        if (returnElapsed < ScheduleReturnMotion.HEADER_MS) {
+            val timeLayer = canvas.saveLayerAlpha(0f, 0f, timeColumnWidth, height.toFloat(),
+                (255 * returnElapsed / ScheduleReturnMotion.HEADER_MS).roundToInt())
+            drawTimeColumn(canvas)
+            canvas.restoreToCount(timeLayer)
+        } else {
+            drawTimeColumn(canvas)
+        }
         drawCourses(canvas)
         drawQuickAddSelection(canvas)
     }
@@ -467,7 +517,14 @@ class CourseTableView @JvmOverloads constructor(
                 .roundToInt()
                 .coerceIn(0, 255)
             val alpha = if (isCurrentWeek) motionAlpha else (motionAlpha * 0.46f).roundToInt()
-            drawCourse(canvas, course, alpha, isCurrentWeek, pressProgress)
+            val delay = returnDelays[course.id]
+            val elapsed = if (delay == null) 420f else (returnElapsed - delay).coerceAtLeast(0f)
+            val progress = returnInterpolator.getInterpolation(ScheduleReturnMotion.fraction(elapsed, ScheduleReturnMotion.MOVE_MS))
+            val entranceAlpha = ScheduleReturnMotion.fraction(elapsed, ScheduleReturnMotion.FADE_MS)
+            canvas.translate(0f, dp(ScheduleReturnMotion.OFFSET_DP) * (1f - progress))
+            val entranceScale = ScheduleReturnMotion.INITIAL_SCALE + (1f - ScheduleReturnMotion.INITIAL_SCALE) * progress
+            canvas.scale(entranceScale, entranceScale, bounds.centerX(), bounds.centerY())
+            drawCourse(canvas, course, (alpha * entranceAlpha).roundToInt(), isCurrentWeek, pressProgress)
             canvas.restoreToCount(saveCount)
         }
     }
@@ -1021,6 +1078,7 @@ class CourseTableView @JvmOverloads constructor(
     }
 
     override fun onDetachedFromWindow() {
+        cancelReturnEntrance()
         clearQuickAddSelection()
         resetCoursePress()
         super.onDetachedFromWindow()
