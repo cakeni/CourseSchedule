@@ -257,7 +257,10 @@ class ImportActivity : AppCompatActivity() {
         setLoading(true)
         lifecycleScope.launch {
             try {
-                val parsed = withContext(Dispatchers.IO) { parser(currentSemester.totalWeeks) }
+                val parsed = withContext(Dispatchers.IO) { parser(currentSemester.totalWeeks) }.let { source ->
+                    val minutes = SchedulePreferences(this@ImportActivity).defaultReminderMinutes
+                    source.copy(courses = source.courses.map { source.withDefaultReminder(it, minutes) })
+                }
                 val existing = courseViewModel.getCurrentSemesterCourses()
                 val analysisWeeks = parsed.semester?.totalWeeks ?: currentSemester.totalWeeks
                 val analysis = ImportAnalyzer.analyze(
@@ -418,7 +421,8 @@ class ImportActivity : AppCompatActivity() {
                     courseViewModel.insertCoursesNow(ready)
                 }
                 val saved = ready.zip(ids).map { (course, id) -> course.copy(id = id) }
-                manager.rescheduleReminders(saved, targetSemester)
+                // 追加导入也可能恢复学期日期/节次配置，旧课程需一并重新排程。
+                manager.restoreReminders()
                 setLoading(false)
                 showImportComplete(
                     saved,
@@ -460,7 +464,7 @@ class ImportActivity : AppCompatActivity() {
                     semesterViewModel.updateSemesterNow(oldSemester)
                     SchedulePreferences(this@ImportActivity).applySnapshot(oldSettings)
                 }
-                manager.rescheduleReminders(existing, oldSemester)
+                manager.restoreReminders()
                 Toast.makeText(this@ImportActivity, R.string.import_undone, Toast.LENGTH_SHORT).show()
             }
         }.show()

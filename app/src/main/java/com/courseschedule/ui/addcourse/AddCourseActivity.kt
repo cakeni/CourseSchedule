@@ -179,11 +179,7 @@ class AddCourseActivity : AppCompatActivity() {
             ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, reminderOptions)
         )
         val preferences = SchedulePreferences(this)
-        val defaultMinutes = if (preferences.reminderEnabled) {
-            preferences.defaultReminderMinutes
-        } else {
-            -1
-        }
+        val defaultMinutes = preferences.defaultReminderMinutes
         val index = reminderValues.indexOf(defaultMinutes).takeIf { it >= 0 } ?: 0
         binding.spinnerReminder.setText(reminderOptions[index], false)
     }

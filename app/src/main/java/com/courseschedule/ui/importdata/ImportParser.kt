@@ -16,8 +16,12 @@ data class ParsedImport(
     val courses: List<Course>,
     val semester: SemesterSnapshot? = null,
     val settings: SettingsSnapshot? = null,
-    val sourceLabel: String = ""
-)
+    val sourceLabel: String = "",
+    val explicitReminderCourses: Set<Course> = emptySet()
+) {
+    fun withDefaultReminder(course: Course, minutes: Int): Course =
+        if (course in explicitReminderCourses) course else course.copy(reminderMinutes = minutes)
+}
 
 enum class AcademicImportErrorCode {
     NO_TIMETABLE,
@@ -48,7 +52,10 @@ class ImportParser(private val defaultTotalWeeks: Int) {
         if (root.isJsonArray) {
             val type = object : TypeToken<List<Course>>() {}.type
             val courses: List<Course> = gson.fromJson(root, type) ?: emptyList()
-            return ParsedImport(courses = courses, sourceLabel = "JSON")
+            val explicit = courses.zip(root.asJsonArray).filter { (_, json) ->
+                json.isJsonObject && json.asJsonObject.has("reminderMinutes")
+            }.map { it.first }.toSet()
+            return ParsedImport(courses = courses, sourceLabel = "JSON", explicitReminderCourses = explicit)
         }
         if (root.isJsonObject && root.asJsonObject.has("courses")) {
             val backup = runCatching { gson.fromJson(root, ScheduleBackup::class.java) }
@@ -60,7 +67,8 @@ class ImportParser(private val defaultTotalWeeks: Int) {
                 courses = backup.courses,
                 semester = backup.semester,
                 settings = backup.settings,
-                sourceLabel = "完整备份"
+                sourceLabel = "完整备份",
+                explicitReminderCourses = backup.courses.toSet()
             )
         }
         throw ImportFormatException("JSON 中没有课程列表")

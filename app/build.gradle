@@ -12,15 +12,17 @@ android {
         applicationId "com.courseschedule"
         minSdk 26
         targetSdk 34
-        versionCode 12
-        versionName "1.0.11"
+        versionCode 13
+        versionName "1.0.12"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
         release {
+            debuggable false
             minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -35,8 +37,17 @@ android {
     }
 
     buildFeatures {
+        buildConfig true
         viewBinding true
         dataBinding true
+    }
+
+    // AGP 8.1 不会为未压缩的 .so 生成16 KB ZIP对齐；压缩后由安装器提取。
+    // 64位原生库本身的ELF LOAD段已满足16 KB对齐。
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging true
+        }
     }
 }
 

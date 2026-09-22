@@ -344,4 +344,26 @@
     <string name="github_link">GitHub</string>
     <string name="about_course_schedule">关于晴课表</string>
     <string name="about_message">晴课表 v%1$s\n\n专注于日常排课与查看，支持周视图、课程提醒、Excel 与文本文件导入，以及 JSON 数据导出。</string>
+    <string name="reminder_status_loading">正在检查提醒状态…</string>
+    <string name="reminder_status_off">课程提醒已暂停；开启后按每门课程的设置恢复。</string>
+    <string name="reminder_status_notification_blocked">系统通知或课程通知渠道已关闭，点击设置。</string>
+    <string name="reminder_status_inexact">未允许精确提醒，休眠时可能延迟，点击授权。</string>
+    <string name="reminder_status_ready">通知与精确提醒均已允许。</string>
+    <string name="reminder_course_count">本学期 %1$d 条课程记录，%2$d 条已开启提醒。</string>
+    <string name="reminder_next_time">下次提醒：%1$s</string>
+    <string name="reminder_no_upcoming">当前没有待提醒的课次。</string>
+    <string name="reminder_default_hint">默认时间用于新建和普通导入课程；已有课程可在下方批量应用。</string>
+    <string name="reminder_test_action">发送测试提醒（10秒后）</string>
+    <string name="reminder_test_title">测试提醒</string>
+    <string name="reminder_test_content">提醒已送达。课程提醒会按课程设置发送。</string>
+    <string name="reminder_test_scheduled">已安排测试提醒，可锁屏等待；未授权精确提醒时可能延迟。</string>
+    <string name="reminder_apply_action">将默认提醒应用到本学期课程</string>
+    <string name="reminder_apply_confirm">将本学期全部课程改为提前 %1$d 分钟提醒，包括当前设为“不提醒”的课程。是否应用？</string>
+    <string name="reminder_choose_default">请先选择一个提前提醒时间。</string>
+    <string name="reminder_applied">已更新 %1$d 条课程的提醒设置。</string>
+    <string name="reminder_settings_title">提醒权限</string>
+    <string name="reminder_notification_settings">系统通知设置</string>
+    <string name="reminder_exact_settings">精确闹钟设置</string>
+    <string name="reminder_settings_unavailable">无法打开该设置，请在系统应用设置中检查权限。</string>
+    <string name="reminder_operation_failed">提醒更新失败，请重试。</string>
 </resources>

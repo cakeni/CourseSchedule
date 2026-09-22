@@ -10,6 +10,7 @@ import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.HapticFeedbackConstants
 import android.view.Menu
 import android.view.MenuItem
@@ -24,6 +25,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.doOnLayout
 import androidx.core.view.doOnPreDraw
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
 import com.courseschedule.R
 import com.courseschedule.data.entity.Course
@@ -36,6 +38,8 @@ import com.courseschedule.ui.settings.SettingsActivity
 import com.courseschedule.domain.SemesterPhase
 import com.courseschedule.domain.SemesterWeekStatus
 import com.courseschedule.utils.SchedulePreferences
+import com.courseschedule.utils.ReminderManager
+import kotlinx.coroutines.launch
 import com.courseschedule.view.CourseTableView
 import com.courseschedule.viewmodel.CourseViewModel
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -120,7 +124,11 @@ class MainActivity : AppCompatActivity() {
     // 通知权限请求 launcher
     private val notificationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
-    ) { /* 结果忽略：用户拒绝则提醒通知不显示，不影响其他功能 */ }
+    ) { granted ->
+        if (granted) {
+            restoreCourseReminders()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -736,6 +744,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        restoreCourseReminders()
         applyDisplaySettings()
         val returningToHome = hasResumedOnce &&
             binding.bottomNavigation.selectedItemId != R.id.nav_home
@@ -775,6 +784,18 @@ class MainActivity : AppCompatActivity() {
      * 请求通知权限（Android 13+ / API 33+）
      * 提醒功能依赖通知权限，未授予则提醒通知不会显示
      */
+    private fun restoreCourseReminders() {
+        lifecycleScope.launch {
+            try {
+                ReminderManager(applicationContext).restoreReminders()
+            } catch (error: kotlinx.coroutines.CancellationException) {
+                throw error
+            } catch (error: Exception) {
+                Log.e("MainActivity", "Unable to restore reminders", error)
+            }
+        }
+    }
+
     private fun requestNotificationPermissionIfNeeded() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             val granted = ContextCompat.checkSelfPermission(

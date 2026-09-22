@@ -10,6 +10,9 @@ import com.courseschedule.data.entity.Course
 @Dao
 interface CourseDao {
 
+    @Query("SELECT * FROM courses")
+    suspend fun getAllCoursesSync(): List<Course>
+
     // 插入课程
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCourse(course: Course): Long

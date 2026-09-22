@@ -1,6 +1,9 @@
 package com.courseschedule.ui.settings
 
 import android.app.DatePickerDialog
+import android.os.Build
+import android.provider.Settings
+import android.util.Log
 import android.content.ActivityNotFoundException
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -27,9 +30,15 @@ import androidx.core.view.doOnPreDraw
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.courseschedule.R
+import com.courseschedule.BuildConfig
 import com.courseschedule.data.backup.ScheduleBackup
 import com.courseschedule.data.backup.SemesterSnapshot
 import com.courseschedule.data.entity.Semester
+import com.courseschedule.data.AppDatabase
+import com.courseschedule.domain.ReminderTimeCalculator
+import com.courseschedule.utils.AlarmReceiver
+import androidx.room.withTransaction
+import kotlinx.coroutines.Job
 import com.courseschedule.databinding.ActivitySettingsBinding
 import com.courseschedule.domain.ScheduleRules
 import com.courseschedule.domain.SemesterPhase
@@ -61,6 +70,7 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var courseViewModel: CourseViewModel
     private lateinit var preferences: SchedulePreferences
     private var semesters: List<Semester> = emptyList()
+    private var reminderStatusJob: Job? = null
     private var suppressBottomNavigationMotion = false
     private val motionInterpolator = PathInterpolator(0.22f, 1f, 0.36f, 1f)
 
@@ -90,6 +100,7 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun initSettingsControls() {
+        binding.reminderDiagnostics.visibility = if (BuildConfig.DEBUG) View.VISIBLE else View.GONE
         val systemIsDark = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK ==
             Configuration.UI_MODE_NIGHT_YES
         binding.switchDarkMode.isChecked = preferences.darkModeOverride ?: systemIsDark
@@ -146,7 +157,7 @@ class SettingsActivity : AppCompatActivity() {
         binding.switchReminder.setOnCheckedChangeListener { _, checked ->
             preferences.reminderEnabled = checked
             updateReminderControlState(checked, animate = true)
-            updateReminderScheduling(checked)
+            refreshReminderStatus()
         }
         binding.spinnerSectionHeight.onItemSelectedListener = onItemSelected { position ->
             preferences.sectionHeightDp = sectionHeightValues[position]
@@ -154,6 +165,16 @@ class SettingsActivity : AppCompatActivity() {
         binding.spinnerDefaultReminder.onItemSelectedListener = onItemSelected { position ->
             preferences.defaultReminderMinutes = reminderValues[position]
         }
+        binding.tvReminderStatus.setOnClickListener { showReminderPermissions() }
+        binding.buttonReminderTest.setOnClickListener {
+            if (!AlarmReceiver.notificationsAvailable(this)) {
+                showReminderPermissions()
+            } else {
+                ReminderManager(this).scheduleTestReminder()
+                Toast.makeText(this, R.string.reminder_test_scheduled, Toast.LENGTH_LONG).show()
+            }
+        }
+        binding.buttonApplyReminders.setOnClickListener { applyDefaultReminders() }
     }
 
     private fun simpleSpinnerAdapter(values: List<String>): ArrayAdapter<String> =
@@ -193,14 +214,89 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateReminderScheduling(enabled: Boolean) {
-        lifecycleScope.launch {
-            val semester = courseViewModel.currentSemester.value ?: return@launch
-            val courses = courseViewModel.getCurrentSemesterCourses()
-            val manager = ReminderManager(this@SettingsActivity)
-            manager.cancelAllReminders(courses)
-            if (enabled) manager.rescheduleReminders(courses, semester)
+    private fun refreshReminderStatus() {
+        reminderStatusJob?.cancel()
+        reminderStatusJob = lifecycleScope.launch {
+            try {
+                val manager = ReminderManager(applicationContext)
+                manager.restoreReminders()
+                if (!BuildConfig.DEBUG) return@launch
+                val database = AppDatabase.getDatabase(applicationContext)
+                val semester = database.semesterDao().getCurrentSemesterSync()
+                val courses = semester?.let { database.courseDao().getCoursesBySemesterSync(it.id) }.orEmpty()
+                val next = if (preferences.reminderEnabled && semester != null) courses.mapNotNull {
+                    ReminderTimeCalculator.nextOccurrence(it, semester, preferences.sectionTimes,
+                        lastDeliveredClassStart = manager.lastDelivered(it.id))?.reminderTime
+                }.minOrNull() else null
+                val status = when {
+                    !preferences.reminderEnabled -> R.string.reminder_status_off
+                    !AlarmReceiver.notificationsAvailable(this@SettingsActivity) -> R.string.reminder_status_notification_blocked
+                    !manager.canScheduleExactAlarms() -> R.string.reminder_status_inexact
+                    else -> R.string.reminder_status_ready
+                }
+                binding.tvReminderStatus.text = listOf(
+                    getString(status),
+                    getString(R.string.reminder_course_count, courses.size, courses.count { it.reminderMinutes > 0 }),
+                    next?.let { getString(R.string.reminder_next_time,
+                        SimpleDateFormat("MM-dd E HH:mm", Locale.CHINA).format(Date(it))) }
+                        ?: getString(R.string.reminder_no_upcoming),
+                    getString(R.string.reminder_default_hint)
+                ).joinToString("\n")
+            } catch (error: kotlinx.coroutines.CancellationException) {
+                throw error
+            } catch (error: Exception) {
+                Log.e("SettingsActivity", "Unable to update reminders", error)
+                binding.tvReminderStatus.setText(R.string.reminder_operation_failed)
+            }
         }
+    }
+
+    private fun showReminderPermissions() {
+        val labels = mutableListOf(getString(R.string.reminder_notification_settings))
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) labels.add(getString(R.string.reminder_exact_settings))
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.reminder_settings_title)
+            .setItems(labels.toTypedArray()) { _, index ->
+                val intent = if (index == 1 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM, Uri.parse("package:$packageName"))
+                } else {
+                    Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                        .putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+                }
+                try { startActivity(intent) } catch (error: ActivityNotFoundException) {
+                    Toast.makeText(this, R.string.reminder_settings_unavailable, Toast.LENGTH_LONG).show()
+                }
+            }
+            .setNegativeButton(R.string.cancel, null).show()
+    }
+
+    private fun applyDefaultReminders() {
+        val minutes = preferences.defaultReminderMinutes
+        if (minutes <= 0) {
+            Toast.makeText(this, R.string.reminder_choose_default, Toast.LENGTH_SHORT).show()
+            return
+        }
+        MaterialAlertDialogBuilder(this).setTitle(R.string.reminder_apply_action)
+            .setMessage(getString(R.string.reminder_apply_confirm, minutes))
+            .setNegativeButton(R.string.cancel, null)
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                lifecycleScope.launch {
+                    try {
+                        val database = AppDatabase.getDatabase(applicationContext)
+                        val count = database.withTransaction {
+                            val semester = database.semesterDao().getCurrentSemesterSync() ?: return@withTransaction 0
+                            val courses = database.courseDao().getCoursesBySemesterSync(semester.id)
+                            courses.forEach { database.courseDao().updateCourse(it.copy(reminderMinutes = minutes)) }
+                            courses.size
+                        }
+                        refreshReminderStatus()
+                        Toast.makeText(this@SettingsActivity, getString(R.string.reminder_applied, count), Toast.LENGTH_LONG).show()
+                    } catch (error: Exception) {
+                        Log.e("SettingsActivity", "Unable to apply reminder defaults", error)
+                        Toast.makeText(this@SettingsActivity, R.string.reminder_operation_failed, Toast.LENGTH_LONG).show()
+                    }
+                }
+            }.show()
     }
 
     private fun initActions() {
@@ -532,7 +628,7 @@ class SettingsActivity : AppCompatActivity() {
                 }
                 preferences.setSectionTimes(startTimes, endTimes)
                 updateSectionTimesSummary()
-                updateReminderScheduling(preferences.reminderEnabled)
+                refreshReminderStatus()
                 dialog.dismiss()
             }
         }
@@ -624,6 +720,7 @@ class SettingsActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        refreshReminderStatus()
         if (binding.bottomNavigation.selectedItemId != R.id.nav_settings) {
             suppressBottomNavigationMotion = true
             binding.bottomNavigation.selectItemWithoutAnimation(R.id.nav_settings)
