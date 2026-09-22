@@ -140,6 +140,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/weekSelector"
         app:trackColor="@color/progress_track"
+        app:trackCornerRadius="1dp"
         app:trackThickness="2dp" />
 
     <androidx.viewpager2.widget.ViewPager2
@@ -155,6 +156,31 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/weekProgress" />
+
+    <View
+        android:id="@+id/weekProgressThumb"
+        android:layout_width="12dp"
+        android:layout_height="12dp"
+        android:alpha="0"
+        android:background="@drawable/bg_week_progress_thumb"
+        android:elevation="2dp"
+        android:scaleX="0.65"
+        android:scaleY="0.65"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@id/weekProgress"
+        app:layout_constraintStart_toStartOf="@id/weekProgress"
+        app:layout_constraintTop_toTopOf="@id/weekProgress" />
+
+    <View
+        android:id="@+id/weekProgressTouchTarget"
+        android:layout_width="0dp"
+        android:layout_height="32dp"
+        android:background="@android:color/transparent"
+        android:importantForAccessibility="no"
+        app:layout_constraintBottom_toBottomOf="@id/weekProgress"
+        app:layout_constraintEnd_toEndOf="@id/weekProgress"
+        app:layout_constraintStart_toStartOf="@id/weekProgress"
+        app:layout_constraintTop_toTopOf="@id/weekProgress" />
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigation"

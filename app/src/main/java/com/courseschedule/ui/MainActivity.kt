@@ -1,15 +1,19 @@
 package com.courseschedule.ui
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.RectF
+import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.view.HapticFeedbackConstants
 import android.view.Menu
 import android.view.MenuItem
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.PathInterpolator
@@ -17,6 +21,7 @@ import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.view.doOnLayout
 import androidx.core.view.doOnPreDraw
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.widget.ViewPager2
@@ -41,6 +46,12 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import kotlin.math.abs
+import kotlin.math.roundToInt
+
+internal fun weekAtProgressPosition(x: Float, width: Int, totalWeeks: Int): Int {
+    if (width <= 0 || totalWeeks <= 1) return 1
+    return (x / width * totalWeeks).roundToInt().coerceIn(1, totalWeeks)
+}
 
 /**
  * 主界面 - 课程表显示
@@ -68,6 +79,8 @@ class MainActivity : AppCompatActivity() {
     private var coursesDataLoaded = false
     private var suppressBottomNavigationMotion = false
     private var hasResumedOnce = false
+    private var weekProgressScrubbing = false
+    private var weekProgressScrubbedWeek = 1
     private var dateHeaderWeek: Int? = null
     private var dateHeaderSemesterId: Long? = null
     private val headerInterpolator = PathInterpolator(0.2f, 0.8f, 0.2f, 1f)
@@ -83,7 +96,9 @@ class MainActivity : AppCompatActivity() {
                 viewModel.setCurrentWeek(week)
             }
             updateWeekDisplay()
-            if (pagerMotionReady && previousPosition >= 0 && previousPosition != position) {
+            if (pagerMotionReady && !weekProgressScrubbing &&
+                previousPosition >= 0 && previousPosition != position
+            ) {
                 pendingPagerMotionPosition = position
                 pendingPagerMotionForward = position > previousPosition
                 animateWeekHeader(forward = pendingPagerMotionForward)
@@ -164,6 +179,8 @@ class MainActivity : AppCompatActivity() {
             selectWeek(currentWeek + 1, smoothScroll = true)
         }
 
+        installWeekProgressScrubbing()
+
         binding.weekInfo.setOnClickListener { showWeekPicker() }
         binding.weekInfo.installPressScale(0.97f)
         binding.btnPreviousWeek.installPressScale(0.97f)
@@ -191,6 +208,87 @@ class MainActivity : AppCompatActivity() {
         }
         binding.bottomNavigation.setOnItemReselectedListener { item ->
             binding.bottomNavigation.findViewById<View>(item.itemId)?.playNavigationMotion()
+        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private fun installWeekProgressScrubbing() {
+        binding.weekProgressTouchTarget.setOnTouchListener { view, event ->
+            when (event.actionMasked) {
+                MotionEvent.ACTION_DOWN -> {
+                    if (currentSemester == null) return@setOnTouchListener false
+                    view.parent.requestDisallowInterceptTouchEvent(true)
+                    weekProgressScrubbedWeek = currentWeek
+                    setWeekProgressScrubbing(true)
+                    true
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    val totalWeeks = currentSemester?.totalWeeks ?: return@setOnTouchListener false
+                    val targetWeek = weekAtProgressPosition(event.x, view.width, totalWeeks)
+                    if (targetWeek != weekProgressScrubbedWeek) {
+                        weekProgressScrubbedWeek = targetWeek
+                        view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+                        selectWeek(targetWeek, smoothScroll = false)
+                    }
+                    true
+                }
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    view.parent.requestDisallowInterceptTouchEvent(false)
+                    setWeekProgressScrubbing(false)
+                    true
+                }
+                else -> false
+            }
+        }
+    }
+
+    private fun setWeekProgressScrubbing(scrubbing: Boolean) {
+        if (weekProgressScrubbing == scrubbing) return
+        weekProgressScrubbing = scrubbing
+        if (scrubbing) {
+            pendingPagerMotionPosition = -1
+            positionWeekProgressThumb()
+        }
+
+        binding.weekProgress.animate().cancel()
+        binding.weekProgress.animate()
+            .scaleY(if (scrubbing) 2.5f else 1f)
+            .setDuration(if (scrubbing) 120L else 180L)
+            .setInterpolator(headerInterpolator)
+            .start()
+
+        binding.weekProgressThumb.animate().cancel()
+        if (scrubbing) {
+            binding.weekProgressThumb.visibility = View.VISIBLE
+            binding.weekProgressThumb.animate()
+                .alpha(1f)
+                .scaleX(1f)
+                .scaleY(1f)
+                .setDuration(120L)
+                .setInterpolator(headerInterpolator)
+                .start()
+        } else {
+            binding.weekProgressThumb.animate()
+                .alpha(0f)
+                .scaleX(0.65f)
+                .scaleY(0.65f)
+                .setDuration(160L)
+                .setInterpolator(headerInterpolator)
+                .withEndAction {
+                    if (!weekProgressScrubbing) {
+                        binding.weekProgressThumb.visibility = View.INVISIBLE
+                    }
+                }
+                .start()
+        }
+    }
+
+    private fun positionWeekProgressThumb() {
+        val totalWeeks = currentSemester?.totalWeeks ?: return
+        binding.weekProgress.doOnLayout { progress ->
+            binding.weekProgressThumb.translationX =
+                progress.width * currentWeek / totalWeeks.toFloat() -
+                binding.weekProgressThumb.width / 2f
         }
     }
 
@@ -530,7 +628,8 @@ class MainActivity : AppCompatActivity() {
         binding.dateHeader.setDate(
             date = dateTitle,
             summary = getString(R.string.toolbar_week_summary, currentWeek, weekday),
-            animate = pagerMotionReady && dateHeaderSemesterId == semester.id &&
+            animate = pagerMotionReady && !weekProgressScrubbing &&
+                dateHeaderSemesterId == semester.id &&
                 previousHeaderWeek != null && previousHeaderWeek != currentWeek,
             forward = currentWeek >= (previousHeaderWeek ?: currentWeek)
         )
@@ -555,12 +654,14 @@ class MainActivity : AppCompatActivity() {
         binding.tvWeekContext.text = buildWeekContext(status, visibleCourses.size)
         binding.weekProgress.max = semester.totalWeeks
         binding.weekProgress.progress = currentWeek
-        binding.weekProgress.setIndicatorColor(
-            ContextCompat.getColor(
-                this,
-                if (isOutsideSemester) R.color.secondary else R.color.primary
-            )
+        val indicatorColor = ContextCompat.getColor(
+            this,
+            if (isOutsideSemester) R.color.secondary else R.color.primary
         )
+        binding.weekProgress.setIndicatorColor(indicatorColor)
+        (binding.weekProgressThumb.background.mutate() as? GradientDrawable)
+            ?.setColor(indicatorColor)
+        positionWeekProgressThumb()
         binding.btnPreviousWeek.isEnabled = currentWeek > 1
         binding.btnNextWeek.isEnabled = currentWeek < semester.totalWeeks
         binding.btnPreviousWeek.alpha = if (binding.btnPreviousWeek.isEnabled) 1f else 0.35f
