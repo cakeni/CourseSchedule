@@ -5,16 +5,18 @@
 [![License](https://img.shields.io/badge/License-MIT-D29436)](LICENSE)
 [![Android CI](https://github.com/cakeni/CourseSchedule/actions/workflows/android-ci.yml/badge.svg)](https://github.com/cakeni/CourseSchedule/actions/workflows/android-ci.yml)
 
-一款专注于日常查看、导入和管理课程的 Android 应用。课程数据保存在本机，不依赖账号或自建服务器。
+晴课表是一款本地优先的 Android 课程表应用，方便日常看课、排课和导入。课程数据保存在本机，无需注册账号或使用自建服务器。
 
 <p align="center">
-  <img src="docs/screenshots/schedule-week.png" width="360" alt="晴课表周课表界面">
+  <img src="docs/screenshots/2026-09-refresh/schedule-light.png" width="300" alt="晴课表浅色周课表，显示示例课程">
+  <img src="docs/screenshots/2026-09-refresh/schedule-dark.png" width="300" alt="晴课表深色周课表，显示示例课程">
 </p>
+<p align="center"><sub>2026 年 9 月 · v1.0.12 模拟器截图；课程信息为虚构示例</sub></p>
 
 ## 功能
 
-- 左右跟手切换周次，每周保留独立的纵向滚动位置。
-- 周视图展示课程名称、教师和完整地点，支持隐藏周末与调整课程块高度。
+- 左右跟手切换周次，或拖动周次进度条快速跳周；每周保留独立的纵向滚动位置。
+- 周视图展示课程名称、教师和完整地点，支持隐藏周末、调整课程块高度和深色模式。
 - 长按课表空白处并拖动可按当前周、对应星期和节次快速添加课程；也支持编辑、删除、单双周、课程颜色、备注和冲突检测。
 - 导入 `.xlsx`、JSON、CSV、HTML 和纯文本，导入前检查无效项、重复项与时间冲突。
 - 可在应用内登录教务网页，按需切换电脑模式或横屏模式；本地解析失败时，可选择使用自己的 DeepSeek 或 OpenAI API Key 识别当前课表页。
