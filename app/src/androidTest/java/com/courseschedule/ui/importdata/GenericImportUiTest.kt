@@ -117,11 +117,27 @@ class GenericImportUiTest {
         val rejected = raw.mapNotNull { element ->
             val item = element.asJsonObject
             if (item.get("support")?.asString == "adapter_required") return@mapNotNull null
-            val profile = GenericAcademicImport.profile(item.get("profile")?.asString) ?: return@mapNotNull null
+            val sourceType = item.get("sourceType")?.asString.orEmpty()
+            val profile = item.get("profile")?.takeUnless { it.isJsonNull }?.asString
+                ?.let(GenericAcademicImport::profile)
+                ?: WakeUpImportCatalog.profileFor(sourceType)
+                ?: return@mapNotNull null
             runCatching {
-                GenericAcademicImport.createCatalog(profile, item.get("url").asString,
-                    item.get("cleartext")?.asBoolean == true,
-                    item.getAsJsonArray("authenticationUrls")?.map { it.asString }.orEmpty())
+                GenericAcademicImport.createCatalog(
+                    profile = profile,
+                    address = item.get("url").asString,
+                    allowCleartext = item.get("cleartext")?.asBoolean == true,
+                    authenticationUrls = item.getAsJsonArray("authenticationUrls")
+                        ?.map { it.asString }.orEmpty(),
+                    timetableUrls = item.getAsJsonArray("timetableUrls")
+                        ?.map { it.asString }.orEmpty(),
+                    adapterId = item.get("adapterId")?.asString.orEmpty(),
+                    loginUrls = item.getAsJsonArray("loginUrls")
+                        ?.map { it.asString }.orEmpty(),
+                    allowIpAddress = item.get("allowIpAddress")?.asBoolean == true,
+                    allowVpnOrigin = item.get("allowVpnOrigin")?.asBoolean == true,
+                    retainQuery = item.get("retainQuery")?.asBoolean == true
+                )
             }.exceptionOrNull()?.let { "${item.get("name").asString}: ${it.message}" }
         }
         assertTrue("bundled rows rejected at runtime: ${rejected.joinToString(" | ")}", rejected.isEmpty())
@@ -132,13 +148,13 @@ class GenericImportUiTest {
         assertTrue(entries.any { it.name == "浙江大学" })
         assertTrue(entries.any { it.name == "北京大学" })
         // The built-in NUAA graduate route replaces its adapter-required catalog row.
-        assertEquals(2_682, entries.count { it.canImport })
-        assertEquals(884, entries.count { !it.canImport })
-        assertEquals(764, entries.count { it.needsUserUrl })
+        assertEquals(2_861, entries.count { it.canImport })
+        assertEquals(705, entries.count { !it.canImport })
+        assertEquals(585, entries.count { it.needsUserUrl })
         assertEquals(120, entries.count { !it.canImport && !it.needsUserUrl })
         assertEquals(1_088, entries.count { it.isCloudOnly })
-        // The built-in SDUFE route upgrades the catalog's HTTP entry to WebVPN HTTPS.
-        assertEquals(934, entries.count { it.allowCleartext })
+        // The built-in SDUFE route now uses the catalog's direct HTTP entry.
+        assertEquals(1_087, entries.count { it.allowCleartext })
         entries.filter { it.canImport }.forEach { entry ->
             val school = entry.toAcademicSchool()
             assertNotNull(entry.name, school)

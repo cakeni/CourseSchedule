@@ -68,6 +68,9 @@ class AcademicWebImportActivity : AppCompatActivity() {
         private const val EXTRA_GENERIC_ADAPTER = "generic_adapter"
         private const val EXTRA_GENERIC_NAME = "generic_name"
         private const val EXTRA_GENERIC_CLEARTEXT = "generic_cleartext"
+        private const val EXTRA_GENERIC_IP_ADDRESS = "generic_ip_address"
+        private const val EXTRA_GENERIC_VPN_ORIGIN = "generic_vpn_origin"
+        private const val EXTRA_GENERIC_RETAIN_QUERY = "generic_retain_query"
         private const val EXTRA_GENERIC_AUTH_URLS = "generic_auth_urls"
         private const val EXTRA_GENERIC_LOGIN_URLS = "generic_login_urls"
         private const val EXTRA_GENERIC_TIMETABLE_URLS = "generic_timetable_urls"
@@ -120,6 +123,9 @@ class AcademicWebImportActivity : AppCompatActivity() {
             return runCatching {
                 val profile = intent.getStringExtra(EXTRA_GENERIC_PROFILE)
                 val allowCleartext = intent.getBooleanExtra(EXTRA_GENERIC_CLEARTEXT, false)
+                val allowIpAddress = intent.getBooleanExtra(EXTRA_GENERIC_IP_ADDRESS, false)
+                val allowVpnOrigin = intent.getBooleanExtra(EXTRA_GENERIC_VPN_ORIGIN, false)
+                val retainQuery = intent.getBooleanExtra(EXTRA_GENERIC_RETAIN_QUERY, false)
                 val created = if (profile != null) {
                     val definition = GenericAcademicImport.profile(profile)
                         ?: throw ImportFormatException("不支持的教务系统类型")
@@ -127,11 +133,14 @@ class AcademicWebImportActivity : AppCompatActivity() {
                         definition,
                         intent.getStringExtra(EXTRA_GENERIC_URL).orEmpty(),
                         allowCleartext,
-                        intent.getStringArrayListExtra(EXTRA_GENERIC_AUTH_URLS).orEmpty(),
-                        intent.getStringArrayListExtra(EXTRA_GENERIC_TIMETABLE_URLS).orEmpty(),
-                        intent.getStringExtra(EXTRA_GENERIC_ADAPTER)
+                        authenticationUrls = intent.getStringArrayListExtra(EXTRA_GENERIC_AUTH_URLS).orEmpty(),
+                        timetableUrls = intent.getStringArrayListExtra(EXTRA_GENERIC_TIMETABLE_URLS).orEmpty(),
+                        adapterId = intent.getStringExtra(EXTRA_GENERIC_ADAPTER)
                             ?: AcademicAdapterRegistry.defaultAdapterId(profile),
-                        intent.getStringArrayListExtra(EXTRA_GENERIC_LOGIN_URLS).orEmpty()
+                        loginUrls = intent.getStringArrayListExtra(EXTRA_GENERIC_LOGIN_URLS).orEmpty(),
+                        allowIpAddress = allowIpAddress,
+                        allowVpnOrigin = allowVpnOrigin,
+                        retainQuery = retainQuery
                     )
                 }
                 else GenericAcademicImport.create(
@@ -150,6 +159,9 @@ class AcademicWebImportActivity : AppCompatActivity() {
                         putExtra(EXTRA_GENERIC_URL, school.loginUrl)
                         putExtra(EXTRA_GENERIC_NAME, school.name)
                         putExtra(EXTRA_GENERIC_CLEARTEXT, school.allowCleartext)
+                        putExtra(EXTRA_GENERIC_IP_ADDRESS, school.allowIpAddress)
+                        putExtra(EXTRA_GENERIC_VPN_ORIGIN, school.allowVpnOrigin)
+                        putExtra(EXTRA_GENERIC_RETAIN_QUERY, school.retainQuery)
                         putStringArrayListExtra(
                             EXTRA_GENERIC_AUTH_URLS,
                             ArrayList(school.authenticationPrefixes)
@@ -230,7 +242,8 @@ class AcademicWebImportActivity : AppCompatActivity() {
         val genericHost = academicWebUri(
             school.loginUrl,
             school.allowCleartext,
-            school.allowNonDefaultPort
+            school.allowNonDefaultPort,
+            school.allowIpAddress
         )?.host
         binding.toolbar.title = when (school.id) {
             AcademicSchools.NUAA.id -> getString(R.string.academic_nuaa_undergraduate_title)

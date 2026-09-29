@@ -45,12 +45,15 @@ data class AcademicSchool(
     val adapterId: String = "",
     val allowCleartext: Boolean = false,
     val cleartextHosts: Set<String> = emptySet(),
-    val allowNonDefaultPort: Boolean = false
+    val allowNonDefaultPort: Boolean = false,
+    val allowIpAddress: Boolean = false,
+    val allowVpnOrigin: Boolean = false,
+    val retainQuery: Boolean = false
 ) {
     val isGeneric: Boolean get() = id == GenericAcademicImport.SCHOOL_ID
 
     fun allowsNavigation(url: String?): Boolean {
-        val uri = academicWebUri(url, allowCleartext, allowNonDefaultPort) ?: return false
+        val uri = academicWebUri(url, allowCleartext, allowNonDefaultPort, allowIpAddress) ?: return false
         val host = uri.host.lowercase(Locale.ROOT)
         if (uri.scheme.equals("http", ignoreCase = true) && host !in cleartextHosts) return false
         if (host !in trustedHosts) {
@@ -61,7 +64,7 @@ data class AcademicSchool(
                 trustedHosts.any { sameEduCnInstitution(it, host) }
         }
         if (isGeneric) {
-            val scope = academicUrlScope(url, allowCleartext, allowNonDefaultPort) ?: return false
+            val scope = academicUrlScope(url, allowCleartext, allowNonDefaultPort, allowIpAddress) ?: return false
             return scope in loginPrefixes || scope in timetablePrefixes || scope in authenticationPrefixes
         }
         if (host != webVpnHost) return true
@@ -75,9 +78,9 @@ data class AcademicSchool(
     }
 
     fun allowsTimetable(url: String?): Boolean {
-        val uri = academicWebUri(url, allowCleartext, allowNonDefaultPort) ?: return false
+        val uri = academicWebUri(url, allowCleartext, allowNonDefaultPort, allowIpAddress) ?: return false
         if (isGeneric) return allowsNavigation(url) &&
-            academicUrlScope(url, allowCleartext, allowNonDefaultPort) in timetablePrefixes
+            academicUrlScope(url, allowCleartext, allowNonDefaultPort, allowIpAddress) in timetablePrefixes
         return allowsNavigation(url) && timetablePrefixes.any { pageUrl(uri).startsWith(it) }
     }
 
@@ -89,14 +92,16 @@ data class AcademicSchool(
 internal fun academicWebUri(
     url: String?,
     allowCleartext: Boolean = false,
-    allowNonDefaultPort: Boolean = false
+    allowNonDefaultPort: Boolean = false,
+    allowIpAddress: Boolean = false
 ): URI? {
     if (url.isNullOrBlank() || url.length > 8192 || '\\' in url) return null
     val uri = runCatching { URI(url) }.getOrNull() ?: return null
     val scheme = uri.scheme?.lowercase(Locale.ROOT)
     if (scheme != "https" && !(allowCleartext && scheme == "http")) return null
     val host = uri.host?.lowercase(Locale.ROOT) ?: return null
-    if (uri.rawUserInfo != null || host.endsWith('.') || '.' !in host || isIpAddress(host)) return null
+    if (uri.rawUserInfo != null || host.endsWith('.') || '.' !in host ||
+        isIpAddress(host) && !allowIpAddress) return null
     val defaultPort = if (scheme == "https") 443 else 80
     if (uri.port != -1 && (!allowNonDefaultPort && uri.port != defaultPort || uri.port !in 1..65535)) return null
     val path = uri.rawPath.orEmpty()
@@ -111,9 +116,10 @@ internal fun academicHttpsUri(url: String?): URI? = academicWebUri(url)
 internal fun academicUrlScope(
     url: String?,
     allowCleartext: Boolean = false,
-    allowNonDefaultPort: Boolean = false
+    allowNonDefaultPort: Boolean = false,
+    allowIpAddress: Boolean = false
 ): String? {
-    val uri = academicWebUri(url, allowCleartext, allowNonDefaultPort) ?: return null
+    val uri = academicWebUri(url, allowCleartext, allowNonDefaultPort, allowIpAddress) ?: return null
     val origin = "${uri.scheme.lowercase(Locale.ROOT)}://${academicAuthority(uri)}"
     val path = uri.rawPath.orEmpty()
     val proxy = Regex("^/(https?(?:-\\d+)?)/([^/]+)(?:/|$)", RegexOption.IGNORE_CASE).find(path)
@@ -166,12 +172,12 @@ object AcademicSchools {
         id = "swpu",
         name = "西南石油大学",
         system = AcademicSystem.WISEDU,
-        loginUrl = "https://deanservices.swpu.edu.cn/jwapp/sys/jwauthapp/login/index.html",
-        trustedHosts = setOf("swpu.edu.cn", "deanservices.swpu.edu.cn"),
+        loginUrl = "https://deancs.swpu.edu.cn/xsxk/profile/index.html",
+        trustedHosts = setOf("swpu.edu.cn", "deanservices.swpu.edu.cn", "deancs.swpu.edu.cn"),
         verified = true,
         adapterId = AcademicAdapterRegistry.WISEDU_AUTO,
-        loginPrefixes = listOf("https://deanservices.swpu.edu.cn/"),
-        timetablePrefixes = listOf("https://deanservices.swpu.edu.cn/jwapp/")
+        loginPrefixes = listOf("https://deancs.swpu.edu.cn/", "https://deanservices.swpu.edu.cn/"),
+        timetablePrefixes = listOf("https://deancs.swpu.edu.cn/xsxk/", "https://deanservices.swpu.edu.cn/jwapp/")
     )
 
     // Wengine's public URL encoding for jw.sdufe.edu.cn; this is not a session token.
@@ -182,14 +188,15 @@ object AcademicSchools {
         id = "sdufe",
         name = "山东财经大学",
         system = AcademicSystem.QIANGZHI_HTML,
-        loginUrl = "https://webvpn.sdufe.edu.cn/login",
+        loginUrl = "http://jw.sdufe.edu.cn",
         trustedHosts = setOf("webvpn.sdufe.edu.cn", "jw.sdufe.edu.cn", "ids.sdufe.edu.cn"),
         webVpnHost = "webvpn.sdufe.edu.cn",
         verified = false,
         adapterId = AcademicAdapterRegistry.QIANGZHI_STANDARD,
-        loginPrefixes = listOf("https://webvpn.sdufe.edu.cn/"),
-        timetableUrl = "https://webvpn.sdufe.edu.cn/http/$SDUFE_JW_ROUTE/",
+        loginPrefixes = listOf("http://jw.sdufe.edu.cn/", "https://webvpn.sdufe.edu.cn/"),
+        timetableUrl = "http://jw.sdufe.edu.cn/",
         timetablePrefixes = listOf(
+            "http://jw.sdufe.edu.cn/",
             "https://jw.sdufe.edu.cn/",
             "https://webvpn.sdufe.edu.cn/http/$SDUFE_JW_ROUTE/",
             "https://webvpn.sdufe.edu.cn/https/$SDUFE_JW_ROUTE/"
@@ -199,7 +206,9 @@ object AcademicSchools {
         authenticationPrefixes = listOf(
             "https://webvpn.sdufe.edu.cn/http/$SDUFE_AUTH_ROUTE/",
             "https://webvpn.sdufe.edu.cn/https/$SDUFE_AUTH_ROUTE/"
-        )
+        ),
+        allowCleartext = true,
+        cleartextHosts = setOf("jw.sdufe.edu.cn")
     )
 
     val NUAA = AcademicSchool(

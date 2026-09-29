@@ -78,6 +78,49 @@ class GenericAcademicImportTest {
         assertFalse(school.allowsNavigation("http://other.example.edu.cn/"))
     }
 
+    @Test fun verifiedDirectoryUrlOptInsStayExplicitAndOriginScoped() {
+        val profile = GenericAcademicImport.profile("qiangzhi")!!
+        assertThrows(ImportFormatException::class.java) {
+            GenericAcademicImport.createCatalog(profile, "http://203.0.113.10:8080/jsxsd/", true)
+        }
+        val ipSchool = GenericAcademicImport.createCatalog(
+            profile,
+            "http://203.0.113.10:8080/jsxsd/",
+            allowCleartext = true,
+            allowIpAddress = true
+        )
+        assertTrue(ipSchool.allowsNavigation("http://203.0.113.10:8080/jsxsd/"))
+        assertFalse(ipSchool.allowsNavigation("http://127.0.0.1:8080/"))
+        assertFalse(ipSchool.allowsNavigation("http://203.0.113.11:8080/jsxsd/"))
+
+        assertThrows(ImportFormatException::class.java) {
+            GenericAcademicImport.createCatalog(profile, "https://jw.webvpn.example.edu.cn/", false)
+        }
+        val vpnSchool = GenericAcademicImport.createCatalog(
+            profile,
+            "https://jw.webvpn.example.edu.cn/",
+            allowCleartext = false,
+            allowVpnOrigin = true
+        )
+        assertTrue(vpnSchool.allowsNavigation("https://jw.webvpn.example.edu.cn/"))
+
+        val querySchool = GenericAcademicImport.createCatalog(
+            profile,
+            "https://jw.example.edu.cn/cas/login?service=https%3A%2F%2Fjw.example.edu.cn%2Fhome",
+            allowCleartext = false,
+            retainQuery = true
+        )
+        assertEquals(
+            "https://jw.example.edu.cn/cas/login?service=https%3A%2F%2Fjw.example.edu.cn%2Fhome",
+            querySchool.loginUrl
+        )
+        assertEquals(
+            "https://jw.example.edu.cn/cas/login",
+            GenericAcademicImport.create(profile.system,
+                "https://jw.example.edu.cn/cas/login?service=https%3A%2F%2Fjw.example.edu.cn%2Fhome").loginUrl
+        )
+    }
+
     @Test fun reviewedCatalogRejectsUnsafeAuthenticationScopes() {
         val profile = GenericAcademicImport.profile("topology")!!
         listOf(
