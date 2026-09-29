@@ -7,6 +7,8 @@
 
 晴课表是一款本地优先的 Android 课程表应用，方便日常看课、排课和导入。课程数据保存在本机，无需注册账号或使用自建服务器。
 
+原生 HarmonyOS NEXT 工程见 [harmonyos/README.md](harmonyos/README.md)。
+
 <p align="center">
   <img src="docs/screenshots/2026-09-refresh/schedule-light.png" width="300" alt="晴课表浅色周课表，显示示例课程">
   <img src="docs/screenshots/2026-09-refresh/schedule-dark.png" width="300" alt="晴课表深色周课表，显示示例课程">
