@@ -6,6 +6,7 @@ import { i18n } from '@kit.LocalizationKit';
 import { AcademicImport } from './AcademicImport';
 import { DUCK_FRAMES } from './DuckFrames';
 import { DateHeader } from './DateHeader';
+import { NavigationItem } from './NavigationItem';
 import { SchoolEntry, AcademicSchool, AcademicDefinitions, builtinSchools, createSchool, schoolMatches, webAddress } from '../model/AcademicSchools';
 import { syncReminders, authorizeNotifications, testReminder, reminderError } from '../data/CourseReminders';
 import { BusinessError } from '@kit.BasicServicesKit';
@@ -51,12 +52,6 @@ struct Index {
   @State private entranceAnimating: boolean = false;
   @State private emptyEntrance: number = 1;
   @State private dateForward: boolean = true;
-  @State private navTarget: string = '';
-  @State private navScale: number = 1;
-  @State private navRotation: number = 0;
-  @State private navFlip: number = 0;
-  @State private navOffset: number = 0;
-  private navigationGeneration: number = 0;
   private entranceGeneration: number = 0;
   private readonly pressCurve = curves.cubicBezierCurve(0.22, 1, 0.36, 1);
   private readonly importCurve = curves.cubicBezierCurve(0.2, 0.85, 0.25, 1);
@@ -122,36 +117,14 @@ struct Index {
     const entering = !this.modal() && ['backup', 'settings', 'schedule'].includes(target);
     const generation = ++this.entranceGeneration;
     if (entering) { this.entranceAnimating = true; this.pageEntrance = 0; this.entrance = 0; this.emptyEntrance = 0; }
-    this.getUIContext().animateTo({ duration: 300, curve: this.pressCurve, expectedFrameRateRange: { min: 30, max: 120, expected: 60 } }, () => this.screen = target);
+    if (entering) this.screen = target;
+    else this.getUIContext().animateTo({ duration: 300, curve: this.pressCurve, expectedFrameRateRange: { min: 30, max: 120, expected: 60 } }, () => this.screen = target);
     if (entering) setTimeout(() => {
       if (generation !== this.entranceGeneration) return;
       this.pageEntrance = 1; this.emptyEntrance = 1;
       this.getUIContext().animateTo({ duration: 420, curve: this.pressCurve }, () => this.entrance = 1);
       setTimeout(() => { if (generation === this.entranceGeneration) this.entranceAnimating = false; }, 1100);
     }, 32);
-  }
-
-  private animateNavigation(target: string): void {
-    const generation = ++this.navigationGeneration;
-    this.navTarget = target; this.navScale = 1; this.navRotation = 0; this.navFlip = 0; this.navOffset = 0;
-    const finish = (): void => {
-      if (generation !== this.navigationGeneration) return;
-      this.getUIContext().animateTo({ duration: target === 'backup' ? 430 : 520, curve: overshoot(target === 'backup' ? 0.68 : target === 'schedule' ? 0.7 : 0.6),
-        expectedFrameRateRange: { min: 30, max: 120, expected: 60 } }, () => {
-        this.navScale = 1; this.navRotation = 0; this.navFlip = 0; this.navOffset = 0;
-      });
-    };
-    this.getUIContext().animateTo({ duration: target === 'schedule' ? 280 : target === 'backup' ? 220 : 400,
-      curve: this.pressCurve, expectedFrameRateRange: { min: 30, max: 120, expected: 60 }, onFinish: () => {
-        if (generation !== this.navigationGeneration) return;
-        if (target === 'backup') this.getUIContext().animateTo({ duration: 300, curve: this.pressCurve, onFinish: finish }, () => { this.navOffset = -8; this.navScale = 1.07; });
-        else finish();
-      }
-    }, () => {
-      if (target === 'schedule') { this.navFlip = -38; this.navScale = 0.91; }
-      else if (target === 'backup') { this.navOffset = 4; this.navScale = 0.9; }
-      else { this.navRotation = 88; this.navScale = 0.93; }
-    });
   }
 
   private closeDetails(): void {
@@ -934,23 +907,9 @@ struct Index {
 
   @Builder
   private navItem(label: string, target: string, source: Resource) {
-    Column({ space: 6 }) {
-      Stack() {
-        Image(source).width(22).height(22).fillColor(this.baseScreen() === target ? this.palette().primary : this.palette().tertiary).objectFit(ImageFit.Contain)
-          .scale({ x: this.navTarget === target ? this.navScale : 1, y: this.navTarget === target ? this.navScale : 1 })
-          .rotate({ x: 0, y: target === 'schedule' ? 1 : 0, z: target === 'schedule' ? 0 : 1,
-            angle: this.navTarget === target ? target === 'schedule' ? this.navFlip : this.navRotation : 0 })
-          .translate({ y: this.navTarget === target ? this.navOffset : 0 });
-      }
-        .width(58).height(34).borderRadius(17)
-        .backgroundColor(this.baseScreen() === target ? this.palette().container : Color.Transparent);
-      Text(label).fontSize(12).fontColor(this.baseScreen() === target ? this.palette().primary : this.palette().tertiary)
-        .fontWeight(this.baseScreen() === target ? FontWeight.Bold : FontWeight.Normal);
-    }.layoutWeight(1).height(72).justifyContent(FlexAlign.Center)
-      .id('nav-' + target).accessibilityText(label)
-      .onClick(() => {
-        this.quickDay = 0; this.navigate(target); this.message = ''; this.animateNavigation(target);
-      });
+    NavigationItem({ label, target, source, selected: this.baseScreen() === target,
+      selectedColor: this.palette().primary, inactiveColor: this.palette().tertiary, indicatorColor: this.palette().container,
+      onSelected: () => { this.quickDay = 0; this.navigate(target); this.message = ''; } }).layoutWeight(1);
   }
 
   @Builder
