@@ -7,6 +7,10 @@
     "deviceTypes": ["phone"],
     "deliveryWithInstall": true,
     "installationFree": false,
+    "requestPermissions": [
+      { "name": "ohos.permission.PUBLISH_AGENT_REMINDER" },
+      { "name": "ohos.permission.INTERNET" }
+    ],
     "pages": "$profile:main_pages",
     "abilities": [
       {
