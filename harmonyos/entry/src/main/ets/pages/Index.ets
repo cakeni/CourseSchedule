@@ -1095,9 +1095,9 @@ struct Index {
     Scroll() {
       Column() {
         Column({ space: 6 }) {
-          Text('开源项目').fontSize(16).fontWeight(FontWeight.Bold).fontColor(this.palette().text).width('100%');
-          Text('晴课表的源代码公开，欢迎查看项目与反馈问题。').fontSize(12).fontColor(this.palette().secondary).width('100%');
-          Text('github.com/cakeni/CourseSchedule').fontSize(12).fontColor(this.palette().primary).width('100%').margin({ top: 2 });
+          Text('项目公告 · 晴课表已开源').fontSize(16).fontWeight(FontWeight.Bold).fontColor(this.palette().text).width('100%');
+          Text('采用 MIT 许可证。点击查看源码、反馈问题或参与贡献；长按可复制项目地址。').fontSize(12).fontColor(this.palette().secondary).width('100%');
+          Text('https://github.com/cakeni/CourseSchedule').fontSize(12).fontColor(this.palette().primary).width('100%').margin({ top: 2 });
         }.padding(16).width('100%').borderRadius(20).backgroundColor(this.palette().container).margin({ top: 12 })
           .onClick(() => this.openRepository()).gesture(LongPressGesture().onAction(() => this.copyRepository())).scale({ x: this.pressedAction === 'repository' ? 0.98 : 1, y: this.pressedAction === 'repository' ? 0.98 : 1 })
           .animation({ duration: this.pressedAction === 'repository' ? 115 : 245, curve: this.pressCurve })
