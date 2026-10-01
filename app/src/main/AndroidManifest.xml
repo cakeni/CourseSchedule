@@ -58,6 +58,13 @@
 
         <!-- 设置 -->
         <activity
+            android:name=".ui.assistant.CourseAssistantActivity"
+            android:exported="false"
+            android:label="@string/assistant_title"
+            android:windowSoftInputMode="adjustResize"
+            android:theme="@style/Theme.CourseSchedule" />
+
+        <activity
             android:name=".ui.settings.SettingsActivity"
             android:label="@string/settings"
             android:theme="@style/Theme.CourseSchedule" />

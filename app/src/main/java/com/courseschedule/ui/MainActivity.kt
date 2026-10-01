@@ -31,6 +31,7 @@ import com.courseschedule.R
 import com.courseschedule.data.entity.Course
 import com.courseschedule.data.entity.Semester
 import com.courseschedule.databinding.ActivityMainBinding
+import com.courseschedule.ui.assistant.CourseAssistantActivity
 import com.courseschedule.domain.ScheduleRules
 import com.courseschedule.ui.addcourse.AddCourseActivity
 import com.courseschedule.ui.importdata.ImportActivity
@@ -725,6 +726,11 @@ class MainActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
+            R.id.action_course_assistant -> {
+                openTab(Intent(this, CourseAssistantActivity::class.java)
+                    .putExtra(CourseAssistantActivity.EXTRA_DISPLAYED_WEEK, currentWeek))
+                true
+            }
             R.id.action_add_course -> {
                 openNewCourse()
                 true

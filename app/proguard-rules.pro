@@ -5,6 +5,14 @@
 -keep class com.google.gson.reflect.TypeToken { *; }
 -keep class * extends com.google.gson.reflect.TypeToken { *; }
 -keep class com.courseschedule.data.entity.Course { *; }
+-keep class com.courseschedule.data.entity.Semester { *; }
+-keep class com.courseschedule.ui.assistant.AssistantApiConfig { *; }
+-keep class com.courseschedule.ui.assistant.AssistantConversationState { *; }
+-keep class com.courseschedule.ui.assistant.AssistantPendingOperation { *; }
+-keep class com.courseschedule.ui.assistant.AssistantUndoBatch { *; }
+-keep class com.courseschedule.ui.assistant.AssistantRetryRequest { *; }
+-keep class com.courseschedule.ui.assistant.AssistantCourseReply { *; }
+-keep class com.courseschedule.ui.assistant.AssistantCourseUpdate { *; }
 -keep class com.courseschedule.data.backup.SemesterSnapshot { *; }
 -keep class com.courseschedule.data.backup.SettingsSnapshot { *; }
 -keep class com.courseschedule.data.backup.ScheduleBackup { *; }

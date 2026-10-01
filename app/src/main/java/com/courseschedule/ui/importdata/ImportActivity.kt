@@ -25,6 +25,7 @@ import com.courseschedule.data.entity.Semester
 import com.courseschedule.databinding.ActivityImportBinding
 import com.courseschedule.domain.ScheduleRules
 import com.courseschedule.ui.MainActivity
+import com.courseschedule.ui.assistant.CourseAssistantActivity
 import com.courseschedule.ui.installPressScale
 import com.courseschedule.ui.playNavigationMotion
 import com.courseschedule.ui.selectItemWithoutAnimation
@@ -116,9 +117,14 @@ class ImportActivity : AppCompatActivity() {
         }
         binding.cardImportJson.setOnClickListener { openFilePicker() }
         binding.cardImportText.setOnClickListener { showTextImportDialog() }
+        binding.cardImportAssistant.setOnClickListener {
+            startActivity(Intent(this, CourseAssistantActivity::class.java)
+                .putExtra(CourseAssistantActivity.EXTRA_DISPLAYED_WEEK, courseViewModel.currentWeek.value ?: 1))
+        }
         binding.cardImportSchool.installPressScale()
         binding.cardImportJson.installPressScale()
         binding.cardImportText.installPressScale()
+        binding.cardImportAssistant.installPressScale()
         initBottomNavigation()
         animateImportEntrance()
         courseViewModel.currentSemester.observe(this) { semester ->
