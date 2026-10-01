@@ -1,6 +1,7 @@
 package com.courseschedule.ui.importdata
 
 import com.courseschedule.data.entity.Course
+import com.courseschedule.domain.AiCourseColors
 import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
@@ -237,6 +238,7 @@ internal class AiWebScheduleRecognizer(
                         startWeek = range.start,
                         endWeek = range.end,
                         weekType = range.weekType,
+                        colorIndex = AiCourseColors.index(name),
                         note = "${provider.displayName} 网页识别，请核对"
                     )
                 }

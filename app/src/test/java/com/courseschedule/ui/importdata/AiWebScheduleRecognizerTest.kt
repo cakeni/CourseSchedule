@@ -118,6 +118,24 @@ class AiWebScheduleRecognizerTest {
         assertTrue(fallback.get("instructions").asString.contains("只输出一个 JSON 对象"))
     }
 
+    @Test fun sameCourseHasOneColorAcrossTimesTeachersAndWeekRanges() {
+        val rows = JsonParser.parseString(schedule).asJsonObject.getAsJsonArray("courses")
+        val second = rows[0].deepCopy().asJsonObject.apply {
+            addProperty("dayOfWeek", 3)
+            addProperty("classroom", "另一个教室")
+            addProperty("teacher", "另一位教师")
+            add("weeks", JsonParser.parseString("[1,2,6]"))
+        }
+        rows.add(second)
+        val payload = JsonObject().apply { add("courses", rows) }
+        val courses = AiWebScheduleRecognizer.parseResponse(response(payload.toString()), 20, AiWebProvider.DEEPSEEK).courses
+        assertTrue(courses.size >= 3)
+        assertEquals(1, courses.map { it.colorIndex }.distinct().size)
+        val forward = ImportAnalyzer.analyze(courses, emptyList(), 1, 20)
+        val reverse = ImportAnalyzer.analyze(courses.reversed(), emptyList(), 1, 20)
+        assertEquals(1, (forward.accepted + reverse.accepted).map { it.colorIndex }.distinct().size)
+    }
+
     @Test fun distinguishesIncompleteRefusalEmptyAndInvalidCourseResults() {
         val incomplete = assertThrows(AiResponseException::class.java) {
             AiWebScheduleRecognizer.parseResponse("""{"status":"incomplete","incomplete_details":{"reason":"max_output_tokens"}}""", 20, AiWebProvider.DEEPSEEK)

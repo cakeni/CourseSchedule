@@ -4,11 +4,13 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.courseschedule.data.dao.CourseDao
 import com.courseschedule.data.dao.SemesterDao
 import com.courseschedule.data.entity.Course
 import com.courseschedule.data.entity.Semester
+import com.courseschedule.domain.AiCourseColors
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -19,7 +21,7 @@ import java.util.Calendar
  */
 @Database(
     entities = [Course::class, Semester::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -28,6 +30,23 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun semesterDao(): SemesterDao
 
     companion object {
+        internal val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // Keep the earliest AI block's color for each course in its own semester.
+                db.execSQL("""
+                    UPDATE courses SET colorIndex = (
+                        SELECT ((first.colorIndex % 16) + 16) % 16
+                        FROM courses AS first
+                        WHERE first.semesterId = courses.semesterId
+                          AND trim(first.courseName) = trim(courses.courseName)
+                          AND first.note IN (?, ?)
+                        ORDER BY first.id LIMIT 1
+                    ) WHERE note IN (?, ?)
+                """.trimIndent(), arrayOf(AiCourseColors.DEEPSEEK_NOTE, AiCourseColors.OPENAI_NOTE,
+                    AiCourseColors.DEEPSEEK_NOTE, AiCourseColors.OPENAI_NOTE))
+            }
+        }
+
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
@@ -39,7 +58,7 @@ abstract class AppDatabase : RoomDatabase() {
                     "course_schedule_database"
                 )
                     .addCallback(DatabaseCallback())
-                    .fallbackToDestructiveMigration()
+                    .addMigrations(MIGRATION_1_2)
                     .build()
                 INSTANCE = instance
                 instance
