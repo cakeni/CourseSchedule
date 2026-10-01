@@ -52,6 +52,9 @@ internal data class AcademicSchoolDirectoryEntry(
     val sourceType: String = "",
     val adapterId: String = "",
     val allowCleartext: Boolean = false,
+    val allowIpAddress: Boolean = false,
+    val allowVpnOrigin: Boolean = false,
+    val retainQuery: Boolean = false,
     val loginUrls: List<String> = emptyList(),
     val authenticationUrls: List<String> = emptyList(),
     val timetableUrls: List<String> = emptyList(),
@@ -59,7 +62,9 @@ internal data class AcademicSchoolDirectoryEntry(
     val referenceUrl: String = ""
 ) {
     val profile: GenericAcademicProfile? get() = GenericAcademicImport.profile(profileId)
-    val host: String get() = academicWebUri(url, allowCleartext, allowNonDefaultPort = true)?.host.orEmpty()
+    val host: String get() = academicWebUri(
+        url, allowCleartext, allowNonDefaultPort = true, allowIpAddress = allowIpAddress
+    )?.host.orEmpty()
     val canImport: Boolean get() = support != AcademicDirectorySupport.ADAPTER_REQUIRED && profile != null && host.isNotEmpty()
     val needsUserUrl: Boolean get() = support == AcademicDirectorySupport.ADAPTER_REQUIRED && profile != null
     val verified: Boolean get() = support == AcademicDirectorySupport.VERIFIED
@@ -74,7 +79,8 @@ internal data class AcademicSchoolDirectoryEntry(
         ?: profile?.takeIf { canImport }?.let {
             runCatching {
                 GenericAcademicImport.createCatalog(
-                    it, url, allowCleartext, authenticationUrls, timetableUrls, adapterId, loginUrls
+                    it, url, allowCleartext, authenticationUrls, timetableUrls, adapterId, loginUrls,
+                    allowIpAddress, allowVpnOrigin, retainQuery
                 ).copy(name = name)
             }.getOrNull()
         }
@@ -144,6 +150,11 @@ internal object AcademicSchoolDirectory {
             val declaredSupport = AcademicDirectorySupport.parse(raw.support, file.schemaVersion)
                 ?: return@mapNotNull null
             val support = declaredSupport
+            // Bundled per-school URL exceptions also apply to explicitly enabled experimental entries.
+            val hasBundledUrl = support != AcademicDirectorySupport.ADAPTER_REQUIRED
+            val allowIpAddress = raw.allowIpAddress == true && hasBundledUrl
+            val allowVpnOrigin = raw.allowVpnOrigin == true && hasBundledUrl
+            val retainQuery = raw.retainQuery == true && hasBundledUrl
             val category = AcademicDirectoryCategory.parse(raw.category, file.schemaVersion) ?: return@mapNotNull null
             val allowCleartext = raw.cleartext == true
             if (!idPattern.matches(id) || !seenIds.add(id) || name.length !in 2..80 ||
@@ -156,7 +167,8 @@ internal object AcademicSchoolDirectory {
                 runCatching {
                     GenericAcademicImport.createCatalog(
                         usableProfile, sourceUrl, allowCleartext, raw.authenticationUrls.orEmpty(),
-                        raw.timetableUrls.orEmpty(), adapterId, raw.loginUrls.orEmpty()
+                        raw.timetableUrls.orEmpty(), adapterId, raw.loginUrls.orEmpty(),
+                        allowIpAddress, allowVpnOrigin, retainQuery
                     )
                 }.getOrNull()
                     ?: return@mapNotNull null
@@ -177,6 +189,9 @@ internal object AcademicSchoolDirectory {
                 sourceType = sourceType,
                 adapterId = adapterId,
                 allowCleartext = allowCleartext && school?.allowCleartext == true,
+                allowIpAddress = school?.allowIpAddress == true,
+                allowVpnOrigin = school?.allowVpnOrigin == true,
+                retainQuery = school?.retainQuery == true,
                 loginUrls = school?.loginPrefixes.orEmpty(),
                 authenticationUrls = school?.authenticationPrefixes.orEmpty(),
                 timetableUrls = school?.timetablePrefixes.orEmpty(),
@@ -197,6 +212,10 @@ internal object AcademicSchoolDirectory {
                 url = school.loginUrl,
                 builtInSchoolId = school.id,
                 adapterId = school.adapterId,
+                allowCleartext = school.allowCleartext,
+                allowIpAddress = school.allowIpAddress,
+                allowVpnOrigin = school.allowVpnOrigin,
+                retainQuery = school.retainQuery,
                 support = if (school.verified) AcademicDirectorySupport.VERIFIED
                     else AcademicDirectorySupport.COMPATIBLE,
                 category = if (school.isGraduate) AcademicDirectoryCategory.GRADUATE
@@ -236,6 +255,9 @@ internal object AcademicSchoolDirectory {
         val sourceType: String? = null,
         val adapterId: String? = null,
         val cleartext: Boolean? = null,
+        val allowIpAddress: Boolean? = null,
+        val allowVpnOrigin: Boolean? = null,
+        val retainQuery: Boolean? = null,
         val loginUrls: List<String>? = null,
         val authenticationUrls: List<String>? = null,
         val timetableUrls: List<String>? = null,
