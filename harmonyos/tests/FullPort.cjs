@@ -97,6 +97,16 @@ assert.throws(() => academic.parseAcademic(school, JSON.stringify({ sourceUrl: s
   { kcmc: '有效课程', xqj: '1', jcs: '1-2', zcd: '1-8周' }, { xqj: '2', jcs: '3-4', zcd: '1-8周' }
 ] }), 20), /名称/);
 assert.equal(schools.createSchool({ id:'spa', name:'测试', profile:'zhengfang', url:'https://jw.test.edu.cn/?token=discard#/schedule', category:'undergraduate', support:'compatible' }, definitions).loginUrl, 'https://jw.test.edu.cn/#/schedule');
+assert.equal(schools.builtinSchools()[0].loginUrl, 'https://deanservices.swpu.edu.cn/jwapp/sys/jwauthapp/login/index.html');
+assert.equal(catalog.find(e => e.name === '西南石油大学').url, 'https://deanservices.swpu.edu.cn/');
+const overridden = schools.createSchool({ id:'override', name:'测试', profile:'zhengfang', adapterId:'zhengfang_auto', url:'https://old.test.edu.cn/', category:'undergraduate', support:'compatible',
+  timetableUrls:['https://old.test.edu.cn/kbcx/'], authenticationUrls:['https://login.example.com/sso'] }, definitions, '  new.test.edu.cn/?token=discard#/schedule  ');
+assert.equal(overridden.loginUrl, 'https://new.test.edu.cn/#/schedule');
+assert.equal(overridden.adapterId, 'zhengfang_auto');
+assert.equal(schools.allowsTimetable(overridden, 'https://new.test.edu.cn/kbcx/'), true);
+assert.equal(schools.allowsTimetable(overridden, 'https://old.test.edu.cn/kbcx/'), false);
+assert.equal(schools.allowsNavigation(overridden, 'https://login.example.com/sso'), false);
+assert.throws(() => schools.createSchool(catalog.find(e => e.name === '西南石油大学'), definitions, 'file:///table.html'), /有效网址/);
 const qiangzhi = { ...school, system: 'QIANGZHI_HTML', adapterId: 'qiangzhi_standard' };
 const qz = academic.parseAcademic(qiangzhi, JSON.stringify({ sourceUrl: school.loginUrl, html: '<table id="kbtable"><tr><td>节次</td><td>星期一</td><td>星期二</td></tr><tr><td>第1-2节</td><td><div class="kbcontent">操作系统<br><font title="教师">张老师</font><br><font title="周次">1-8周[1-2节]</font><br><font title="教室">A101</font></div></td><td></td></tr></table>' }), 20);
 assert.equal(qz.courses[0].courseName, '操作系统');
@@ -157,6 +167,8 @@ for (const [fixture, adapter, name, day, start, end, teacher, room] of reports) 
   if (room) assert.equal(c.classroom, room, fixture);
 }
 assert.throws(() => academic.academicHtml(fixtures.southSoftGridRespectsRowspanAndRequiresExplicitWeeks.replace('1-8周', '时间待定'), 20, 'REPORT_HTML', 'south_soft'));
-assert.deepEqual(academic.academicHtml(fixtures.southSoftGridRespectsRowspanAndRequiresExplicitWeeks + qzTable(qzTitled('1-8周[1-2节]')).replace('kbtable','unrelated'), 20, 'REPORT_HTML', 'south_soft'),
-  academic.academicHtml(fixtures.southSoftGridRespectsRowspanAndRequiresExplicitWeeks, 20, 'REPORT_HTML', 'south_soft'));
+// Separate parses stamp their courses at different times; compare the course content.
+const courseContent = courses => courses.map(({ createTime, ...course }) => course);
+assert.deepEqual(courseContent(academic.academicHtml(fixtures.southSoftGridRespectsRowspanAndRequiresExplicitWeeks + qzTable(qzTitled('1-8周[1-2节]')).replace('kbtable','unrelated'), 20, 'REPORT_HTML', 'south_soft')),
+  courseContent(academic.academicHtml(fixtures.southSoftGridRespectsRowspanAndRequiresExplicitWeeks, 20, 'REPORT_HTML', 'south_soft')));
 console.log('完整移植核心校验通过：多学期、追加/替换、冲突检查、文件导入、教务域名、正方/强智/EAMS、12种原版报表样例、单双周提醒');

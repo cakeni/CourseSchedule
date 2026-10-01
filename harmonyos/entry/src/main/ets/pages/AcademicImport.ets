@@ -4,7 +4,7 @@ import { window } from '@kit.ArkUI';
 import { util } from '@kit.ArkTS';
 import { pasteboard } from '@kit.BasicServicesKit';
 import { AcademicSchool, AcademicDefinitions, builtinSchools, allowsNavigation, allowsTimetable, authorizeAuthentication,
-  captureScript, fetchScript, webAddress, decodeWebResult } from '../model/AcademicSchools';
+  captureScript, fetchScript, webAddress, decodeWebResult, SchoolEntry, createSchool } from '../model/AcademicSchools';
 import { parseAcademic } from '../model/AcademicParser';
 import { ParsedImport } from '../model/ImportCore';
 import { AI_PROVIDERS, AiProvider } from '../model/AiRecognition';
@@ -25,6 +25,9 @@ export struct AcademicImport {
   onBackHandler: (handler: () => boolean) => void = (_: () => boolean) => {};
   @State private activeSchool: AcademicSchool = builtinSchools()[0];
   @State private url: string = '';
+  @State private addressInput: string = '';
+  @State private addressError: string = '';
+  private addressController: TextInputController = new TextInputController();
   @State private status: string = '';
   @State private busy: boolean = false;
   @State private desktop: boolean = true;
@@ -43,6 +46,7 @@ export struct AcademicImport {
   aboutToAppear(): void {
     this.activeSchool = this.school;
     this.url = this.school.loginUrl;
+    this.addressInput = this.school.loginUrl;
     this.status = this.school.instructions;
     this.onBackHandler(() => { if (this.aiDialog) { this.aiDialog = false; this.aiKey = ''; } else this.close(); return true; });
   }
@@ -129,6 +133,24 @@ export struct AcademicImport {
     } finally { if (this.token === token) this.busy = false; }
   }
 
+  private openAddress(): void {
+    if (this.busy || !this.addressInput.trim()) return;
+    try {
+      const entry: SchoolEntry = { id: this.activeSchool.id, name: this.activeSchool.name, profile: this.activeSchool.profile,
+        adapterId: this.activeSchool.adapterId, url: this.activeSchool.loginUrl, category: 'undergraduate', support: 'compatible' };
+      const school = createSchool(entry, this.definitions, this.addressInput);
+      const open = (): void => {
+        this.addressController.stopEditing(); this.token = ''; this.busy = false; this.acceptedSslHosts.clear(); this.diagnostics = '';
+        this.activeSchool = school; this.url = school.loginUrl; this.addressInput = school.loginUrl; this.addressError = '';
+        this.status = school.instructions; this.controller.loadUrl(school.loginUrl);
+      };
+      if (school.cleartextHosts.length) {
+        this.getUIContext().showAlertDialog({ title: '学校教务使用 HTTP', message: school.loginUrl + '\n请确认在可信网络中访问。',
+          primaryButton: { value: '取消', action: () => {} }, secondaryButton: { value: '继续', action: open } });
+      } else open();
+    } catch (error) { this.addressError = String(error); }
+  }
+
   private toggleDesktop(): void {
     this.desktop = !this.desktop;
     this.controller.setCustomUserAgent(this.desktop ? 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' : this.defaultUserAgent);
@@ -212,20 +234,32 @@ export struct AcademicImport {
         Text(this.status).fontSize(14).fontWeight(FontWeight.Bold).fontColor(this.dark ? DARK.text : LIGHT.text).width('100%').maxLines(3);
         Text('账号和密码只提交给学校网页，本应用不会保存').fontSize(11).fontColor(this.dark ? DARK.secondary : LIGHT.secondary).width('100%');
       }.padding(14).backgroundColor(this.dark ? DARK.container : LIGHT.container).borderRadius(16).width('calc(100% - 24vp)').margin({ top: 10, bottom: 10 });
+      Column({ space: 4 }) {
+        Row({ space: 8 }) {
+          TextInput({ text: this.addressInput, placeholder: '教务网址，可自行修改', controller: this.addressController }).id('academic-address')
+            .layoutWeight(1).height(44).fontSize(12).borderRadius(12).cancelButton({ style: CancelButtonStyle.INPUT })
+            .fontColor(this.dark ? DARK.text : LIGHT.text).backgroundColor(this.dark ? DARK.surface : LIGHT.surface)
+            .onChange((value: string) => { this.addressInput = value; this.addressError = ''; }).onSubmit(() => this.openAddress());
+          Button('打开', { type: ButtonType.Normal }).id('academic-open-address').height(44).fontSize(13).borderRadius(12)
+            .backgroundColor(this.dark ? DARK.container : LIGHT.container).fontColor(this.dark ? DARK.primary : LIGHT.primary)
+            .enabled(!this.busy && this.addressInput.trim().length > 0).onClick(() => this.openAddress());
+        }.width('100%');
+        if (this.addressError) { Text(this.addressError).fontSize(11).fontColor(this.dark ? DARK.text : LIGHT.text).width('100%'); }
+      }.width('100%').padding({ left: 12, right: 12, bottom: 10 });
       Web({ src: this.school.loginUrl, controller: this.controller }).layoutWeight(1).width('100%')
         .javaScriptAccess(true).domStorageAccess(true).databaseAccess(true).fileAccess(false)
-        .mixedMode(this.school.cleartextHosts.length ? MixedMode.All : MixedMode.None)
+        .mixedMode(this.activeSchool.cleartextHosts.length ? MixedMode.All : MixedMode.None)
         .onControllerAttached(() => {
           this.defaultUserAgent = this.controller.getUserAgent();
           if (this.desktop) this.controller.setCustomUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
         })
-        .javaScriptOnDocumentStart([{ script: SHUWEI_CAPTURE, scriptRules: this.school.system === 'SHUWEI' ? this.school.timetableScopes.map((scope: string) => scope.replace(/\/$/, '')) : [] }])
+        .javaScriptOnDocumentStart([{ script: SHUWEI_CAPTURE, scriptRules: this.activeSchool.system === 'SHUWEI' ? this.activeSchool.timetableScopes.map((scope: string) => scope.replace(/\/$/, '')) : [] }])
         .onPageBegin(() => { this.token = ''; this.busy = false; })
         .multiWindowAccess(true)
         .onWindowNew((event) => { if (event) { event.handler.setWebController(null); if (event.targetUrl && !this.navigate(event.targetUrl)) this.controller.loadUrl(event.targetUrl); } })
         .onSslErrorEvent((event: SslErrorEvent) => this.sslError(event))
         .onOverrideUrlLoading((request: WebResourceRequest) => this.navigate(request.getRequestUrl()))
-        .onPageEnd((event) => { if (event) { this.url = event.url; if (!this.busy) this.status = this.school.instructions; } })
+        .onPageEnd((event) => { if (event) { this.url = event.url; if (!this.busy) this.status = this.activeSchool.instructions; } })
         .onErrorReceive((event) => { if (event && event.request.isMainFrame()) this.status = '页面加载失败：' + event.error.getErrorInfo(); });
       Row({ space: 8 }) {
         this.toolbarButton(this.desktop ? '电脑模式 ✓' : '电脑模式', () => this.toggleDesktop());

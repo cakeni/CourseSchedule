@@ -96,6 +96,8 @@
     <string name="academic_import_description">搜索学校 · 自动匹配教务入口和系统类型</string>
     <string name="academic_choose_school">选择学校</string>
     <string name="academic_search_school">搜索学校名称或教务域名</string>
+    <string name="academic_edit_web_address">教务网址，可自行修改</string>
+    <string name="academic_open_web_address">打开</string>
     <string name="academic_category_all">全部</string>
     <string name="academic_category_undergraduate">专科及本科</string>
     <string name="academic_category_graduate">研究生</string>

@@ -5,6 +5,16 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class GenericAcademicImportTest {
+    @Test fun changingAddressKeepsParserAndRescopesTheImportSession() {
+        val changed = GenericAcademicImport.withAddress(AcademicSchools.SWPU, "deanservices.swpu.edu.cn/jwapp/#/schedule")
+        assertEquals("https://deanservices.swpu.edu.cn/jwapp/#/schedule", changed.loginUrl)
+        assertEquals(AcademicSchools.SWPU.adapterId, changed.adapterId)
+        assertEquals(AcademicSchools.SWPU.name, changed.name)
+        assertTrue(changed.allowsTimetable("https://deanservices.swpu.edu.cn/jwapp/table"))
+        assertFalse(changed.allowsTimetable("https://deancs.swpu.edu.cn/xsxk/table"))
+        assertThrows(ImportFormatException::class.java) { GenericAcademicImport.withAddress(changed, "file:///table.html") }
+    }
+
     private val qiangzhi = AcademicSystem.QIANGZHI_HTML
 
     @Test fun exposesTheGenericSystemProfilesWithoutDuplicatingSchoolEntries() {

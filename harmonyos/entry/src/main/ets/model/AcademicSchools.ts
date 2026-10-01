@@ -54,21 +54,21 @@ export function allowsTimetable(school: AcademicSchool, url: string): boolean {
 export function createSchool(entry: SchoolEntry, definitions: AcademicDefinitions, entered: string = ''): AcademicSchool {
   const profile = definitions.profiles.find(p => p.id === entry.profile);
   if (!profile) throw new Error('该学校没有可复用的本地解析器');
-  const configured = !!entered; let url = (entered || entry.url || '').trim(); if (!url.includes('://')) url = 'https://' + url;
-  const address = webAddress(url, configured ? url.startsWith('http://') : !!entry.cleartext, !configured && !!entry.allowIpAddress);
+  const configured = !!entered.trim(); let url = (configured ? entered : entry.url || '').trim(); if (!url.includes('://')) url = 'https://' + url;
+  const address = webAddress(url, configured ? /^http:\/\//i.test(url) : !!entry.cleartext, !configured && !!entry.allowIpAddress);
   if (!address) throw new Error('请输入学校官方域名的有效网址，地址不能含账号或本机路径');
   if (!entry.allowVpnOrigin && address.host.includes('vpn') && address.scope === address.origin + '/') throw new Error('请填写 WebVPN 中具体教务资源地址，不能只填写门户地址');
   const route = (urls: string[] | undefined): string[] => (urls ?? []).map(u => {
     const parsed = webAddress(u, !!entry.cleartext, !!entry.allowIpAddress); if (!parsed) throw new Error('学校目录访问范围无效'); return parsed.scope;
   });
-  const loginScopes = [address.scope, ...route(entry.loginUrls)];
-  const timetableScopes = route(entry.timetableUrls);
+  const loginScopes = [address.scope, ...route(configured ? undefined : entry.loginUrls)];
+  const timetableScopes = route(configured ? undefined : entry.timetableUrls);
   if (!timetableScopes.length) timetableScopes.push(address.scope);
   if (address.scheme === 'http') timetableScopes.push('https://' + address.host + '/');
-  const authScopes = route(entry.authenticationUrls);
+  const authScopes = route(configured ? undefined : entry.authenticationUrls);
   const trustedHosts = Array.from(new Set([...loginScopes, ...timetableScopes, ...authScopes].map(s => webAddress(s, true, !!entry.allowIpAddress)!.host)));
   const cleartextHosts = Array.from(new Set([...loginScopes, ...timetableScopes, ...authScopes].filter(s => s.startsWith('http:')).map(s => webAddress(s, true, !!entry.allowIpAddress)!.host)));
-  if (!entry.retainQuery || configured) url = address.origin + address.path.replace(/;jsessionid=[^/;]*/ig, '') + (!configured && url.includes('#') ? url.slice(url.indexOf('#')) : '');
+  if (!entry.retainQuery || configured) url = address.origin + address.path.replace(/;jsessionid=[^/;]*/ig, '') + (url.includes('#') ? url.slice(url.indexOf('#')) : '');
   const adapterId = entry.adapterId || definitions.sourceTypeAdapters?.[entry.sourceType || ''] || definitions.profileAdapters?.[profile.id] || profile.id;
   return { id: entry.id, name: entry.name, system: profile.system, profile: profile.id, adapterId,
     loginUrl: url, trustedHosts, loginScopes, timetableScopes, authScopes, cleartextHosts,
@@ -108,7 +108,7 @@ export function builtinSchools(): AcademicSchool[] {
   const jw = '77726476706e69737468656265737421fae00f8f23256e55300d8db9d6562d';
   const auth = '77726476706e69737468656265737421f9f352d234347d567b468ca88d1b203b';
   return [
-    make('swpu', '西南石油大学', 'WISEDU', 'wisedu', 'wisedu_auto', 'https://deancs.swpu.edu.cn/xsxk/profile/index.html',
+    make('swpu', '西南石油大学', 'WISEDU', 'wisedu', 'wisedu_auto', 'https://deanservices.swpu.edu.cn/jwapp/sys/jwauthapp/login/index.html',
       ['https://deancs.swpu.edu.cn/xsxk/', 'https://deanservices.swpu.edu.cn/jwapp/'], ['swpu.edu.cn', 'deanservices.swpu.edu.cn', 'deancs.swpu.edu.cn']),
     make('sdufe', '山东财经大学', 'QIANGZHI_HTML', 'qiangzhi', 'qiangzhi_standard', 'http://jw.sdufe.edu.cn',
       ['http://jw.sdufe.edu.cn/', 'https://jw.sdufe.edu.cn/', `https://webvpn.sdufe.edu.cn/http/${jw}/`, `https://webvpn.sdufe.edu.cn/https/${jw}/`],

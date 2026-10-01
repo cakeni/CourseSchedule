@@ -301,10 +301,38 @@ class AcademicWebImportActivity : AppCompatActivity() {
         }
         if (readsDisplayedPage) binding.btnFetchSchedule.setText(R.string.academic_read_displayed_term)
         binding.btnFetchSchedule.setOnClickListener { fetchCurrentSchedule() }
+        binding.etWebAddress.setText(school.loginUrl)
+        binding.btnOpenWebAddress.setOnClickListener { openEditedAddress() }
         configureDisplayModes()
         updateResponsiveLayout(resources.configuration.orientation)
         setImportStatus(false, getString(R.string.academic_waiting_login))
         binding.webView.loadUrl(school.loginUrl)
+    }
+
+    private fun openEditedAddress() {
+        binding.tilWebAddress.error = null
+        val replacement = runCatching {
+            GenericAcademicImport.withAddress(school, binding.etWebAddress.text?.toString().orEmpty())
+        }.getOrElse { error -> binding.tilWebAddress.error = error.message; return }
+        val open = {
+            invalidateRequest()
+            binding.webView.stopLoading()
+            acceptedSslHosts.clear()
+            school = replacement
+            intent = schoolIntent(this, replacement).putExtra(EXTRA_TOTAL_WEEKS, totalWeeks)
+            binding.etWebAddress.setText(school.loginUrl)
+            binding.etWebAddress.clearFocus()
+            (getSystemService(INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager)
+                .hideSoftInputFromWindow(binding.etWebAddress.windowToken, 0)
+            setImportStatus(false, getString(R.string.academic_waiting_login))
+            binding.webView.loadUrl(school.loginUrl)
+        }
+        if (replacement.allowCleartext) {
+            MaterialAlertDialogBuilder(this).setTitle(R.string.academic_cleartext_title)
+                .setMessage(getString(R.string.academic_cleartext_detail, school.name, replacement.trustedHosts.first()))
+                .setPositiveButton(R.string.academic_cleartext_continue) { _, _ -> open() }
+                .setNegativeButton(R.string.cancel, null).show()
+        } else open()
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -982,6 +1010,7 @@ class AcademicWebImportActivity : AppCompatActivity() {
             binding.tvStatus.translationY = 0f
         }
         binding.statusProgress.visibility = if (loading) View.VISIBLE else View.GONE
+        binding.btnOpenWebAddress.isEnabled = !loading
         binding.statusIcon.visibility = if (loading) View.GONE else View.VISIBLE
         binding.statusIcon.setImageResource(if (success) R.drawable.ic_check else R.drawable.ic_school)
         binding.statusIcon.animate().cancel()

@@ -39,6 +39,29 @@ import java.util.concurrent.atomic.AtomicReference
 
 @RunWith(AndroidJUnit4::class)
 class GenericImportUiTest {
+    @Test fun academicLoginPageCanEditAndOpenItsAddress() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val intent = AcademicWebImportActivity.schoolIntent(context, AcademicSchools.SWPU)
+        ActivityScenario.launch<AcademicWebImportActivity>(intent).use { scenario ->
+            scenario.onActivity { it.findViewById<WebView>(R.id.webView).stopLoading() }
+            onView(withId(R.id.etWebAddress)).check(matches(isDisplayed()))
+                .perform(replaceText("file:///table.html"), closeSoftKeyboard())
+            onView(withId(R.id.btnOpenWebAddress)).perform(click())
+            scenario.onActivity { activity ->
+                assertTrue(activity.findViewById<com.google.android.material.textfield.TextInputLayout>(R.id.tilWebAddress).error != null)
+                assertEquals(AcademicSchools.SWPU.loginUrl, AcademicWebImportActivity.schoolFromIntent(activity.intent)!!.loginUrl)
+            }
+            onView(withId(R.id.etWebAddress)).perform(replaceText("deanservices.swpu.edu.cn/jwapp/#/schedule"), closeSoftKeyboard())
+            onView(withId(R.id.btnOpenWebAddress)).perform(click())
+            scenario.onActivity { activity ->
+                val changed = AcademicWebImportActivity.schoolFromIntent(activity.intent)!!
+                assertEquals("https://deanservices.swpu.edu.cn/jwapp/#/schedule", changed.loginUrl)
+                assertEquals(AcademicSchools.SWPU.adapterId, changed.adapterId)
+                activity.findViewById<WebView>(R.id.webView).stopLoading()
+            }
+        }
+    }
+
     @Test fun cleartextRedirectsDoNotUseADomainAllowlist() {
         val policy = NetworkSecurityPolicy.getInstance()
         assertTrue(policy.isCleartextTrafficPermitted("jw.sdufe.edu.cn"))
