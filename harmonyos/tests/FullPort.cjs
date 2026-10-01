@@ -7,6 +7,25 @@ require.extensions['.ts'] = (module, filename) => module._compile(ts.transpileMo
 }).outputText, filename);
 const model = path.resolve(__dirname, '../entry/src/main/ets/model');
 const core = require(path.join(model, 'ScheduleCore.ts'));
+const calendar = require(path.join(model, 'CalendarDates.ts'));
+for (const [year, month, count, offset] of [[2026, 8, 30, 1], [2026, 1, 28, 6], [2028, 1, 29, 1], [2026, 11, 31, 1], [2027, 0, 31, 4]]) {
+  const days = calendar.calendarMonthDays(year, month);
+  assert.equal(days.length, 42);
+  assert.equal(days.indexOf(1), offset);
+  assert.deepEqual(days.filter(day => day > 0), Array.from({ length: count }, (_, index) => index + 1));
+}
+const originalTZ = process.env.TZ;
+try {
+  for (const zone of ['Asia/Hong_Kong', 'America/Los_Angeles', 'Pacific/Kiritimati']) {
+    process.env.TZ = zone;
+    const chosen = new Date('2026-08-31T00:00:00');
+    assert.equal(calendar.calendarDateText(chosen), '2026-08-31');
+    assert.equal(calendar.calendarDateText(core.mondayOf(new Date('2026-09-06T00:00:00'))), '2026-08-31');
+  }
+} finally {
+  if (originalTZ === undefined) delete process.env.TZ;
+  else process.env.TZ = originalTZ;
+}
 const imports = require(path.join(model, 'ImportCore.ts'));
 const schools = require(path.join(model, 'AcademicSchools.ts'));
 const academic = require(path.join(model, 'AcademicParser.ts'));

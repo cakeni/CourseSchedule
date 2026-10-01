@@ -8,6 +8,8 @@ import { DUCK_FRAMES } from './DuckFrames';
 import { DateHeader } from './DateHeader';
 import { NavigationItem } from './NavigationItem';
 import { ProjectNotice } from './ProjectNotice';
+import { SemesterCalendar } from './SemesterCalendar';
+import { calendarDateText } from '../model/CalendarDates';
 import { SchoolEntry, AcademicSchool, AcademicDefinitions, builtinSchools, createSchool, schoolMatches, webAddress } from '../model/AcademicSchools';
 import { syncReminders, authorizeNotifications, testReminder, reminderError } from '../data/CourseReminders';
 import { BusinessError } from '@kit.BasicServicesKit';
@@ -40,6 +42,7 @@ struct Index {
   @State private dark: boolean = false;
   @State private weekPicker: boolean = false;
   @State private semesterPicker: boolean = false;
+  @State private semesterDatePicker: boolean = false;
   @State private quickDay: number = 0;
   @State private quickStart: number = 1;
   @State private quickEnd: number = 1;
@@ -251,7 +254,7 @@ struct Index {
     this.semesterEditingId = existing ? existing.id || currentSemesterId(this.state) : 0;
     const date = new Date(existing ? existing.startDate : mondayOf(new Date()).getTime());
     this.semesterName = existing ? existing.name : '';
-    this.semesterDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    this.semesterDate = calendarDateText(date);
     this.semesterWeeks = String(existing ? existing.totalWeeks : 20);
     this.message = '';
     this.returnScreen = this.screen;
@@ -654,6 +657,7 @@ struct Index {
   }
 
   onBackPress(): boolean {
+    if (this.semesterDatePicker) { this.semesterDatePicker = false; return true; }
     if (this.screen === 'academic' && this.academicBack()) return true;
     if (this.quickDay) { this.quickDay = 0; return true; }
     if (this.semesterPicker) { this.setSemesterPicker(false); return true; }
@@ -1061,13 +1065,7 @@ struct Index {
       Stack({ alignContent: Alignment.TopStart }) {
       Button(this.semesterDate, { type: ButtonType.Normal }).id('semester-date').height(56).width('100%').borderRadius(4).fontColor(this.palette().text)
         .border({ width: 1, color: this.palette().divider })
-        .backgroundColor(this.palette().surface).onClick(() => {
-          DatePickerDialog.show({ selected: new Date(this.semesterDate), lunar: false,
-            onDateAccept: (date: Date) => {
-              const monday = mondayOf(date);
-              this.semesterDate = `${monday.getFullYear()}-${String(monday.getMonth() + 1).padStart(2, '0')}-${String(monday.getDate()).padStart(2, '0')}`;
-            } });
-        });
+        .backgroundColor(this.palette().surface).onClick(() => this.semesterDatePicker = true);
         Text('开学日期').fontSize(12).fontColor(this.palette().secondary).backgroundColor(this.palette().surface)
           .padding({ left: 4, right: 4 }).position({ x: 12, y: -7 });
       }.width('100%').height(56).margin({ top: 6, bottom: 6 });
@@ -1540,6 +1538,18 @@ struct Index {
       if (this.weekPicker) { this.weekPickerDialog(); }
       if (this.semesterPicker) { this.semesterPickerDialog(); }
       if (this.detailCourse) { this.courseDetails(this.detailCourse); }
+      if (this.semesterDatePicker) {
+        Stack({ alignContent: Alignment.Center }) {
+          Column().width('100%').height('100%').backgroundColor('#66000000')
+            .onClick(() => this.semesterDatePicker = false);
+          SemesterCalendar({ dateText: this.semesterDate, palette: this.palette(),
+            onCancel: () => this.semesterDatePicker = false,
+            onAccept: (date: Date) => {
+              this.semesterDate = calendarDateText(mondayOf(date));
+              this.semesterDatePicker = false;
+            } });
+        }.width('100%').height('100%');
+      }
     }.height('100%').width('100%').backgroundColor(this.dark ? '#121212' : '#F4F7FC')
       .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.BOTTOM]);
   }
