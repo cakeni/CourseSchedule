@@ -8,26 +8,27 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.courseschedule.data.dao.CourseDao
 import com.courseschedule.data.dao.SemesterDao
+import com.courseschedule.data.dao.AssistantConversationDao
+import com.courseschedule.data.entity.AssistantConversation
+import com.courseschedule.data.entity.AssistantChatMessage
 import com.courseschedule.data.entity.Course
 import com.courseschedule.data.entity.Semester
 import com.courseschedule.domain.AiCourseColors
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import java.util.Calendar
 
 /**
  * 应用数据库
  */
 @Database(
-    entities = [Course::class, Semester::class],
-    version = 2,
+    entities = [Course::class, Semester::class, AssistantConversation::class, AssistantChatMessage::class],
+    version = 3,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun courseDao(): CourseDao
     abstract fun semesterDao(): SemesterDao
+    abstract fun assistantConversationDao(): AssistantConversationDao
 
     companion object {
         internal val MIGRATION_1_2 = object : Migration(1, 2) {
@@ -50,6 +51,20 @@ abstract class AppDatabase : RoomDatabase() {
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
+        internal val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // The locally distributed assistant build also used version 2, before
+                // the main branch's color migration. Preserve both version-2 schemas.
+                val hasAssistantTables = db.query("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'assistant_conversations'")
+                    .use { it.moveToFirst() }
+                if (hasAssistantTables) MIGRATION_1_2.migrate(db)
+                db.execSQL("CREATE TABLE IF NOT EXISTS assistant_conversations (id TEXT NOT NULL PRIMARY KEY, semesterId INTEGER NOT NULL, title TEXT NOT NULL, updatedAt INTEGER NOT NULL, stateJson TEXT NOT NULL, revision INTEGER NOT NULL, FOREIGN KEY(semesterId) REFERENCES semesters(id) ON UPDATE NO ACTION ON DELETE CASCADE)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_assistant_conversations_semesterId ON assistant_conversations(semesterId)")
+                db.execSQL("CREATE TABLE IF NOT EXISTS assistant_messages (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, conversationId TEXT NOT NULL, role TEXT NOT NULL, content TEXT NOT NULL, kind TEXT NOT NULL, createdAt INTEGER NOT NULL, FOREIGN KEY(conversationId) REFERENCES assistant_conversations(id) ON UPDATE NO ACTION ON DELETE CASCADE)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_assistant_messages_conversationId ON assistant_messages(conversationId)")
+            }
+        }
+
         fun getDatabase(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -58,7 +73,7 @@ abstract class AppDatabase : RoomDatabase() {
                     "course_schedule_database"
                 )
                     .addCallback(DatabaseCallback())
-                    .addMigrations(MIGRATION_1_2)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
                     .build()
                 INSTANCE = instance
                 instance
@@ -67,19 +82,35 @@ abstract class AppDatabase : RoomDatabase() {
     }
 
     /**
-     * 数据库创建回调 - 初始化默认学期
+     * 数据库打开时，确保第一次查询就能取得当前学期。
      */
-    private class DatabaseCallback : Callback() {
-        override fun onCreate(db: SupportSQLiteDatabase) {
-            super.onCreate(db)
-            INSTANCE?.let { database ->
-                CoroutineScope(Dispatchers.IO).launch {
-                    initDefaultSemester(database.semesterDao())
+    internal class DatabaseCallback : Callback() {
+        override fun onOpen(db: SupportSQLiteDatabase) {
+            super.onOpen(db)
+            db.beginTransaction()
+            try {
+                val hasCurrent = db.query("SELECT 1 FROM semesters WHERE isCurrent = 1 LIMIT 1")
+                    .use { it.moveToFirst() }
+                if (!hasCurrent) {
+                    val existingId = db.query("SELECT id FROM semesters ORDER BY startDate DESC, id DESC LIMIT 1")
+                        .use { if (it.moveToFirst()) it.getLong(0) else null }
+                    if (existingId != null) {
+                        db.execSQL("UPDATE semesters SET isCurrent = 1 WHERE id = ?", arrayOf(existingId))
+                    } else {
+                        val semester = defaultSemester()
+                        db.execSQL(
+                            "INSERT INTO semesters (name, startDate, totalWeeks, isCurrent, createTime) VALUES (?, ?, ?, 1, ?)",
+                            arrayOf(semester.name, semester.startDate, semester.totalWeeks, semester.createTime)
+                        )
+                    }
                 }
+                db.setTransactionSuccessful()
+            } finally {
+                db.endTransaction()
             }
         }
 
-        private suspend fun initDefaultSemester(semesterDao: SemesterDao) {
+        private fun defaultSemester(): Semester {
             // 创建默认学期
             val calendar = Calendar.getInstance()
             val currentYear = calendar.get(Calendar.YEAR)
@@ -110,15 +141,17 @@ abstract class AppDatabase : RoomDatabase() {
             while (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) {
                 calendar.add(Calendar.DAY_OF_MONTH, 1)
             }
+            calendar.set(Calendar.HOUR_OF_DAY, 0)
+            calendar.set(Calendar.MINUTE, 0)
+            calendar.set(Calendar.SECOND, 0)
+            calendar.set(Calendar.MILLISECOND, 0)
 
-            val defaultSemester = Semester(
+            return Semester(
                 name = semesterName,
                 startDate = calendar.timeInMillis,
                 totalWeeks = 20,
                 isCurrent = true
             )
-
-            semesterDao.insertSemester(defaultSemester)
         }
     }
 }

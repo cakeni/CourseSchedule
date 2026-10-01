@@ -33,24 +33,26 @@ class AiCourseColorMigrationTest {
             val originalSemesterDao = database.semesterDao()
             semesters.forEach { originalSemesterDao.insertSemester(it) }
             database.courseDao().insertCourses(before)
-            // The table schema is unchanged; mark this fixture with the previous database version.
+            // Version 1 had only courses and semesters.
+            database.openHelper.writableDatabase.execSQL("DROP TABLE assistant_messages")
+            database.openHelper.writableDatabase.execSQL("DROP TABLE assistant_conversations")
             database.openHelper.writableDatabase.version = 1
             database.close()
             database = Room.databaseBuilder(context, AppDatabase::class.java, name)
-                .addMigrations(AppDatabase.MIGRATION_1_2).build()
+                .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3).build()
             val expected = before.map {
                 if (AiCourseColors.isAiCourse(it)) it.copy(colorIndex = if (it.semesterId == 1L) 0 else 12) else it
             }
             assertEquals(expected, database.courseDao().getAllCoursesSync().sortedBy { it.id })
             val migratedSemesterDao = database.semesterDao()
             semesters.forEach { assertEquals(it, migratedSemesterDao.getSemesterById(it.id)) }
-            assertEquals(2, database.openHelper.writableDatabase.version)
+            assertEquals(3, database.openHelper.writableDatabase.version)
 
             val edited = expected[1].copy(colorIndex = 10)
             database.courseDao().updateCourse(edited)
             database.close()
             database = Room.databaseBuilder(context, AppDatabase::class.java, name)
-                .addMigrations(AppDatabase.MIGRATION_1_2).build()
+                .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3).build()
             assertEquals(edited, database.courseDao().getCourseById(edited.id))
         } finally {
             database?.close()
