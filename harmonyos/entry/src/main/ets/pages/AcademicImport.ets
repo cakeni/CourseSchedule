@@ -9,6 +9,7 @@ import { parseAcademic } from '../model/AcademicParser';
 import { ParsedImport } from '../model/ImportCore';
 import { AI_PROVIDERS, AiProvider } from '../model/AiRecognition';
 import { recognizePage } from '../data/AiRecognition';
+import { loadAiProvider, loadAiKey, saveAiKey, removeAiKey } from '../data/AiCredentials';
 import { LIGHT, DARK } from './ScheduleTheme';
 
 interface CaptureResult { json?: string; error?: string; stage?: string }
@@ -35,6 +36,10 @@ export struct AcademicImport {
   @State private aiDialog: boolean = false;
   @State private aiKey: string = '';
   @State private aiProvider: number = 0;
+  @State private aiSettingsBusy: boolean = false;
+  @State private aiKeySaved: boolean = false;
+  @State private aiSettingsError: string = '';
+  private aiSettingsVersion: number = 0;
   private defaultUserAgent: string = '';
   private controller: webview.WebviewController = new webview.WebviewController();
   private token: string = '';
@@ -48,11 +53,12 @@ export struct AcademicImport {
     this.url = this.school.loginUrl;
     this.addressInput = this.school.loginUrl;
     this.status = this.school.instructions;
-    this.onBackHandler(() => { if (this.aiDialog) { this.aiDialog = false; this.aiKey = ''; } else this.close(); return true; });
+    this.onBackHandler(() => { if (this.aiDialog) this.dismissAiSettings(); else this.close(); return true; });
   }
 
   aboutToDisappear(): void {
     this.token = '';
+    this.aiSettingsVersion++;
     this.aiKey = ''; this.onBackHandler(() => false);
     if (this.landscape) this.setOrientation(false);
   }
@@ -168,16 +174,71 @@ export struct AcademicImport {
     else { this.token = ''; this.onClose(); }
   }
 
+  private dismissAiSettings(): void { this.aiSettingsVersion++; this.aiDialog = false; this.aiKey = ''; this.aiSettingsBusy = false; }
+
+  private async openAiSettings(): Promise<void> {
+    if (this.busy) return;
+    const version = ++this.aiSettingsVersion;
+    this.aiKey = ''; this.aiKeySaved = false; this.aiSettingsError = ''; this.aiSettingsBusy = true; this.aiDialog = true;
+    try {
+      const name = await loadAiProvider(this.context());
+      const index = Math.max(0, AI_PROVIDERS.findIndex(provider => provider.name === name));
+      const key = await loadAiKey(AI_PROVIDERS[index].name);
+      if (!this.aiDialog || version !== this.aiSettingsVersion) return;
+      this.aiProvider = index; this.aiKey = key; this.aiKeySaved = key.length > 0;
+    } catch (error) { if (version === this.aiSettingsVersion) this.aiSettingsError = (error as Error).message; }
+    finally { if (version === this.aiSettingsVersion) this.aiSettingsBusy = false; }
+  }
+
+  private async selectAiProvider(index: number): Promise<void> {
+    if (this.aiSettingsBusy || this.aiProvider === index) return;
+    const version = ++this.aiSettingsVersion;
+    this.aiProvider = index; this.aiKey = ''; this.aiKeySaved = false; this.aiSettingsError = ''; this.aiSettingsBusy = true;
+    try {
+      const key = await loadAiKey(AI_PROVIDERS[index].name);
+      if (!this.aiDialog || version !== this.aiSettingsVersion) return;
+      this.aiKey = key; this.aiKeySaved = key.length > 0;
+    } catch (error) { if (version === this.aiSettingsVersion) this.aiSettingsError = (error as Error).message; }
+    finally { if (version === this.aiSettingsVersion) this.aiSettingsBusy = false; }
+  }
+
+  private async saveAiSettings(): Promise<boolean> {
+    if (this.aiSettingsBusy || !this.aiDialog) return false;
+    if (!this.aiKey.trim()) { this.aiSettingsError = '请输入 API Key'; return false; }
+    const version = this.aiSettingsVersion;
+    this.aiSettingsBusy = true; this.aiSettingsError = '';
+    try {
+      await saveAiKey(this.context(), AI_PROVIDERS[this.aiProvider].name, this.aiKey);
+      if (!this.aiDialog || version !== this.aiSettingsVersion) return false;
+      this.aiKeySaved = true; return true;
+    } catch (error) { if (version === this.aiSettingsVersion) this.aiSettingsError = (error as Error).message; return false; }
+    finally { if (version === this.aiSettingsVersion) this.aiSettingsBusy = false; }
+  }
+
+  private async clearAiSettings(): Promise<void> {
+    if (this.aiSettingsBusy) return;
+    const version = this.aiSettingsVersion;
+    this.aiSettingsBusy = true; this.aiSettingsError = '';
+    try {
+      await removeAiKey(AI_PROVIDERS[this.aiProvider].name);
+      if (!this.aiDialog || version !== this.aiSettingsVersion) return;
+      this.aiKey = ''; this.aiKeySaved = false;
+    } catch (error) { if (version === this.aiSettingsVersion) this.aiSettingsError = (error as Error).message; }
+    finally { if (version === this.aiSettingsVersion) this.aiSettingsBusy = false; }
+  }
+
   private async recognize(): Promise<void> {
-    if (!this.aiKey.trim()) { this.status = '请输入 API Key'; return; }
+    if (!await this.saveAiSettings()) return;
     const current = this.controller.getUrl();
-    if (!allowsTimetable(this.activeSchool, current)) { this.aiKey = ''; this.aiDialog = false; this.status = '请先打开本次确认范围内的完整学期课表'; return; }
-    const key = this.aiKey; this.aiKey = ''; this.aiDialog = false; this.busy = true;
+    if (!allowsTimetable(this.activeSchool, current)) { this.dismissAiSettings(); this.status = '请先打开本次确认范围内的完整学期课表'; return; }
+    const key = this.aiKey, provider = AI_PROVIDERS[this.aiProvider]; this.dismissAiSettings(); this.busy = true;
     const token = String(Date.now()); this.token = token; this.status = '正在识别网页课表…';
     try {
       const snapshot = decodeWebResult(await this.controller.runJavaScript(await this.script('AcademicAiCaptureScript')));
       if (JSON.parse(snapshot).error) throw new Error('当前网页没有可识别的课表内容');
-      const parsed = await recognizePage(snapshot, key, this.totalWeeks, AI_PROVIDERS[this.aiProvider]);
+      const parsed = await recognizePage(snapshot, key, this.totalWeeks, provider, (value: string) => {
+        if (this.token === token) this.diagnostics = value;
+      });
       if (this.token === token && allowsTimetable(this.activeSchool, this.controller.getUrl())) this.onImported(parsed);
     } catch (error) { if (this.token === token) this.status = '识别失败：' + ((error as Error).message || '请检查 API Key、账户额度和网络后重试'); }
     finally { if (this.token === token) this.busy = false; }
@@ -188,23 +249,35 @@ export struct AcademicImport {
     Stack({ alignContent: Alignment.Center }) {
       Column({ space: 14 }) {
         Text('AI 网页识别').fontSize(20).fontWeight(FontWeight.Bold).fontColor(this.dark ? DARK.text : LIGHT.text).width('100%');
-        Text('当前网页中筛选出的课表表格文字会直接发送至所选 AI 服务商；不会发送 Cookie、密码、表单输入或完整网页源码。API Key 仅在本次识别期间保存在内存中，应用不会保存。')
+        Text('仅将当前网页中筛选出的课表文字发送至所选 AI 服务商。Key 会加密保存在本机，下次自动填入；可随时清除。')
           .fontSize(13).lineHeight(20).fontColor(this.dark ? DARK.secondary : LIGHT.secondary).width('100%');
         Row({ space: 14 }) {
           ForEach(AI_PROVIDERS, (provider: AiProvider, index: number) => {
             Radio({ value: provider.name, group: 'aiProvider' }).checked(this.aiProvider === index)
-              .radioStyle({ checkedBackgroundColor: this.dark ? DARK.primary : LIGHT.primary }).onChange((selected: boolean) => { if (selected) this.aiProvider = index; });
+              .id('ai-provider-' + provider.name).enabled(!this.aiSettingsBusy)
+              .radioStyle({ checkedBackgroundColor: this.dark ? DARK.primary : LIGHT.primary }).onChange((selected: boolean) => { if (selected) this.selectAiProvider(index); });
             Text(provider.name).fontSize(14).fontColor(this.dark ? DARK.text : LIGHT.text);
           });
         }
         TextInput({ text: this.aiKey, placeholder: 'API Key' }).type(InputType.Password).id('ai-key').height(56)
           .backgroundColor(this.dark ? DARK.surface : LIGHT.surface).fontColor(this.dark ? DARK.text : LIGHT.text)
-          .border({ width: 1, color: this.dark ? DARK.divider : LIGHT.divider }).borderRadius(8).onChange((value: string) => this.aiKey = value);
+          .enabled(!this.aiSettingsBusy).border({ width: 1, color: this.dark ? DARK.divider : LIGHT.divider }).borderRadius(8)
+          .onChange((value: string) => { if (value !== this.aiKey) { this.aiKey = value; this.aiKeySaved = false; this.aiSettingsError = ''; } });
+        Row() {
+          Button('保存 Key').id('ai-save-key').backgroundColor(Color.Transparent).fontColor(this.dark ? DARK.primary : LIGHT.primary)
+            .enabled(!this.aiSettingsBusy && this.aiKey.trim().length > 0).onClick(() => this.saveAiSettings());
+          Blank();
+          Button('清除已保存 Key').id('ai-clear-key').backgroundColor(Color.Transparent).fontColor(this.dark ? DARK.primary : LIGHT.primary)
+            .enabled(!this.aiSettingsBusy).onClick(() => this.clearAiSettings());
+        }.width('100%');
+        Text(this.aiSettingsError || (this.aiSettingsBusy ? '正在读取或保存 Key…' : this.aiKeySaved ? '已保存到本机，识别时自动使用' : '点“保存 Key”或“识别”后会记住 Key'))
+          .id('ai-key-status').fontSize(12).fontColor(this.dark ? DARK.secondary : LIGHT.secondary).width('100%');
         Text('AI 可能识别错误；结果仍会经过课程校验，并在写入前显示预览，请逐项核对。').fontSize(12).fontColor(this.dark ? DARK.tertiary : LIGHT.tertiary);
         Row() {
           Blank();
-          Button('取消').backgroundColor(Color.Transparent).fontColor(this.dark ? DARK.primary : LIGHT.primary).onClick(() => { this.aiKey = ''; this.aiDialog = false; });
-          Button('识别').backgroundColor(Color.Transparent).fontColor(this.dark ? DARK.primary : LIGHT.primary).onClick(() => this.recognize());
+          Button('取消').backgroundColor(Color.Transparent).fontColor(this.dark ? DARK.primary : LIGHT.primary).onClick(() => this.dismissAiSettings());
+          Button('识别').id('ai-recognize').backgroundColor(Color.Transparent).fontColor(this.dark ? DARK.primary : LIGHT.primary)
+            .enabled(!this.aiSettingsBusy).onClick(() => this.recognize());
         }.width('100%');
       }.padding(24).width('90%').backgroundColor(this.dark ? DARK.surface : LIGHT.surface).borderRadius(24);
     }.width('100%').height('100%').backgroundColor('#66000000');
@@ -264,7 +337,7 @@ export struct AcademicImport {
       Row({ space: 8 }) {
         this.toolbarButton(this.desktop ? '电脑模式 ✓' : '电脑模式', () => this.toggleDesktop());
         this.toolbarButton(this.landscape ? '竖屏' : '横屏', () => this.setOrientation(!this.landscape));
-        this.toolbarButton('AI 识别', () => { this.aiKey = ''; this.aiDialog = true; });
+        this.toolbarButton('AI 识别', () => this.openAiSettings());
         this.toolbarButton('诊断', () => {
           pasteboard.getSystemPasteboard().setDataSync(pasteboard.createData(pasteboard.MIMETYPE_TEXT_PLAIN, this.diagnostics || this.status));
           this.getUIContext().getPromptAction().showToast({ message: '诊断信息已复制' });

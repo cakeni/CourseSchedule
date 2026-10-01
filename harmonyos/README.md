@@ -11,7 +11,7 @@
 - 多学期创建、切换、编辑与删除；12 节开始和结束时间、默认提醒及批量应用；本地 Preferences 持久化。
 - 学校目录、中文/拼音搜索和分类筛选；教务网页登录页可直接修改网址并打开，支持手机/桌面模式、横屏、读取课表和脱敏诊断。
 - JSON、CSV、HTML、XLSX、文本导入；预览、无效项/重复/冲突检查、追加/替换、可选学期及设置恢复、导入撤销；系统文件选择器导入及 Android v2 格式导出。
-- 原版可选 DeepSeek/OpenAI 网页识别入口。使用者在界面中自行输入 Key，仅用于当次请求，不写入课表或本地设置。
+- 可选 DeepSeek/OpenAI 网页识别。使用者自行输入 Key，按服务商分别保存到系统加密资产存储；重新打开或重启自动填回，可随时清除，不进入课表备份。
 - 原生系统通知授权与代理提醒调度：提前量、单双周排除、学期起止、临近课程补发、重新排程与测试提醒。
 
 ## 验证范围与待验收项
@@ -38,6 +38,7 @@ DevEco Studio 打开 **本目录 `harmonyos`**，构建 `entry` 模块，选中�
 $env:DEVECO_SDK_HOME='D:/devco/DevEco Studio/sdk'
 & 'D:/devco/DevEco Studio/tools/node/node.exe' 'D:/devco/DevEco Studio/tools/hvigor/bin/hvigorw.js' assembleHap --mode module -p module=entry -p product=default --no-daemon --no-incremental
 node tests/FullPort.cjs
+node tests/AiRecognition.cjs
 node --test tests/ScheduleCore.test.ts
 ```
 
