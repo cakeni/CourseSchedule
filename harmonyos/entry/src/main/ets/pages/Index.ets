@@ -834,10 +834,11 @@ struct Index {
       Column() {
         ForEach(SECTIONS, () => { Column() {}.width('100%').height(this.sectionHeight()); });
       }.width('100%');
+      // Retained ForEach nodes keep builder arguments; refresh changed data and week status.
       ForEach(selectCoursesForWeek(this.state.courses, this.week, this.state.settings.showInactiveCourses).filter(c => c.dayOfWeek === day), (course: Course) => {
         Column() { this.courseCard(course, course.endSection - course.startSection + 1, courseInWeek(course, this.week)); }
           .width('100%').position({ x: 0, y: (course.startSection - 1) * this.sectionHeight() });
-      }, (course: Course) => String(course.id));
+      }, (course: Course) => `${currentSemesterId(this.state)}:${JSON.stringify(course)}:${courseInWeek(course, this.week)}`);
       if (this.quickDay === day) {
         Stack({ alignContent: Alignment.Center }) {
           Column() {
