@@ -801,22 +801,24 @@ struct Index {
   private courseCard(course: Course, span: number, active: boolean) {
     Column({ space: 0 }) {
       Text((active ? '' : '[非本周]\n') + this.courseDisplayName(course.courseName))
-        .fontSize(course.courseName.length >= 18 ? 9 : course.courseName.length >= 12 ? 10 : 11.5)
+        .id('course-name-' + course.id).minFontSize(9)
+        .maxFontSize(course.courseName.length >= 18 ? 9 : course.courseName.length >= 12 ? 10 : 11.5)
         .fontWeight(FontWeight.Bold).fontColor(Color.White).width('100%').maxLines(span === 1 ? 3 : 7)
+        .flexShrink(1).heightAdaptivePolicy(TextHeightAdaptivePolicy.LAYOUT_CONSTRAINT_FIRST)
         .textOverflow({ overflow: TextOverflow.Ellipsis });
       if (span >= 2 && course.classroom) {
-        Text('@' + course.classroom).fontSize(9).fontColor('#DCFFFFFF').width('100%')
+        Text('@' + course.classroom).id('course-room-' + course.id).fontSize(9).fontColor('#DCFFFFFF').width('100%')
           .maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis }).margin({ top: 3 });
       }
       if (span >= 2 && course.teacher) {
-        Text(course.teacher).fontSize(8.5).fontColor('#CDFFFFFF').width('100%')
+        Text(course.teacher).id('course-teacher-' + course.id).fontSize(8.5).fontColor('#CDFFFFFF').width('100%')
           .maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis })
           .margin({ top: course.classroom ? 1 : 3 });
       }
-    }.alignItems(HorizontalAlign.Start).justifyContent(FlexAlign.Center)
+    }.id('course-card-' + course.id).alignItems(HorizontalAlign.Start).justifyContent(FlexAlign.Center)
       .padding({ left: 6, right: 6, top: 5, bottom: 5 })
       .width('calc(100% - 6vp)').height(span * this.sectionHeight() - 6)
-      .margin(3).backgroundColor(this.color(course.colorIndex)).borderRadius(10)
+      .margin(3).backgroundColor(this.color(course.colorIndex)).borderRadius(10).clip(true)
       .border({ width: this.dark ? 0 : 1.25, color: '#BEFFFFFF' })
       .opacity((active ? 1 : 0.46) * this.entrance).translate({ y: 18 * (1 - this.entrance) })
       .accessibilityText(`${course.courseName}，${DAYS[course.dayOfWeek - 1]}，第${course.startSection}到${course.endSection}节`)
