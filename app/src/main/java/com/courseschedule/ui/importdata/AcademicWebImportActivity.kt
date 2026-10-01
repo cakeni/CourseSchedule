@@ -32,6 +32,7 @@ import android.widget.ScrollView
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.lifecycleScope
 import com.courseschedule.R
 import com.courseschedule.databinding.ActivityAcademicWebImportBinding
@@ -79,7 +80,7 @@ class AcademicWebImportActivity : AppCompatActivity() {
         private const val MIN_PARSING_DISPLAY_MILLIS = 360L
         private const val SUCCESS_DISPLAY_MILLIS = 1_100L
         private const val REQUEST_TIMEOUT_MILLIS = 45_000L
-        private const val AI_REQUEST_TIMEOUT_MILLIS = 105_000L
+        private const val AI_REQUEST_TIMEOUT_MILLIS = 220_000L
         private const val MAX_BROWSER_DOCUMENT_BYTES = 2_000_000
         private const val INCOMPLETE_DOCUMENT_CHECK = """
             (function () {
@@ -301,10 +302,39 @@ class AcademicWebImportActivity : AppCompatActivity() {
         }
         if (readsDisplayedPage) binding.btnFetchSchedule.setText(R.string.academic_read_displayed_term)
         binding.btnFetchSchedule.setOnClickListener { fetchCurrentSchedule() }
+        binding.btnAiRecognition.setOnClickListener { showAiWebImportDialog() }
+        binding.etWebAddress.setText(school.loginUrl)
+        binding.btnOpenWebAddress.setOnClickListener { openEditedAddress() }
         configureDisplayModes()
         updateResponsiveLayout(resources.configuration.orientation)
         setImportStatus(false, getString(R.string.academic_waiting_login))
         binding.webView.loadUrl(school.loginUrl)
+    }
+
+    private fun openEditedAddress() {
+        binding.tilWebAddress.error = null
+        val replacement = runCatching {
+            GenericAcademicImport.withAddress(school, binding.etWebAddress.text?.toString().orEmpty())
+        }.getOrElse { error -> binding.tilWebAddress.error = error.message; return }
+        val open = {
+            invalidateRequest()
+            binding.webView.stopLoading()
+            acceptedSslHosts.clear()
+            school = replacement
+            intent = schoolIntent(this, replacement).putExtra(EXTRA_TOTAL_WEEKS, totalWeeks)
+            binding.etWebAddress.setText(school.loginUrl)
+            binding.etWebAddress.clearFocus()
+            (getSystemService(INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager)
+                .hideSoftInputFromWindow(binding.etWebAddress.windowToken, 0)
+            setImportStatus(false, getString(R.string.academic_waiting_login))
+            binding.webView.loadUrl(school.loginUrl)
+        }
+        if (replacement.allowCleartext) {
+            MaterialAlertDialogBuilder(this).setTitle(R.string.academic_cleartext_title)
+                .setMessage(getString(R.string.academic_cleartext_detail, school.name, replacement.trustedHosts.first()))
+                .setPositiveButton(R.string.academic_cleartext_continue) { _, _ -> open() }
+                .setNegativeButton(R.string.cancel, null).show()
+        } else open()
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -982,6 +1012,7 @@ class AcademicWebImportActivity : AppCompatActivity() {
             binding.tvStatus.translationY = 0f
         }
         binding.statusProgress.visibility = if (loading) View.VISIBLE else View.GONE
+        binding.btnOpenWebAddress.isEnabled = !loading
         binding.statusIcon.visibility = if (loading) View.GONE else View.VISIBLE
         binding.statusIcon.setImageResource(if (success) R.drawable.ic_check else R.drawable.ic_school)
         binding.statusIcon.animate().cancel()
@@ -1007,6 +1038,7 @@ class AcademicWebImportActivity : AppCompatActivity() {
             binding.statusIcon.rotation = 0f
         }
         binding.btnFetchSchedule.isEnabled = !loading && !success
+        binding.btnAiRecognition.isEnabled = !loading && !success
         binding.btnOpenSchool.isEnabled = !loading && !success
         binding.btnFetchSchedule.alpha = if (binding.btnFetchSchedule.isEnabled) 1f else 0.72f
     }
@@ -1015,7 +1047,8 @@ class AcademicWebImportActivity : AppCompatActivity() {
         message: String,
         payload: String? = null,
         error: Throwable? = null,
-        allowAiFallback: Boolean = true
+        allowAiFallback: Boolean = true,
+        aiDiagnostic: String? = null
     ) {
         invalidateRequest()
         setImportStatus(false, getString(R.string.academic_fetch_failed))
@@ -1029,7 +1062,7 @@ class AcademicWebImportActivity : AppCompatActivity() {
                     payload = payload,
                     error = error ?: ImportFormatException(message),
                     currentUrl = currentUrl
-                )
+                ) + (aiDiagnostic?.let { "\nAI response: $it" } ?: "")
             }
             if (isFinishing || isDestroyed) return@launch
             pendingDiagnostic = diagnostic
@@ -1053,44 +1086,108 @@ class AcademicWebImportActivity : AppCompatActivity() {
     }
 
     private fun showAiWebImportDialog() {
-        if (isFinishing || isDestroyed || pageHadError ||
-            !school.allowsTimetable(binding.webView.url)) return
+        if (isFinishing || isDestroyed || activeRequestToken != null) return
+        if (pageHadError || !school.allowsTimetable(binding.webView.url)) {
+            Toast.makeText(this, R.string.academic_ai_no_schedule, Toast.LENGTH_LONG).show()
+            return
+        }
         val dialogView = layoutInflater.inflate(R.layout.dialog_ai_schedule_import, null)
         val providerGroup = dialogView.findViewById<RadioGroup>(R.id.groupAiProvider)
         val keyLayout = dialogView.findViewById<TextInputLayout>(R.id.inputAiApiKey)
         val keyInput = dialogView.findViewById<TextInputEditText>(R.id.etAiApiKey)
+        val keyStatus = dialogView.findViewById<TextView>(R.id.tvAiKeyStatus)
+        val saveKey = dialogView.findViewById<View>(R.id.btnSaveAiKey)
+        val clearKey = dialogView.findViewById<View>(R.id.btnClearAiKey)
+        val credentials = AiWebCredentials(this)
+        var savedKey = ""
+        var busy = false
+        var version = 0
         fun selectedProvider() = if (providerGroup.checkedRadioButtonId == R.id.radioAiOpenAi) {
             AiWebProvider.OPENAI
         } else {
             AiWebProvider.DEEPSEEK
         }
-        fun updateKeyHint() {
-            keyLayout.hint = getString(R.string.ai_api_key_hint_format, selectedProvider().displayName)
-            keyLayout.error = null
-        }
-        providerGroup.setOnCheckedChangeListener { _, _ -> updateKeyHint() }
-        updateKeyHint()
+        providerGroup.check(if (credentials.lastProvider() == AiWebProvider.OPENAI) R.id.radioAiOpenAi else R.id.radioAiDeepSeek)
         val dialog = MaterialAlertDialogBuilder(this)
             .setTitle(R.string.academic_ai_dialog_title)
             .setView(dialogView)
             .setPositiveButton(R.string.ai_start_recognition, null)
             .setNegativeButton(R.string.cancel, null)
             .create()
+        fun setBusy(value: Boolean) {
+            busy = value
+            keyInput.isEnabled = !value
+            saveKey.isEnabled = !value
+            clearKey.isEnabled = !value
+            for (index in 0 until providerGroup.childCount) providerGroup.getChildAt(index).isEnabled = !value
+            dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE)?.isEnabled = !value
+        }
+        fun updateKeyStatus() {
+            keyStatus.text = if (savedKey.isNotBlank() && keyInput.text?.toString()?.trim() == savedKey)
+                getString(R.string.ai_key_saved_format, selectedProvider().displayName) else getString(R.string.ai_key_unsaved)
+        }
+        fun loadKey() {
+            val provider = selectedProvider()
+            val currentVersion = ++version
+            setBusy(true)
+            savedKey = ""
+            keyInput.setText("")
+            keyLayout.hint = getString(R.string.ai_api_key_hint_format, provider.displayName)
+            keyLayout.error = null
+            keyStatus.setText(R.string.ai_key_loading)
+            lifecycleScope.launch {
+                val result = withContext(Dispatchers.IO) { runCatching { credentials.load(provider) } }
+                if (!dialog.isShowing || currentVersion != version) return@launch
+                result.onSuccess { savedKey = it; keyInput.setText(it) }
+                    .onFailure { keyLayout.error = getString(R.string.ai_key_load_failed) }
+                setBusy(false)
+                updateKeyStatus()
+            }
+        }
+        fun saveCurrentKey(recognize: Boolean) {
+            if (busy) return
+            val provider = selectedProvider()
+            val key = runCatching {
+                AiWebScheduleRecognizer.normalizeKey(keyInput.text?.toString().orEmpty(), provider)
+            }.getOrElse { error -> keyLayout.error = error.message; return }
+            val currentVersion = ++version
+            setBusy(true)
+            keyLayout.error = null
+            lifecycleScope.launch {
+                val result = withContext(Dispatchers.IO) { runCatching { credentials.save(provider, key) } }
+                if (!dialog.isShowing || currentVersion != version) return@launch
+                setBusy(false)
+                result.onSuccess {
+                    savedKey = key
+                    keyInput.setText(key)
+                    updateKeyStatus()
+                    if (recognize) { dialog.dismiss(); startAiWebRecognition(key, provider) }
+                }.onFailure { keyLayout.error = getString(R.string.ai_key_save_failed) }
+            }
+        }
+        providerGroup.setOnCheckedChangeListener { _, _ -> loadKey() }
+        keyInput.doAfterTextChanged { if (!busy) { keyLayout.error = null; updateKeyStatus() } }
+        saveKey.setOnClickListener { saveCurrentKey(false) }
+        clearKey.setOnClickListener {
+            if (busy) return@setOnClickListener
+            val provider = selectedProvider()
+            val currentVersion = ++version
+            setBusy(true)
+            lifecycleScope.launch {
+                val result = withContext(Dispatchers.IO) { runCatching { credentials.remove(provider) } }
+                if (!dialog.isShowing || currentVersion != version) return@launch
+                result.onSuccess { savedKey = ""; keyInput.setText(""); keyLayout.error = null }
+                    .onFailure { keyLayout.error = getString(R.string.ai_key_clear_failed) }
+                setBusy(false)
+                updateKeyStatus()
+            }
+        }
+        dialog.setOnDismissListener { version++; savedKey = ""; keyInput.text?.clear() }
         dialog.setOnShowListener {
             dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).setOnClickListener {
-                val provider = selectedProvider()
-                val apiKey = keyInput.text?.toString()?.trim().orEmpty()
-                if (apiKey.isBlank()) {
-                    keyLayout.error = getString(
-                        R.string.ai_api_key_required_format,
-                        provider.displayName
-                    )
-                    return@setOnClickListener
-                }
-                keyInput.text?.clear()
-                dialog.dismiss()
-                startAiWebRecognition(apiKey, provider)
+                saveCurrentKey(true)
             }
+            loadKey()
         }
         dialog.show()
     }
@@ -1142,13 +1239,15 @@ class AcademicWebImportActivity : AppCompatActivity() {
                 getString(R.string.academic_ai_recognizing_format, provider.displayName)
             )
             lifecycleScope.launch {
+                var diagnostic = ""
                 val result = runCatching {
                     withContext(Dispatchers.IO) {
                         AiWebScheduleRecognizer().recognize(
                             snapshot,
                             apiKey,
                             totalWeeks,
-                            provider
+                            provider,
+                            onDiagnostic = { diagnostic = it }
                         )
                     }
                 }
@@ -1156,9 +1255,10 @@ class AcademicWebImportActivity : AppCompatActivity() {
                 result.onSuccess { receiveAiSchedule(requestToken, it) }
                     .onFailure { failure ->
                         showFetchError(
-                            failure.message ?: getString(R.string.academic_fetch_failed_detail),
+                            AiWebScheduleRecognizer.failureMessage(failure, provider),
                             error = failure,
-                            allowAiFallback = false
+                            allowAiFallback = false,
+                            aiDiagnostic = diagnostic.takeIf { it.isNotEmpty() }
                         )
                     }
             }

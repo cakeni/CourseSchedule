@@ -172,7 +172,7 @@ object AcademicSchools {
         id = "swpu",
         name = "西南石油大学",
         system = AcademicSystem.WISEDU,
-        loginUrl = "https://deancs.swpu.edu.cn/xsxk/profile/index.html",
+        loginUrl = "https://deanservices.swpu.edu.cn/jwapp/sys/jwauthapp/login/index.html",
         trustedHosts = setOf("swpu.edu.cn", "deanservices.swpu.edu.cn", "deancs.swpu.edu.cn"),
         verified = true,
         adapterId = AcademicAdapterRegistry.WISEDU_AUTO,

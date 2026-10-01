@@ -74,6 +74,14 @@ internal object GenericAcademicImport {
         return create(system, address, profiles.firstOrNull { it.system == system }?.id)
     }
 
+    fun withAddress(school: AcademicSchool, address: String): AcademicSchool {
+        val definition = profile(school.genericProfileId)
+            ?: profiles.firstOrNull { it.system == school.system }
+            ?: throw ImportFormatException("该学校没有可复用的本地解析器")
+        return createCatalog(definition, address, address.trim().startsWith("http://", ignoreCase = true),
+            adapterId = school.adapterId).copy(name = school.name)
+    }
+
     fun create(profileId: String, address: String): AcademicSchool {
         val profile = profile(profileId) ?: throw ImportFormatException("不支持的教务系统类型")
         return create(profile.system, address, profile.id)

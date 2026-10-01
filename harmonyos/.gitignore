@@ -1,0 +1,8 @@
+/.hvigor/
+/oh_modules/
+/build/
+/entry/build/
+/entry/oh_modules/
+/local.properties
+*.hap
+*.app

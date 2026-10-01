@@ -14,7 +14,7 @@ class AcademicSchoolTest {
         assertFalse(AcademicSchools.NUAA_GRADUATE.verified)
         assertFalse(AcademicSchools.NUAA.isGraduate)
         assertTrue(AcademicSchools.NUAA_GRADUATE.isGraduate)
-        assertEquals("https://deancs.swpu.edu.cn/xsxk/profile/index.html", AcademicSchools.SWPU.loginUrl)
+        assertEquals("https://deanservices.swpu.edu.cn/jwapp/sys/jwauthapp/login/index.html", AcademicSchools.SWPU.loginUrl)
         assertEquals("http://jw.sdufe.edu.cn", AcademicSchools.SDUFE.loginUrl)
         assertNull(AcademicSchools.find("made-up-school"))
         assertNull(AcademicSchools.find(null))

@@ -96,6 +96,8 @@
     <string name="academic_import_description">搜索学校 · 自动匹配教务入口和系统类型</string>
     <string name="academic_choose_school">选择学校</string>
     <string name="academic_search_school">搜索学校名称或教务域名</string>
+    <string name="academic_edit_web_address">教务网址，可自行修改</string>
+    <string name="academic_open_web_address">打开</string>
     <string name="academic_category_all">全部</string>
     <string name="academic_category_undergraduate">专科及本科</string>
     <string name="academic_category_graduate">研究生</string>
@@ -208,8 +210,17 @@
     <string name="import_from_file">从文件导入</string>
     <string name="import_from_text">从文本导入</string>
     <string name="academic_ai_fallback">用 AI 识别当前网页</string>
+    <string name="academic_ai_recognize">AI 识别</string>
     <string name="academic_ai_dialog_title">AI 网页识别</string>
-    <string name="academic_ai_privacy_notice">当前网页中筛选出的课表表格文字会直接发送至所选 AI 服务商；不会发送 Cookie、密码、表单输入或完整网页源码。API Key 仅在本次识别期间保存在内存中，应用不会保存。</string>
+    <string name="academic_ai_privacy_notice">当前网页中筛选出的课表表格文字会直接发送至所选 AI 服务商；不会发送 Cookie、密码、表单输入或完整网页源码。API Key 加密保存在此设备上，可随时清除；不会放入课表备份或安装包。</string>
+    <string name="ai_save_key">保存 Key</string>
+    <string name="ai_clear_key">清除 Key</string>
+    <string name="ai_key_saved_format">%1$s Key 已保存，下次自动填写</string>
+    <string name="ai_key_unsaved">当前输入尚未保存</string>
+    <string name="ai_key_loading">正在读取已保存的 Key…</string>
+    <string name="ai_key_load_failed">已保存的 Key 无法读取，请重新填写</string>
+    <string name="ai_key_save_failed">Key 保存失败，请重试</string>
+    <string name="ai_key_clear_failed">Key 清除失败，请重试</string>
     <string name="academic_ai_provider_label">AI 服务商</string>
     <string name="ai_provider_deepseek">DeepSeek</string>
     <string name="ai_provider_openai">OpenAI</string>
