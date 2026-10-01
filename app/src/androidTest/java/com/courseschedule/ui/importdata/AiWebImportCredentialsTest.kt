@@ -136,8 +136,8 @@ class AiWebImportCredentialsTest {
     private fun openDialog(scenario: ActivityScenario<AcademicWebImportActivity>) {
         scenario.onActivity { activity ->
             AcademicWebImportActivity::class.java.getDeclaredField("pageHadError").apply { isAccessible = true }.setBoolean(activity, false)
-            AcademicWebImportActivity::class.java.getDeclaredMethod("showAiWebImportDialog").apply { isAccessible = true }.invoke(activity)
         }
+        onView(withId(R.id.btnAiRecognition)).check(matches(isDisplayed())).perform(click())
         awaitKeyReady()
     }
 

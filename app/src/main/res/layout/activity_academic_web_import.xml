@@ -192,6 +192,15 @@
                 android:text="@string/academic_landscape_mode"
                 app:checkedIconVisible="true"
                 app:ensureMinTouchTargetSize="true" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/btnAiRecognition"
+                style="@style/CourseScheduleChoiceChip"
+                android:checkable="false"
+                android:minHeight="48dp"
+                android:text="@string/academic_ai_recognize"
+                app:checkedIconVisible="false"
+                app:ensureMinTouchTargetSize="true" />
         </com.google.android.material.chip.ChipGroup>
 
         <com.google.android.material.button.MaterialButton

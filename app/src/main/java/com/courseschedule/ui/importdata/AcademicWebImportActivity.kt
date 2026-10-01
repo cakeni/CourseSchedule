@@ -302,6 +302,7 @@ class AcademicWebImportActivity : AppCompatActivity() {
         }
         if (readsDisplayedPage) binding.btnFetchSchedule.setText(R.string.academic_read_displayed_term)
         binding.btnFetchSchedule.setOnClickListener { fetchCurrentSchedule() }
+        binding.btnAiRecognition.setOnClickListener { showAiWebImportDialog() }
         binding.etWebAddress.setText(school.loginUrl)
         binding.btnOpenWebAddress.setOnClickListener { openEditedAddress() }
         configureDisplayModes()
@@ -1037,6 +1038,7 @@ class AcademicWebImportActivity : AppCompatActivity() {
             binding.statusIcon.rotation = 0f
         }
         binding.btnFetchSchedule.isEnabled = !loading && !success
+        binding.btnAiRecognition.isEnabled = !loading && !success
         binding.btnOpenSchool.isEnabled = !loading && !success
         binding.btnFetchSchedule.alpha = if (binding.btnFetchSchedule.isEnabled) 1f else 0.72f
     }
@@ -1084,8 +1086,11 @@ class AcademicWebImportActivity : AppCompatActivity() {
     }
 
     private fun showAiWebImportDialog() {
-        if (isFinishing || isDestroyed || activeRequestToken != null || pageHadError ||
-            !school.allowsTimetable(binding.webView.url)) return
+        if (isFinishing || isDestroyed || activeRequestToken != null) return
+        if (pageHadError || !school.allowsTimetable(binding.webView.url)) {
+            Toast.makeText(this, R.string.academic_ai_no_schedule, Toast.LENGTH_LONG).show()
+            return
+        }
         val dialogView = layoutInflater.inflate(R.layout.dialog_ai_schedule_import, null)
         val providerGroup = dialogView.findViewById<RadioGroup>(R.id.groupAiProvider)
         val keyLayout = dialogView.findViewById<TextInputLayout>(R.id.inputAiApiKey)
