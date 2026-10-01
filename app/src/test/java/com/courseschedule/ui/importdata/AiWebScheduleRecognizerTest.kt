@@ -144,7 +144,7 @@ class AiWebScheduleRecognizerTest {
         assertEquals(1, AiWebScheduleRecognizer.parseResponse(response(payload.toString()), 20, AiWebProvider.DEEPSEEK).courses.size)
     }
 
-    private class ResponseConnection(val status: Int, val body: String, val timeout: Boolean = false) :
+    private open class ResponseConnection(val status: Int, val body: String, val timeout: Boolean = false) :
         HttpURLConnection(URL("https://fixture.invalid/responses")) {
         val request = ByteArrayOutputStream()
         var disconnected = false
@@ -187,5 +187,49 @@ class AiWebScheduleRecognizerTest {
             AiWebScheduleRecognizer { connections[calls++] }.recognize("{}", "PRIVATE_KEY", 20, AiWebProvider.DEEPSEEK)
         }
         assertEquals(2, calls); assertTrue(connections.all { it.disconnected })
+    }
+
+    @Test fun cleansBoundaryClipboardCharactersAndRejectsInvalidKeysBeforeOpeningConnection() {
+        val key = "TEST_KEY_123"
+        listOf(" $key\u0001", "\u0000$key\n", "\u200b$key\ufeff", "\u2028$key\u007f").forEach { copied ->
+            val connection = ResponseConnection(200, response(schedule))
+            AiWebScheduleRecognizer { connection }.recognize("{}", copied, 20, AiWebProvider.DEEPSEEK)
+            assertEquals("Bearer $key", connection.getRequestProperty("Authorization"))
+        }
+        listOf("TEST\u0001KEY", "TEST\nKEY", "TEST KEY", "TEST\u200bKEY", "TEST中文KEY", "TEST\u007fKEY", "\u0001\ufeff ").forEach { invalid ->
+            var calls = 0
+            val error = assertThrows(ImportFormatException::class.java) {
+                AiWebScheduleRecognizer { calls++; ResponseConnection(200, response(schedule)) }
+                    .recognize("{}", invalid, 20, AiWebProvider.DEEPSEEK)
+            }
+            assertEquals(0, calls)
+            assertFalse(error.message!!.contains("TEST"))
+            assertFalse(error.message!!.contains("Bearer"))
+        }
+    }
+
+    @Test fun unexpectedClientErrorsCannotEchoCredentialsIntoUiOrDiagnostics() {
+        val key = "TEST_PRIVATE_KEY"
+        val connection = object : ResponseConnection(200, response(schedule)) {
+            override fun setRequestProperty(name: String, value: String) {
+                throw IllegalArgumentException("Unexpected char in header value: $value")
+            }
+        }
+        var calls = 0
+        val diagnostics = mutableListOf<String>()
+        val error = assertThrows(ImportFormatException::class.java) {
+            AiWebScheduleRecognizer { calls++; connection }.recognize("{}", key, 20, AiWebProvider.DEEPSEEK, diagnostics::add)
+        }
+        assertEquals(1, calls)
+        assertTrue(connection.disconnected)
+        assertEquals(null, error.cause)
+        assertFalse(error.message!!.contains(key))
+        assertFalse(error.message!!.contains("header value"))
+        assertTrue(diagnostics.none { it.contains(key) })
+        val raw = IllegalArgumentException("Unexpected char in header value: Bearer $key")
+        assertFalse(AiWebScheduleRecognizer.failureMessage(raw, AiWebProvider.DEEPSEEK).contains(key))
+        val diagnostic = AcademicImportDiagnostics.create("1.0.13", AcademicSchools.SWPU, null, raw)
+        assertFalse(diagnostic.contains(key))
+        assertFalse(diagnostic.contains("Bearer"))
     }
 }

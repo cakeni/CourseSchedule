@@ -35,12 +35,13 @@ internal class AiWebCredentials(context: Context) {
             ?: error("Saved credential encryption key is unavailable")
         cipher.init(Cipher.DECRYPT_MODE, key, GCMParameterSpec(128, Base64.decode(stored.getString("iv"), Base64.NO_WRAP)))
         cipher.updateAAD(provider.name.toByteArray(Charsets.UTF_8))
-        String(cipher.doFinal(Base64.decode(stored.getString("secret"), Base64.NO_WRAP)), Charsets.UTF_8)
+        AiWebScheduleRecognizer.normalizeKey(
+            String(cipher.doFinal(Base64.decode(stored.getString("secret"), Base64.NO_WRAP)), Charsets.UTF_8), provider
+        )
     }
 
     fun save(provider: AiWebProvider, apiKey: String) = synchronized(LOCK) {
-        val key = apiKey.trim()
-        require(key.isNotEmpty())
+        val key = AiWebScheduleRecognizer.normalizeKey(apiKey, provider)
         val store = keyStore()
         val encryptionKey = store.getKey(KEY_ALIAS, null) as? SecretKey ?: KeyGenerator
             .getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore").apply {

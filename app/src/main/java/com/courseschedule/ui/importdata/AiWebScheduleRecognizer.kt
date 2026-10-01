@@ -36,8 +36,7 @@ internal class AiWebScheduleRecognizer(
         provider: AiWebProvider,
         onDiagnostic: (String) -> Unit = {}
     ): ParsedImport {
-        val key = apiKey.trim()
-        if (key.isBlank()) throw ImportFormatException("请输入 ${provider.displayName} API Key")
+        val key = normalizeKey(apiKey, provider)
         if (pageSnapshot.isBlank()) throw ImportFormatException("当前网页没有可识别的课表内容")
         if (pageSnapshot.length > MAX_SNAPSHOT_CHARS) {
             throw ImportFormatException("当前网页课表内容过大，请只保留一个学期的课表后重试")
@@ -45,7 +44,8 @@ internal class AiWebScheduleRecognizer(
         val weeks = totalWeeks.coerceIn(1, 52)
         for (attempt in 0..1) {
             val requestBody = createRequest(pageSnapshot, weeks, provider, attempt > 0).toByteArray(Charsets.UTF_8)
-            val connection = openConnection(URL(provider.apiUrl))
+            val connection = try { openConnection(URL(provider.apiUrl)) }
+                catch (error: Exception) { throw ImportFormatException(failureMessage(error, provider)) }
             try {
                 connection.requestMethod = "POST"
                 connection.connectTimeout = 15_000
@@ -79,8 +79,11 @@ internal class AiWebScheduleRecognizer(
                 throw ImportFormatException("连接 ${provider.displayName} 超时，请检查网络后重试")
             } catch (_: IOException) {
                 throw ImportFormatException("无法连接 ${provider.displayName}，请检查当前网络后重试")
+            } catch (error: Exception) {
+                // HTTP client exceptions may echo Authorization; never propagate their message or cause.
+                throw ImportFormatException(failureMessage(error, provider))
             } finally {
-                connection.disconnect()
+                runCatching { connection.disconnect() }
             }
         }
         throw ImportFormatException("AI 未返回有效课表")
@@ -89,6 +92,21 @@ internal class AiWebScheduleRecognizer(
     companion object {
         internal const val MAX_SNAPSHOT_CHARS = 180_000
         private const val MAX_RESPONSE_BYTES = 2_000_000
+
+        internal fun normalizeKey(value: String, provider: AiWebProvider): String {
+            val key = value.trim {
+                it.isWhitespace() || Character.isISOControl(it) || Character.getType(it) == Character.FORMAT.toInt()
+            }
+            if (key.isEmpty()) throw ImportFormatException("请输入 ${provider.displayName} API Key")
+            if (key.any { it !in '!'..'~' }) {
+                throw ImportFormatException("API Key 含有空格、不可见字符或非英文字符，请重新复制完整 Key")
+            }
+            return key
+        }
+
+        internal fun failureMessage(error: Throwable, provider: AiWebProvider): String =
+            if (error is ImportFormatException && !error.message.isNullOrBlank()) error.message.orEmpty()
+            else "${provider.displayName} 识别失败，请检查 Key 和网络后重试"
 
         internal fun createRequest(
             pageSnapshot: String,

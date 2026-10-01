@@ -1147,11 +1147,9 @@ class AcademicWebImportActivity : AppCompatActivity() {
         fun saveCurrentKey(recognize: Boolean) {
             if (busy) return
             val provider = selectedProvider()
-            val key = keyInput.text?.toString()?.trim().orEmpty()
-            if (key.isBlank()) {
-                keyLayout.error = getString(R.string.ai_api_key_required_format, provider.displayName)
-                return
-            }
+            val key = runCatching {
+                AiWebScheduleRecognizer.normalizeKey(keyInput.text?.toString().orEmpty(), provider)
+            }.getOrElse { error -> keyLayout.error = error.message; return }
             val currentVersion = ++version
             setBusy(true)
             keyLayout.error = null
@@ -1161,6 +1159,7 @@ class AcademicWebImportActivity : AppCompatActivity() {
                 setBusy(false)
                 result.onSuccess {
                     savedKey = key
+                    keyInput.setText(key)
                     updateKeyStatus()
                     if (recognize) { dialog.dismiss(); startAiWebRecognition(key, provider) }
                 }.onFailure { keyLayout.error = getString(R.string.ai_key_save_failed) }
@@ -1256,7 +1255,7 @@ class AcademicWebImportActivity : AppCompatActivity() {
                 result.onSuccess { receiveAiSchedule(requestToken, it) }
                     .onFailure { failure ->
                         showFetchError(
-                            failure.message ?: getString(R.string.academic_fetch_failed_detail),
+                            AiWebScheduleRecognizer.failureMessage(failure, provider),
                             error = failure,
                             allowAiFallback = false,
                             aiDiagnostic = diagnostic.takeIf { it.isNotEmpty() }
