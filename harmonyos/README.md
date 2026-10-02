@@ -47,3 +47,5 @@ node --test tests/ScheduleCore.test.ts
 ```
 
 模拟器已允许安装上述未签名 HAP；真机调试和发布需配置签名。核心校验脚本使用 DevEco 随附 TypeScript，其他安装路径可通过 `HARMONY_TYPESCRIPT` 指定。
+
+已接入可选 `signing.local.json` 或 `HARMONY_SIGNING_CONFIG` 本地签名配置；`HARMONY_REQUIRE_SIGNING=1` 会在缺少签名配置时停止构建。当前没有华为签名材料和鸿蒙真机，交付包仍未签名。生成证书、构建和凭证保管见 [签名配置说明](docs/signing-20261002/README.md)。

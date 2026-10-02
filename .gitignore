@@ -32,6 +32,12 @@ captures/
 *.keystore
 keystore.properties
 signing.properties
+*.p12
+*.p7b
+*.csr
+*.cer
+/harmonyos/signing/
+/harmonyos/signing.local.json
 .env
 .env.*
 

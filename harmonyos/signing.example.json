@@ -1,0 +1,13 @@
+{
+  "name": "local-device",
+  "type": "HarmonyOS",
+  "material": {
+    "storeFile": "signing/debug.p12",
+    "certpath": "signing/debug.cer",
+    "profile": "signing/debug.p7b",
+    "storePassword": "从 DevEco 复制加密的 storePassword",
+    "keyPassword": "从 DevEco 复制加密的 keyPassword",
+    "keyAlias": "debugKey",
+    "signAlg": "SHA256withECDSA"
+  }
+}
