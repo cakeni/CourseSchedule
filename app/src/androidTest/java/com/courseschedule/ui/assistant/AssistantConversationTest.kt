@@ -1,7 +1,14 @@
 package com.courseschedule.ui.assistant
 
 import android.app.Application
+import android.app.Activity
 import android.content.Intent
+import android.os.Bundle
+import android.view.View
+import android.view.ViewTreeObserver
+import android.widget.LinearLayout
+import android.widget.EditText
+import androidx.core.widget.NestedScrollView
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
@@ -34,6 +41,77 @@ class AssistantConversationTest {
     private val instrumentation = InstrumentationRegistry.getInstrumentation()
     private val context = instrumentation.targetContext
     private val stores = mutableListOf<ViewModelStore>()
+
+    @Test fun restoredConversationIsAtLatestMessageOnItsFirstDraw(): Unit = runBlocking {
+        withFixture { database, semester ->
+            val id = java.util.UUID.randomUUID().toString()
+            val dao = database.assistantConversationDao()
+            dao.insertConversation(com.courseschedule.data.entity.AssistantConversation(
+                id, semester.id, "已有对话", System.currentTimeMillis()))
+            repeat(20) { index ->
+                dao.insertMessage(com.courseschedule.data.entity.AssistantChatMessage(
+                    conversationId = id, role = "assistant", content = "历史消息 $index\n" + "已保存的课程安排\n".repeat(8)))
+            }
+            val preferences = context.getSharedPreferences("assistant_conversations", android.content.Context.MODE_PRIVATE)
+            preferences.edit().putString("active_${semester.id}", id).putString("draft_$id", "保留的草稿").commit()
+            val firstDraw = CountDownLatch(1)
+            var starterVisible = true
+            var drawnMessageCount = 0
+            var drawnDraft = ""
+            var atLatestMessage = false
+            val application = context.applicationContext as Application
+            val callbacks = object : Application.ActivityLifecycleCallbacks {
+                override fun onActivityResumed(activity: Activity) {
+                    if (activity !is CourseAssistantActivity) return
+                    val root = activity.findViewById<View>(android.R.id.content)
+                    val listener = object : ViewTreeObserver.OnDrawListener {
+                        override fun onDraw() {
+                            if (firstDraw.count == 0L) return
+                            starterVisible = activity.findViewById<View>(R.id.starterContent).visibility == View.VISIBLE
+                            drawnMessageCount = activity.findViewById<LinearLayout>(R.id.messagesContainer).childCount
+                            drawnDraft = activity.findViewById<EditText>(R.id.etMessage).text.toString()
+                            atLatestMessage = !activity.findViewById<NestedScrollView>(R.id.conversationScroll).canScrollVertically(1)
+                            firstDraw.countDown()
+                            root.post { root.viewTreeObserver.removeOnDrawListener(this) }
+                        }
+                    }
+                    root.viewTreeObserver.addOnDrawListener(listener)
+                }
+                override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) = Unit
+                override fun onActivityStarted(activity: Activity) = Unit
+                override fun onActivityPaused(activity: Activity) = Unit
+                override fun onActivityStopped(activity: Activity) = Unit
+                override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) = Unit
+                override fun onActivityDestroyed(activity: Activity) = Unit
+            }
+            instrumentation.runOnMainSync { application.registerActivityLifecycleCallbacks(callbacks) }
+            try {
+                ActivityScenario.launch<CourseAssistantActivity>(Intent(context, CourseAssistantActivity::class.java)).use { scenario ->
+                    assertTrue("The assistant must draw after loading", firstDraw.await(15, TimeUnit.SECONDS))
+                    assertFalse("Restored history must never draw the welcome screen", starterVisible)
+                    assertEquals(20, drawnMessageCount)
+                    assertEquals("保留的草稿", drawnDraft)
+                    assertTrue("History must start at the latest message without scrolling after entry", atLatestMessage)
+                    val presented = CountDownLatch(1)
+                    scenario.onActivity { activity ->
+                        activity.window.decorView.postOnAnimation {
+                            activity.window.decorView.postOnAnimation { presented.countDown() }
+                        }
+                    }
+                    assertTrue(presented.await(5, TimeUnit.SECONDS))
+                    instrumentation.waitForIdleSync()
+                    val screenshot = instrumentation.uiAutomation.takeScreenshot()
+                    java.io.File(context.getExternalFilesDir(null), "assistant-restored-first-frame.png").outputStream().use { output ->
+                        screenshot.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, output)
+                    }
+                    screenshot.recycle()
+                }
+            } finally {
+                instrumentation.runOnMainSync { application.unregisterActivityLifecycleCallbacks(callbacks) }
+                preferences.edit().remove("active_${semester.id}").remove("draft_$id").commit()
+            }
+        }
+    }
 
     @Test fun staleAndDamagedPlansAreDiscardedAndReceiptFailureRollsBackMutation(): Unit = runBlocking {
         withFixture { database, semester ->

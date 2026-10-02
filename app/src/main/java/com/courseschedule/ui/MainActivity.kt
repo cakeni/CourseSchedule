@@ -12,6 +12,7 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.HapticFeedbackConstants
+import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
 import android.view.MotionEvent
@@ -19,6 +20,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.PathInterpolator
 import android.widget.TextView
+import android.widget.PopupWindow
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -66,6 +68,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var viewModel: CourseViewModel
     private lateinit var weekPagerAdapter: WeekPagerAdapter
+    private var courseToolsPopup: PopupWindow? = null
 
     private var returnPreDraw: android.view.ViewTreeObserver.OnPreDrawListener? = null
     private var returnTable: CourseTableView? = null
@@ -364,6 +367,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onPause() {
+        courseToolsPopup?.dismiss()
         cancelScheduleReturnEntrance()
         super.onPause()
     }
@@ -721,14 +725,35 @@ class MainActivity : AppCompatActivity() {
         menu.findItem(R.id.action_today)?.actionView?.setOnClickListener {
             goToCurrentWeek()
         }
+        menu.findItem(R.id.action_course_assistant)?.actionView?.setOnClickListener(::showCourseTools)
         return true
+    }
+
+    private fun showCourseTools(anchor: View) {
+        if (courseToolsPopup?.isShowing == true) return
+        val content = layoutInflater.inflate(R.layout.popup_course_tools, binding.toolbar, false)
+        content.clipToOutline = true
+        val popup = PopupWindow(content,
+            minOf(dp(280f).roundToInt(), binding.root.width - dp(32f).roundToInt()),
+            ViewGroup.LayoutParams.WRAP_CONTENT, true).apply {
+            setBackgroundDrawable(ContextCompat.getDrawable(this@MainActivity, R.drawable.bg_course_tools_popup))
+            elevation = dp(8f)
+            isOutsideTouchable = true
+            setOnDismissListener { courseToolsPopup = null }
+        }
+        content.setOnClickListener {
+            popup.dismiss()
+            openTab(Intent(this, CourseAssistantActivity::class.java)
+                .putExtra(CourseAssistantActivity.EXTRA_DISPLAYED_WEEK, currentWeek))
+        }
+        courseToolsPopup = popup
+        popup.showAsDropDown(anchor, -dp(8f).roundToInt(), dp(4f).roundToInt(), Gravity.END)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_course_assistant -> {
-                openTab(Intent(this, CourseAssistantActivity::class.java)
-                    .putExtra(CourseAssistantActivity.EXTRA_DISPLAYED_WEEK, currentWeek))
+                binding.toolbar.menu.findItem(item.itemId)?.actionView?.let(::showCourseTools)
                 true
             }
             R.id.action_add_course -> {

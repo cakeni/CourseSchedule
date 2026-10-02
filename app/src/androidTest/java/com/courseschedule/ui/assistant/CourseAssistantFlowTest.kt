@@ -179,7 +179,12 @@ class CourseAssistantFlowTest {
         }
         ActivityScenario.launch<MainActivity>(Intent(context, MainActivity::class.java)).use {
             screenshot("assistant-entry")
-            androidx.test.espresso.Espresso.openActionBarOverflowOrOptionsMenu(context)
+            onView(withContentDescription(R.string.course_tools)).perform(click())
+            onView(withText(R.string.assistant_entry_description)).check(matches(isDisplayed()))
+            screenshot("assistant-entry-menu")
+            androidx.test.espresso.Espresso.pressBack()
+            onView(withId(R.id.weekPager)).check(matches(isDisplayed()))
+            onView(withContentDescription(R.string.course_tools)).perform(click())
             onView(withText(R.string.assistant_title)).perform(click())
             screenshot("assistant-chat")
             onView(withId(R.id.btnConfigureApi)).perform(click())

@@ -415,6 +415,8 @@
     <string name="assistant_config_cleared">已清除 API 配置</string>
     <string name="assistant_config_save_failed">配置保存失败，请重试。</string>
     <string name="assistant_undo">撤销本对话最近一次课程操作</string>
+    <string name="course_tools">课程工具</string>
+    <string name="assistant_entry_description">查课、加课与调课</string>
     <string name="assistant_history">历史记录</string>
     <string name="assistant_new_conversation">新对话</string>
     <string name="assistant_delete_conversation">删除当前对话</string>

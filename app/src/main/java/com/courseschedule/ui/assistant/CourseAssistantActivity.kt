@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.ViewTreeObserver
 import android.view.Gravity
 import android.view.inputmethod.EditorInfo
 import android.widget.Toast
@@ -30,6 +31,7 @@ class CourseAssistantActivity : AppCompatActivity() {
     private lateinit var viewModel: CourseAssistantViewModel
     private var restoringDraft = false
     private var loadingOlder = false
+    private var initialContentDrawn = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,6 +41,21 @@ class CourseAssistantActivity : AppCompatActivity() {
         supportActionBar?.setTitle(R.string.assistant_title)
         binding.toolbar.setNavigationOnClickListener { finish() }
         viewModel = ViewModelProvider(this)[CourseAssistantViewModel::class.java]
+        // Keep the schedule visible until the restored conversation is ready for its first frame.
+        binding.root.viewTreeObserver.addOnPreDrawListener(object : ViewTreeObserver.OnPreDrawListener {
+            override fun onPreDraw(): Boolean {
+                if (!viewModel.initialConversationLoaded) return false
+                binding.root.viewTreeObserver.removeOnPreDrawListener(this)
+                if (viewModel.messages.value.orEmpty().isNotEmpty()) {
+                    val smoothScrolling = binding.conversationScroll.isSmoothScrollingEnabled
+                    binding.conversationScroll.isSmoothScrollingEnabled = false
+                    binding.conversationScroll.fullScroll(View.FOCUS_DOWN)
+                    binding.conversationScroll.isSmoothScrollingEnabled = smoothScrolling
+                }
+                initialContentDrawn = true
+                return true
+            }
+        })
         binding.btnConfigureApi.setOnClickListener { showConfig() }
         binding.btnSend.setOnClickListener { send() }
         binding.btnExampleSimple.setOnClickListener { fillExample(R.string.assistant_example_simple) }
@@ -104,7 +121,7 @@ class CourseAssistantActivity : AppCompatActivity() {
                     viewModel.pendingChanges.value != null) message.content.substringBefore("\n\n") else message.content
                 binding.messagesContainer.addView(row.root)
             }
-            if (messages.isNotEmpty() && !loadingOlder) {
+            if (initialContentDrawn && messages.isNotEmpty() && !loadingOlder) {
                 binding.conversationScroll.post { binding.conversationScroll.fullScroll(View.FOCUS_DOWN) }
             } else if (loadingOlder) {
                 binding.conversationScroll.post { binding.conversationScroll.fullScroll(View.FOCUS_UP) }
@@ -125,7 +142,9 @@ class CourseAssistantActivity : AppCompatActivity() {
                     R.string.assistant_confirm_delete else R.string.assistant_confirm_changes)
                 binding.etMessage.clearFocus()
                 WindowInsetsControllerCompat(window, binding.root).hide(WindowInsetsCompat.Type.ime())
-                binding.conversationScroll.post { binding.conversationScroll.fullScroll(View.FOCUS_DOWN) }
+                if (initialContentDrawn) {
+                    binding.conversationScroll.post { binding.conversationScroll.fullScroll(View.FOCUS_DOWN) }
+                }
             }
             updateControls()
         }

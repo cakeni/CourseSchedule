@@ -62,7 +62,7 @@
             android:exported="false"
             android:label="@string/assistant_title"
             android:windowSoftInputMode="adjustResize"
-            android:theme="@style/Theme.CourseSchedule" />
+            android:theme="@style/Theme.CourseSchedule.Assistant" />
 
         <activity
             android:name=".ui.settings.SettingsActivity"
