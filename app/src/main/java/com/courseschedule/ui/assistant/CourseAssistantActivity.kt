@@ -5,20 +5,24 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.view.Gravity
 import android.view.inputmethod.EditorInfo
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.core.widget.doAfterTextChanged
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.core.view.doOnLayout
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.ConcatAdapter
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.courseschedule.databinding.AssistantHistoryHeaderBinding
+import com.courseschedule.databinding.AssistantPendingFooterBinding
+import android.content.Intent
+import com.courseschedule.ui.settings.SettingsActivity
 import com.courseschedule.R
 import com.courseschedule.databinding.ActivityCourseAssistantBinding
 import com.courseschedule.databinding.DialogAssistantApiConfigBinding
-import com.courseschedule.databinding.ItemAssistantMessageBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -28,6 +32,9 @@ import java.util.Locale
 class CourseAssistantActivity : AppCompatActivity() {
     private lateinit var binding: ActivityCourseAssistantBinding
     private lateinit var viewModel: CourseAssistantViewModel
+    private lateinit var header: AssistantHistoryHeaderBinding
+    private lateinit var footer: AssistantPendingFooterBinding
+    private val messageAdapter = AssistantMessageAdapter()
     private var restoringDraft = false
     private var loadingOlder = false
 
@@ -35,25 +42,34 @@ class CourseAssistantActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityCourseAssistantBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        binding.root.isFocusableInTouchMode = true
+        binding.root.requestFocus()
+        binding.conversationList.layoutManager = LinearLayoutManager(this)
+        header = AssistantHistoryHeaderBinding.inflate(layoutInflater, binding.conversationList, false)
+        footer = AssistantPendingFooterBinding.inflate(layoutInflater, binding.conversationList, false)
+        binding.conversationList.itemAnimator = null
+        binding.conversationList.adapter = ConcatAdapter(ConcatAdapter.Config.Builder()
+            .setStableIdMode(ConcatAdapter.Config.StableIdMode.ISOLATED_STABLE_IDS).build(),
+            AssistantPanelAdapter(header.root), messageAdapter, AssistantPanelAdapter(footer.root))
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setTitle(R.string.assistant_title)
         binding.toolbar.setNavigationOnClickListener { finish() }
         viewModel = ViewModelProvider(this)[CourseAssistantViewModel::class.java]
         binding.btnConfigureApi.setOnClickListener { showConfig() }
         binding.btnSend.setOnClickListener { send() }
-        binding.btnExampleSimple.setOnClickListener { fillExample(R.string.assistant_example_simple) }
-        binding.btnExampleDetails.setOnClickListener { fillExample(R.string.assistant_example_details) }
-        binding.btnExampleQuery.setOnClickListener { fillExample(R.string.assistant_example_query) }
-        binding.btnExampleDelete.setOnClickListener { fillExample(R.string.assistant_example_delete) }
-        binding.btnConfirmPending.setOnClickListener { viewModel.confirmPending() }
-        binding.btnCancelPending.setOnClickListener { viewModel.cancelPending() }
+        header.btnExampleSimple.setOnClickListener { fillExample(R.string.assistant_example_simple) }
+        header.btnExampleDetails.setOnClickListener { fillExample(R.string.assistant_example_details) }
+        header.btnExampleQuery.setOnClickListener { fillExample(R.string.assistant_example_query) }
+        header.btnExampleDelete.setOnClickListener { fillExample(R.string.assistant_example_delete) }
+        footer.btnConfirmPending.setOnClickListener { viewModel.confirmPending() }
+        footer.btnCancelPending.setOnClickListener { viewModel.cancelPending() }
         binding.btnStopRequest.setOnClickListener { viewModel.stopRequest() }
         binding.btnRetryRequest.setOnClickListener {
             if (viewModel.configured.value != true) showConfig() else try {
                 viewModel.retry()
             } catch (error: IllegalArgumentException) { binding.inputMessage.error = error.message }
         }
-        binding.btnOlderMessages.setOnClickListener { loadingOlder = true; viewModel.loadOlderMessages() }
+        header.btnOlderMessages.setOnClickListener { loadingOlder = true; viewModel.loadOlderMessages() }
         binding.etMessage.doAfterTextChanged { text ->
             if (!restoringDraft) viewModel.updateDraft(text?.toString().orEmpty())
         }
@@ -67,47 +83,26 @@ class CourseAssistantActivity : AppCompatActivity() {
         }
         viewModel.sessionTitle.observe(this) { binding.toolbar.subtitle = it }
         viewModel.hasOlderMessages.observe(this) {
-            binding.btnOlderMessages.visibility = if (it) View.VISIBLE else View.GONE
+            header.btnOlderMessages.visibility = if (it) View.VISIBLE else View.GONE
         }
         binding.etMessage.setOnEditorActionListener { _, action, _ ->
             if (action == EditorInfo.IME_ACTION_SEND) { send(); true } else false
         }
         viewModel.messages.observe(this) { messages ->
-            binding.starterContent.visibility = if (messages.isEmpty()) View.VISIBLE else View.GONE
-            binding.messagesContainer.removeAllViews()
-            messages.forEach { message ->
-                val row = ItemAssistantMessageBinding.inflate(layoutInflater, binding.messagesContainer, false)
-                val user = message.role == "user"
-                row.root.gravity = if (user) Gravity.END else Gravity.START
-                val inset = (32 * resources.displayMetrics.density).toInt()
-                row.root.setPaddingRelative(if (user) inset else 0, 0, if (user) 0 else inset, 0)
-                row.messageBubble.setCardBackgroundColor(ContextCompat.getColor(this,
-                    if (user) R.color.primary else R.color.surface))
-                val sender = getString(if (user) R.string.assistant_you else R.string.assistant_name)
-                val kind = when (message.kind) {
-                    "result" -> " · 执行结果"
-                    "confirmation" -> " · 待确认"
-                    "error" -> " · 未完成"
-                    "interrupted" -> " · 已中断"
-                    "cancel" -> " · 已取消"
-                    else -> ""
-                }
-                val time = SimpleDateFormat("MM-dd HH:mm", Locale.getDefault()).format(Date(message.createdAt))
-                row.tvMessageSender.text = getString(R.string.assistant_message_metadata, sender, time, kind)
-                row.tvMessageSender.setTextColor(ContextCompat.getColor(this,
-                    if (user) R.color.on_primary else R.color.primary_variant))
-                row.tvMessageBody.setTextColor(ContextCompat.getColor(this,
-                    if (user) R.color.on_primary else R.color.text_primary))
-                row.tvMessageBody.maxWidth = resources.displayMetrics.widthPixels -
-                    (96 * resources.displayMetrics.density).toInt()
-                row.tvMessageBody.text = if (message.kind == "confirmation" && message == messages.lastOrNull() &&
-                    viewModel.pendingChanges.value != null) message.content.substringBefore("\n\n") else message.content
-                binding.messagesContainer.addView(row.root)
-            }
-            if (messages.isNotEmpty() && !loadingOlder) {
-                binding.conversationScroll.post { binding.conversationScroll.fullScroll(View.FOCUS_DOWN) }
-            } else if (loadingOlder) {
-                binding.conversationScroll.post { binding.conversationScroll.fullScroll(View.FOCUS_UP) }
+            val manager = binding.conversationList.layoutManager as LinearLayoutManager
+            val first = manager.findFirstVisibleItemPosition().coerceAtLeast(1)
+            val anchor = messageAdapter.currentList.getOrNull(first - 1)?.id
+            val offset = manager.findViewByPosition(first)?.top ?: 0
+            val atBottom = manager.findLastVisibleItemPosition() >= messageAdapter.itemCount
+            val older = loadingOlder
+            val newUserMessage = messages.lastOrNull()?.role == "user" && messages.lastOrNull()?.id != messageAdapter.currentList.lastOrNull()?.id
+            header.starterContent.visibility = if (messages.isEmpty()) View.VISIBLE else View.GONE
+            messageAdapter.pending = viewModel.pendingChanges.value != null
+            messageAdapter.submitList(messages) {
+                if (older && anchor != null) {
+                    val index = messages.indexOfFirst { it.id == anchor }
+                    if (index >= 0) manager.scrollToPositionWithOffset(index + 1, offset)
+                } else if (!older && messages.isNotEmpty() && (atBottom || newUserMessage)) scrollToLatest()
             }
             loadingOlder = false
         }
@@ -118,21 +113,33 @@ class CourseAssistantActivity : AppCompatActivity() {
             binding.apiStatusIcon.setImageResource(if (configured) R.drawable.ic_check else R.drawable.ic_settings)
         }
         viewModel.pendingChanges.observe(this) { pending ->
-            binding.pendingCard.visibility = if (pending == null) View.GONE else View.VISIBLE
+            footer.pendingCard.visibility = if (pending == null) View.GONE else View.VISIBLE
             if (pending != null) {
-                binding.tvPendingSummary.text = viewModel.pendingSummary(pending)
-                binding.btnConfirmPending.setText(if (pending.courses.isEmpty() && pending.updates.isEmpty())
+                footer.tvPendingSummary.text = viewModel.pendingSummary(pending)
+                footer.btnConfirmPending.setText(if (pending.courses.isEmpty() && pending.updates.isEmpty())
                     R.string.assistant_confirm_delete else R.string.assistant_confirm_changes)
-                binding.etMessage.clearFocus()
+                binding.root.requestFocus()
                 WindowInsetsControllerCompat(window, binding.root).hide(WindowInsetsCompat.Type.ime())
-                binding.conversationScroll.post { binding.conversationScroll.fullScroll(View.FOCUS_DOWN) }
+                scrollToLatest()
             }
             updateControls()
+        }
+        viewModel.requestStage.observe(this) { binding.tvRequestStage.text = it }
+        viewModel.reminderNotice.observe(this) { updateNotice() }
+        viewModel.undoUnavailableReason.observe(this) { updateNotice() }
+        binding.tvAssistantNotice.setOnClickListener {
+            if (!viewModel.reminderNotice.value.isNullOrBlank()) startActivity(Intent(this, SettingsActivity::class.java))
         }
         viewModel.busy.observe(this) { updateControls() }
         viewModel.canUndo.observe(this) { invalidateOptionsMenu() }
         viewModel.canRetry.observe(this) { updateControls() }
         viewModel.canStop.observe(this) { updateControls() }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.refreshSemester()
+        viewModel.refreshReminderNotice()
     }
 
     override fun onStart() {
@@ -142,18 +149,20 @@ class CourseAssistantActivity : AppCompatActivity() {
 
     private fun updateControls() {
         val busy = viewModel.busy.value == true
-        val canChat = !busy && viewModel.pendingChanges.value == null
+        val canChat = !busy
         binding.progress.visibility = if (busy) View.VISIBLE else View.GONE
         binding.btnSend.isEnabled = canChat
+        binding.btnSend.setText(if (viewModel.pendingChanges.value != null) R.string.assistant_refine_plan else R.string.assistant_send)
+        binding.etMessage.hint = getString(if (viewModel.pendingChanges.value != null) R.string.assistant_refine_hint else R.string.assistant_message_hint)
         binding.etMessage.isEnabled = canChat
-        binding.btnExampleSimple.isEnabled = canChat
-        binding.btnExampleDetails.isEnabled = canChat
-        binding.btnExampleQuery.isEnabled = canChat
-        binding.btnExampleDelete.isEnabled = canChat
+        header.btnExampleSimple.isEnabled = canChat
+        header.btnExampleDetails.isEnabled = canChat
+        header.btnExampleQuery.isEnabled = canChat
+        header.btnExampleDelete.isEnabled = canChat
         binding.btnConfigureApi.isEnabled = !busy
-        binding.btnConfirmPending.isEnabled = !busy
-        binding.btnCancelPending.isEnabled = !busy
-        binding.btnOlderMessages.isEnabled = !busy
+        footer.btnConfirmPending.isEnabled = !busy
+        footer.btnCancelPending.isEnabled = !busy
+        header.btnOlderMessages.isEnabled = !busy
         binding.btnRetryRequest.visibility = if (viewModel.canRetry.value == true && !busy) View.VISIBLE else View.GONE
         binding.btnStopRequest.visibility = if (viewModel.canStop.value == true) View.VISIBLE else View.GONE
         invalidateOptionsMenu()
@@ -168,7 +177,7 @@ class CourseAssistantActivity : AppCompatActivity() {
     private fun send() {
         val text = binding.etMessage.text?.toString().orEmpty().trim()
         if (text.isBlank() || viewModel.busy.value == true) return
-        if (viewModel.configured.value != true) { showConfig(); return }
+        if (viewModel.configured.value != true && (viewModel.pendingChanges.value != null || AssistantCourseQuery.quick(text) == null)) { showConfig(); return }
         try {
             binding.inputMessage.error = null
             viewModel.send(text, intent.getIntExtra(EXTRA_DISPLAYED_WEEK, 1))
@@ -185,6 +194,7 @@ class CourseAssistantActivity : AppCompatActivity() {
         form.etApiModel.setText(old.model)
         form.inputApiKey.hint = getString(if (old.apiKey.isBlank()) R.string.assistant_key_hint
             else R.string.assistant_key_saved_hint)
+        form.checkJsonMode.isChecked = old.jsonMode
         form.checkRememberKey.isChecked = viewModel.remembersKey
         val dialog = MaterialAlertDialogBuilder(this)
             .setTitle(R.string.assistant_api_config)
@@ -207,7 +217,7 @@ class CourseAssistantActivity : AppCompatActivity() {
                     }
                     viewModel.configure(AssistantApiConfig(url,
                         form.etApiModel.text?.toString().orEmpty().trim(),
-                        newKey.ifBlank { old.apiKey }), form.checkRememberKey.isChecked)
+                        newKey.ifBlank { old.apiKey }, form.checkJsonMode.isChecked), form.checkRememberKey.isChecked)
                     form.etApiKey.text?.clear()
                     dialog.dismiss()
                 } catch (error: IllegalArgumentException) {
@@ -272,6 +282,27 @@ class CourseAssistantActivity : AppCompatActivity() {
                 Toast.makeText(this@CourseAssistantActivity, "历史记录加载失败，请重试。", Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    private fun scrollToLatest() {
+        binding.conversationList.post {
+            val count = binding.conversationList.adapter?.itemCount ?: 0
+            if (count > 0) {
+                binding.conversationList.scrollToPosition(count - 1)
+                binding.conversationList.doOnLayout { list ->
+                    val manager = binding.conversationList.layoutManager as LinearLayoutManager
+                    val bottom = manager.findViewByPosition(count - 1)?.bottom ?: return@doOnLayout
+                    val hidden = bottom - (list.height - list.paddingBottom)
+                    if (hidden > 0) binding.conversationList.scrollBy(0, hidden)
+                }
+            }
+        }
+    }
+
+    private fun updateNotice() {
+        val text = listOf(viewModel.reminderNotice.value.orEmpty(), viewModel.undoUnavailableReason.value.orEmpty()).filter { it.isNotBlank() }.joinToString("\n")
+        binding.tvAssistantNotice.text = text
+        binding.tvAssistantNotice.visibility = if (text.isEmpty()) View.GONE else View.VISIBLE
     }
 
     companion object {

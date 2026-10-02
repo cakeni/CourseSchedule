@@ -185,6 +185,51 @@ class AssistantConversationTest {
         }
     }
 
+    @Test fun pendingRefinementFailureAndCancellationKeepTheOriginalCourse(): Unit = runBlocking {
+        withFixture { database, semester ->
+            val course = com.courseschedule.data.entity.Course(semesterId = semester.id, courseName = "数学",
+                classroom = "A101", dayOfWeek = 3, startSection = 1, endSection = 2, startWeek = 1, endWeek = 16)
+            val original = course.copy(id = database.courseDao().insertCourse(course))
+            var attempt = 0
+            val started = CountDownLatch(1)
+            val release = CountDownLatch(1)
+            val requests = mutableListOf<String>()
+            val factory = { AssistantCourseClient {
+                val body = envelope("""{"reply":"修正方案","updates":[{"id":${original.id},"classroom":"C201"}]}""")
+                when (attempt++) {
+                    0 -> FakeConnection(body, status = 429)
+                    1 -> FakeConnection(body, capture = requests)
+                    else -> FakeConnection(body, started = started, release = release)
+                }
+            } }
+            val model = model(factory)
+            withContext(Dispatchers.Main) {
+                model.receiveReply(AssistantCourseReply("改教室", emptyList(), updates = listOf(
+                    AssistantCourseUpdate(original, listOf(original.copy(classroom = "B201"))))), semester)
+                model.send("改成C201", 4)
+            }
+            awaitIdle(model)
+            assertEquals("B201", model.pendingChanges.value!!.updates.single().replacements.single().classroom)
+            assertEquals(original, database.courseDao().getCourseById(original.id))
+            assertTrue(model.canRetry.value == true)
+            withContext(Dispatchers.Main) { model.retry() }
+            awaitIdle(model)
+            assertTrue(requests.single().contains("尚未执行的方案"))
+            assertEquals("C201", model.pendingChanges.value!!.updates.single().replacements.single().classroom)
+            assertEquals(original, database.courseDao().getCourseById(original.id))
+            withContext(Dispatchers.Main) { model.send("再改成D201", 4) }
+            assertTrue(started.await(10, TimeUnit.SECONDS))
+            withContext(Dispatchers.Main) { model.stopRequest() }
+            awaitIdle(model)
+            assertEquals("C201", model.pendingChanges.value!!.updates.single().replacements.single().classroom)
+            withContext(Dispatchers.Main) { model.cancelPending() }
+            awaitIdle(model)
+            assertNull(model.pendingChanges.value)
+            assertFalse(model.canRetry.value == true)
+            assertEquals(original, database.courseDao().getCourseById(original.id))
+        }
+    }
+
     @Test fun semesterIsolationOlderHistoryAndInterruptedStateDoNotReplayOperations(): Unit = runBlocking {
         withFixture { database, semester ->
             var model = model()
@@ -199,7 +244,8 @@ class AssistantConversationTest {
             model = model()
             assertTrue(model.canRetry.value == true)
             assertTrue(model.messages.value!!.last().content.contains("上次请求已中断"))
-            assertEquals(60, model.messages.value!!.size)
+            // Keep the loaded page anchored when appending the interruption receipt.
+            assertEquals(61, model.messages.value!!.size)
             assertTrue(model.hasOlderMessages.value == true)
             withContext(Dispatchers.Main) { model.loadOlderMessages() }
             awaitIdle(model)

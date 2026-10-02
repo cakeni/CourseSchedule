@@ -1,86 +1,18 @@
-<?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content">
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="24dp">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/assistant_api_notice"
-            android:textSize="13sp"
-            android:textColor="@color/text_secondary" />
-
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:hint="@string/assistant_url_hint">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etApiUrl"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textUri"
-                android:maxLength="2048"
-                android:maxLines="2" />
+<?xml version='1.0' encoding='utf-8'?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent" android:layout_height="wrap_content">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="24dp">
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/assistant_api_notice" android:textSize="13sp" android:textColor="@color/text_secondary" />
+        <com.google.android.material.textfield.TextInputLayout style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:hint="@string/assistant_url_hint">
+            <com.google.android.material.textfield.TextInputEditText android:id="@+id/etApiUrl" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="textUri" android:maxLength="2048" android:maxLines="2" />
         </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:hint="@string/assistant_model_hint">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etApiModel"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textNoSuggestions"
-                android:maxLength="120"
-                android:maxLines="1" />
+        <com.google.android.material.textfield.TextInputLayout style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:hint="@string/assistant_model_hint">
+            <com.google.android.material.textfield.TextInputEditText android:id="@+id/etApiModel" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="textNoSuggestions" android:maxLength="120" android:maxLines="1" />
         </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/inputApiKey"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:hint="@string/assistant_key_hint"
-            app:endIconMode="password_toggle">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etApiKey"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:importantForAutofill="no"
-                android:saveEnabled="false"
-                android:inputType="textPassword"
-                android:maxLength="4096"
-                android:maxLines="1" />
+        <com.google.android.material.textfield.TextInputLayout android:id="@+id/inputApiKey" style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:hint="@string/assistant_key_hint" app:endIconMode="password_toggle">
+            <com.google.android.material.textfield.TextInputEditText android:id="@+id/etApiKey" android:layout_width="match_parent" android:layout_height="wrap_content" android:importantForAutofill="no" android:saveEnabled="false" android:inputType="textPassword" android:maxLength="4096" android:maxLines="1" />
         </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.checkbox.MaterialCheckBox
-            android:id="@+id/checkRememberKey"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/assistant_remember_key" />
-
-        <TextView
-            android:id="@+id/tvConfigError"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:accessibilityLiveRegion="polite"
-            android:textColor="@color/error"
-            android:textSize="13sp" />
+        <com.google.android.material.checkbox.MaterialCheckBox android:id="@+id/checkJsonMode" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/assistant_json_mode" />
+        <com.google.android.material.checkbox.MaterialCheckBox android:id="@+id/checkRememberKey" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/assistant_remember_key" />
+        <TextView android:id="@+id/tvConfigError" android:layout_width="match_parent" android:layout_height="wrap_content" android:accessibilityLiveRegion="polite" android:textColor="@color/error" android:textSize="13sp" />
     </LinearLayout>
 </ScrollView>

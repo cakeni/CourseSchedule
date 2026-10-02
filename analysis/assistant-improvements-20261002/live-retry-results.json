@@ -1,0 +1,37 @@
+{
+  "model": "deepseek-flash",
+  "date": "2026-10-02",
+  "cases": [
+    {
+      "case": "同名课程应追问",
+      "request_chars": 5004,
+      "passed": true,
+      "normalized": {
+        "reply": "本学期有两门“高等数学”：周三第1-2节（张老师，A101）和周一第5-6节（李老师，C101）。请说明要修改哪一条（或是否两条都改）。",
+        "courses": [],
+        "updates": [],
+        "deletions": [],
+        "queriedCourses": [],
+        "undo": false,
+        "additionReminders": {}
+      },
+      "usage": {
+        "prompt_tokens": 2179,
+        "completion_tokens": 149,
+        "total_tokens": 2328,
+        "prompt_tokens_details": {
+          "cached_tokens": 1920
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 56
+        },
+        "prompt_cache_hit_tokens": 1920,
+        "prompt_cache_miss_tokens": 259
+      },
+      "elapsed_ms": 1734
+    }
+  ],
+  "passed": 1,
+  "total": 1,
+  "unauthorized_change_plans": 0
+}

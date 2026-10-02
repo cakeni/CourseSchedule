@@ -1,0 +1,63 @@
+name: Course assistant flow tests
+
+on:
+  pull_request:
+    branches: [main]
+    paths: ['app/**', '.github/workflows/assistant-ci.yml']
+  push:
+    branches: [main]
+    paths: ['app/**', '.github/workflows/assistant-ci.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: assistant-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  assistant-flows:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v6.2.0
+      - name: Enable emulator acceleration
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Run assistant database and UI flows
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          disable-animations: true
+          script: |
+            chmod +x gradlew
+            ./gradlew --no-daemon assembleDebug assembleDebugAndroidTest
+            adb install -r -g app/build/outputs/apk/debug/app-debug.apk
+            adb install -r -g app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+            adb shell am instrument -w -r -e class com.courseschedule.ui.assistant.AssistantConversationTest,com.courseschedule.ui.assistant.CourseAssistantFlowTest,com.courseschedule.ui.assistant.CourseAssistantManagementTest,com.courseschedule.ui.assistant.CourseAssistantReliabilityTest com.courseschedule.test/androidx.test.runner.AndroidJUnitRunner | tee assistant-tests.log
+            grep -Eq 'OK \([1-9][0-9]* tests?\)' assistant-tests.log
+            adb shell am instrument -w -r -e class com.courseschedule.ui.assistant.AssistantProcessRestartTest#prepareBeforeProcessKill com.courseschedule.test/androidx.test.runner.AndroidJUnitRunner | tee restart-prepare.log
+            grep -q 'OK (1 test)' restart-prepare.log
+            adb shell am force-stop com.courseschedule
+            adb shell am instrument -w -r -e class com.courseschedule.ui.assistant.AssistantProcessRestartTest#verifyAfterProcessKill com.courseschedule.test/androidx.test.runner.AndroidJUnitRunner | tee restart-verify.log
+            grep -q 'OK (1 test)' restart-verify.log
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: course-assistant-flow-reports
+          path: |
+            app/build/reports/androidTests/
+            assistant-tests.log
+            restart-*.log
+          if-no-files-found: ignore

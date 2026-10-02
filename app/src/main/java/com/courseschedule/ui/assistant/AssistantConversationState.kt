@@ -6,8 +6,9 @@ import com.courseschedule.domain.ScheduleRules
 import com.google.gson.Gson
 
 internal data class AssistantPendingOperation(val semester: Semester, val reply: AssistantCourseReply)
-internal data class AssistantUndoBatch(val semester: Semester, val before: List<Course>, val after: List<Course>)
-internal data class AssistantRetryRequest(val text: String, val displayedWeek: Int)
+internal data class AssistantUndoBatch(val semester: Semester, val before: List<Course>, val after: List<Course>,
+    val conflictBaseline: List<Course>? = null)
+internal data class AssistantRetryRequest(val text: String, val displayedWeek: Int, val refining: Boolean = false)
 internal data class AssistantConversationState(
     val pending: AssistantPendingOperation? = null,
     val lastUndo: AssistantUndoBatch? = null,
@@ -33,7 +34,8 @@ internal object AssistantConversationCodec {
         }
         state.pending?.let {
             val reply = it.reply
-            require(reply.reply.isNotBlank() && reply.requiresConfirmation && !reply.undo && reply.queriedCourses.isEmpty())
+            require(reply.reply.isNotBlank() && (reply.requiresConfirmation || reply.courses.isNotEmpty()) &&
+                !reply.undo && reply.queriedCourses.isEmpty() && reply.query == null)
             validate(it.semester, reply.courses + reply.deletions + reply.updates.flatMap { row ->
                 require(row.replacements.isNotEmpty())
                 listOf(row.original) + row.replacements
@@ -41,11 +43,12 @@ internal object AssistantConversationCodec {
         }
         state.lastUndo?.let {
             require((it.before + it.after).isNotEmpty())
-            validate(it.semester, it.before + it.after)
+            validate(it.semester, it.before + it.after + it.conflictBaseline.orEmpty())
             require((it.before + it.after).all { course -> course.id > 0 })
         }
         state.retryRequest?.let { require(it.text.isNotBlank() && it.text.length <= 2000 && it.displayedWeek in 1..52) }
-        require(!state.requestRunning || (state.retryRequest != null && state.pending == null))
+        require(!state.requestRunning || (state.retryRequest != null &&
+            (state.pending == null || state.retryRequest.refining)))
         return state
     }
 }

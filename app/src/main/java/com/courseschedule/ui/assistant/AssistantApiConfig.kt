@@ -16,7 +16,8 @@ import javax.crypto.spec.GCMParameterSpec
 internal data class AssistantApiConfig(
     val baseUrl: String = "https://api.openai.com/v1",
     val model: String = "gpt-4o-mini",
-    val apiKey: String = ""
+    val apiKey: String = "",
+    val jsonMode: Boolean = false
 ) {
     fun endpoint(): String {
         val uri = runCatching { URI(baseUrl.trim().trimEnd('/')) }.getOrNull()

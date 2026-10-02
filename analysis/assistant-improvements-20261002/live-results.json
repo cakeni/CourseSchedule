@@ -1,0 +1,1024 @@
+{
+  "model": "deepseek-flash",
+  "date": "2026-10-02",
+  "cases": [
+    {
+      "case": "同名课程应追问",
+      "request_chars": 5004,
+      "passed": true,
+      "normalized": {
+        "reply": "本学期有两门“高等数学”：周三第1-2节（张老师，A101）和周一第5-6节（李老师，C101）。请说明要修改哪一条（或是否两条都改）。",
+        "courses": [],
+        "updates": [],
+        "deletions": [],
+        "queriedCourses": [],
+        "undo": false,
+        "additionReminders": {}
+      },
+      "usage": {
+        "prompt_tokens": 2179,
+        "completion_tokens": 149,
+        "total_tokens": 2328,
+        "prompt_tokens_details": {
+          "cached_tokens": 1920
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 56
+        },
+        "prompt_cache_hit_tokens": 1920,
+        "prompt_cache_miss_tokens": 259
+      },
+      "elapsed_ms": 1734,
+      "prior_attempt": {
+        "error": "Unexpected end of file from server",
+        "elapsed_ms": 15487
+      }
+    },
+    {
+      "case": "缺少课名应追问",
+      "request_chars": 5002,
+      "passed": true,
+      "normalized": {
+        "reply": "请告诉我这门课的名称（周六第1节 08:00-08:45，未指定周次默认全学期 1-16 周）；如有老师、地点也可以一并说明。",
+        "courses": [],
+        "updates": [],
+        "deletions": [],
+        "queriedCourses": [],
+        "undo": false,
+        "additionReminders": {}
+      },
+      "usage": {
+        "prompt_tokens": 2179,
+        "completion_tokens": 197,
+        "total_tokens": 2376,
+        "prompt_tokens_details": {
+          "cached_tokens": 1024
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 110
+        },
+        "prompt_cache_hit_tokens": 1024,
+        "prompt_cache_miss_tokens": 1155
+      },
+      "elapsed_ms": 1722
+    },
+    {
+      "case": "添加完整课程",
+      "request_chars": 5016,
+      "passed": true,
+      "normalized": {
+        "reply": "已添加课程：化学，周六第1-2节，第1-16周，地点E101。",
+        "courses": [
+          {
+            "id": 0,
+            "courseName": "化学",
+            "teacher": "",
+            "classroom": "E101",
+            "dayOfWeek": 6,
+            "startSection": 1,
+            "endSection": 2,
+            "startWeek": 1,
+            "endWeek": 16,
+            "weekType": 0,
+            "semesterId": 1,
+            "colorIndex": 0,
+            "note": "",
+            "reminderMinutes": -1,
+            "createTime": 1790915280126
+          }
+        ],
+        "updates": [],
+        "deletions": [],
+        "queriedCourses": [],
+        "undo": false,
+        "additionReminders": {}
+      },
+      "usage": {
+        "prompt_tokens": 2190,
+        "completion_tokens": 237,
+        "total_tokens": 2427,
+        "prompt_tokens_details": {
+          "cached_tokens": 1920
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 100
+        },
+        "prompt_cache_hit_tokens": 1920,
+        "prompt_cache_miss_tokens": 270
+      },
+      "elapsed_ms": 1541
+    },
+    {
+      "case": "默认一节课",
+      "request_chars": 5007,
+      "passed": true,
+      "normalized": {
+        "reply": "已为你添加课程：生物，周六第9节（09:00-09:45？），第1-16周。未指定结束节次，默认按一节课处理。",
+        "courses": [
+          {
+            "id": 0,
+            "courseName": "生物",
+            "teacher": "",
+            "classroom": "",
+            "dayOfWeek": 6,
+            "startSection": 9,
+            "endSection": 9,
+            "startWeek": 1,
+            "endWeek": 16,
+            "weekType": 0,
+            "semesterId": 1,
+            "colorIndex": 0,
+            "note": "",
+            "reminderMinutes": -1,
+            "createTime": 1790915281339
+          }
+        ],
+        "updates": [],
+        "deletions": [],
+        "queriedCourses": [],
+        "undo": false,
+        "additionReminders": {}
+      },
+      "usage": {
+        "prompt_tokens": 2184,
+        "completion_tokens": 221,
+        "total_tokens": 2405,
+        "prompt_tokens_details": {
+          "cached_tokens": 1920
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 70
+        },
+        "prompt_cache_hit_tokens": 1920,
+        "prompt_cache_miss_tokens": 264
+      },
+      "elapsed_ms": 1206
+    },
+    {
+      "case": "修改唯一明确目标",
+      "request_chars": 5016,
+      "passed": true,
+      "normalized": {
+        "reply": "已将周三第1-2节高等数学（张老师）的地点改为B201，其他信息保持不变。",
+        "courses": [],
+        "updates": [
+          {
+            "original": {
+              "id": 42,
+              "courseName": "高等数学",
+              "teacher": "张老师",
+              "classroom": "A101",
+              "dayOfWeek": 3,
+              "startSection": 1,
+              "endSection": 2,
+              "startWeek": 1,
+              "endWeek": 16,
+              "weekType": 0,
+              "semesterId": 7,
+              "colorIndex": 8,
+              "note": "虚构备注",
+              "reminderMinutes": 15,
+              "createTime": 100
+            },
+            "replacements": [
+              {
+                "id": 42,
+                "courseName": "高等数学",
+                "teacher": "张老师",
+                "classroom": "B201",
+                "dayOfWeek": 3,
+                "startSection": 1,
+                "endSection": 2,
+                "startWeek": 1,
+                "endWeek": 16,
+                "weekType": 0,
+                "semesterId": 7,
+                "colorIndex": 8,
+                "note": "虚构备注",
+                "reminderMinutes": 15,
+                "createTime": 100
+              }
+            ]
+          }
+        ],
+        "deletions": [],
+        "queriedCourses": [],
+        "undo": false,
+        "additionReminders": {}
+      },
+      "usage": {
+        "prompt_tokens": 2188,
+        "completion_tokens": 152,
+        "total_tokens": 2340,
+        "prompt_tokens_details": {
+          "cached_tokens": 1664
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 75
+        },
+        "prompt_cache_hit_tokens": 1664,
+        "prompt_cache_miss_tokens": 524
+      },
+      "elapsed_ms": 1037
+    },
+    {
+      "case": "删除整条课程",
+      "request_chars": 5009,
+      "passed": true,
+      "normalized": {
+        "reply": "已为你整理删除方案：删除周三第1-2节的高等数学（张老师，A101）整学期安排。请在确认方案中确认后执行。",
+        "courses": [],
+        "updates": [],
+        "deletions": [
+          {
+            "id": 42,
+            "courseName": "高等数学",
+            "teacher": "张老师",
+            "classroom": "A101",
+            "dayOfWeek": 3,
+            "startSection": 1,
+            "endSection": 2,
+            "startWeek": 1,
+            "endWeek": 16,
+            "weekType": 0,
+            "semesterId": 7,
+            "colorIndex": 8,
+            "note": "虚构备注",
+            "reminderMinutes": 15,
+            "createTime": 100
+          }
+        ],
+        "queriedCourses": [],
+        "undo": false,
+        "additionReminders": {}
+      },
+      "usage": {
+        "prompt_tokens": 2184,
+        "completion_tokens": 177,
+        "total_tokens": 2361,
+        "prompt_tokens_details": {
+          "cached_tokens": 1920
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 97
+        },
+        "prompt_cache_hit_tokens": 1920,
+        "prompt_cache_miss_tokens": 264
+      },
+      "elapsed_ms": 1247
+    },
+    {
+      "case": "取消单周",
+      "request_chars": 5014,
+      "passed": true,
+      "normalized": {
+        "reply": "已按你的要求，仅取消第5周（周三第1-2节）的高等数学，其余周次保持不变。",
+        "courses": [],
+        "updates": [
+          {
+            "original": {
+              "id": 42,
+              "courseName": "高等数学",
+              "teacher": "张老师",
+              "classroom": "A101",
+              "dayOfWeek": 3,
+              "startSection": 1,
+              "endSection": 2,
+              "startWeek": 1,
+              "endWeek": 16,
+              "weekType": 0,
+              "semesterId": 7,
+              "colorIndex": 8,
+              "note": "虚构备注",
+              "reminderMinutes": 15,
+              "createTime": 100
+            },
+            "replacements": [
+              {
+                "id": 42,
+                "courseName": "高等数学",
+                "teacher": "张老师",
+                "classroom": "A101",
+                "dayOfWeek": 3,
+                "startSection": 1,
+                "endSection": 2,
+                "startWeek": 1,
+                "endWeek": 4,
+                "weekType": 0,
+                "semesterId": 7,
+                "colorIndex": 8,
+                "note": "虚构备注",
+                "reminderMinutes": 15,
+                "createTime": 100
+              },
+              {
+                "id": 0,
+                "courseName": "高等数学",
+                "teacher": "张老师",
+                "classroom": "A101",
+                "dayOfWeek": 3,
+                "startSection": 1,
+                "endSection": 2,
+                "startWeek": 6,
+                "endWeek": 16,
+                "weekType": 0,
+                "semesterId": 7,
+                "colorIndex": 8,
+                "note": "虚构备注",
+                "reminderMinutes": 15,
+                "createTime": 100
+              }
+            ]
+          }
+        ],
+        "deletions": [],
+        "queriedCourses": [],
+        "undo": false,
+        "additionReminders": {}
+      },
+      "usage": {
+        "prompt_tokens": 2189,
+        "completion_tokens": 1039,
+        "total_tokens": 3228,
+        "prompt_tokens_details": {
+          "cached_tokens": 1920
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 930
+        },
+        "prompt_cache_hit_tokens": 1920,
+        "prompt_cache_miss_tokens": 269
+      },
+      "elapsed_ms": 4464
+    },
+    {
+      "case": "移动单次课程",
+      "request_chars": 5027,
+      "passed": true,
+      "normalized": {
+        "reply": "将第5周（2026-10-07 周三）第1-2节的高等数学（张老师，A101）移到该周周五第5节，保留两节课时长（第5-6节），其余周次不变。请确认。",
+        "courses": [],
+        "updates": [
+          {
+            "original": {
+              "id": 42,
+              "courseName": "高等数学",
+              "teacher": "张老师",
+              "classroom": "A101",
+              "dayOfWeek": 3,
+              "startSection": 1,
+              "endSection": 2,
+              "startWeek": 1,
+              "endWeek": 16,
+              "weekType": 0,
+              "semesterId": 7,
+              "colorIndex": 8,
+              "note": "虚构备注",
+              "reminderMinutes": 15,
+              "createTime": 100
+            },
+            "replacements": [
+              {
+                "id": 42,
+                "courseName": "高等数学",
+                "teacher": "张老师",
+                "classroom": "A101",
+                "dayOfWeek": 3,
+                "startSection": 1,
+                "endSection": 2,
+                "startWeek": 1,
+                "endWeek": 4,
+                "weekType": 0,
+                "semesterId": 7,
+                "colorIndex": 8,
+                "note": "虚构备注",
+                "reminderMinutes": 15,
+                "createTime": 100
+              },
+              {
+                "id": 0,
+                "courseName": "高等数学",
+                "teacher": "张老师",
+                "classroom": "A101",
+                "dayOfWeek": 3,
+                "startSection": 1,
+                "endSection": 2,
+                "startWeek": 6,
+                "endWeek": 16,
+                "weekType": 0,
+                "semesterId": 7,
+                "colorIndex": 8,
+                "note": "虚构备注",
+                "reminderMinutes": 15,
+                "createTime": 100
+              },
+              {
+                "id": 0,
+                "courseName": "高等数学",
+                "teacher": "张老师",
+                "classroom": "A101",
+                "dayOfWeek": 5,
+                "startSection": 5,
+                "endSection": 6,
+                "startWeek": 5,
+                "endWeek": 5,
+                "weekType": 0,
+                "semesterId": 7,
+                "colorIndex": 8,
+                "note": "虚构备注",
+                "reminderMinutes": 15,
+                "createTime": 100
+              }
+            ]
+          }
+        ],
+        "deletions": [],
+        "queriedCourses": [],
+        "undo": false,
+        "additionReminders": {}
+      },
+      "usage": {
+        "prompt_tokens": 2199,
+        "completion_tokens": 502,
+        "total_tokens": 2701,
+        "prompt_tokens_details": {
+          "cached_tokens": 1920
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 377
+        },
+        "prompt_cache_hit_tokens": 1920,
+        "prompt_cache_miss_tokens": 279
+      },
+      "elapsed_ms": 2671
+    },
+    {
+      "case": "只修改下周地点",
+      "request_chars": 5024,
+      "passed": true,
+      "normalized": {
+        "reply": "已为你安排：仅将下周（第5周，2026-10-07 周三）第1-2节的高等数学地点改为B201，其余周次仍为A101。请确认后生效。",
+        "courses": [],
+        "updates": [
+          {
+            "original": {
+              "id": 42,
+              "courseName": "高等数学",
+              "teacher": "张老师",
+              "classroom": "A101",
+              "dayOfWeek": 3,
+              "startSection": 1,
+              "endSection": 2,
+              "startWeek": 1,
+              "endWeek": 16,
+              "weekType": 0,
+              "semesterId": 7,
+              "colorIndex": 8,
+              "note": "虚构备注",
+              "reminderMinutes": 15,
+              "createTime": 100
+            },
+            "replacements": [
+              {
+                "id": 42,
+                "courseName": "高等数学",
+                "teacher": "张老师",
+                "classroom": "A101",
+                "dayOfWeek": 3,
+                "startSection": 1,
+                "endSection": 2,
+                "startWeek": 1,
+                "endWeek": 4,
+                "weekType": 0,
+                "semesterId": 7,
+                "colorIndex": 8,
+                "note": "虚构备注",
+                "reminderMinutes": 15,
+                "createTime": 100
+              },
+              {
+                "id": 0,
+                "courseName": "高等数学",
+                "teacher": "张老师",
+                "classroom": "A101",
+                "dayOfWeek": 3,
+                "startSection": 1,
+                "endSection": 2,
+                "startWeek": 6,
+                "endWeek": 16,
+                "weekType": 0,
+                "semesterId": 7,
+                "colorIndex": 8,
+                "note": "虚构备注",
+                "reminderMinutes": 15,
+                "createTime": 100
+              },
+              {
+                "id": 0,
+                "courseName": "高等数学",
+                "teacher": "张老师",
+                "classroom": "B201",
+                "dayOfWeek": 3,
+                "startSection": 1,
+                "endSection": 2,
+                "startWeek": 5,
+                "endWeek": 5,
+                "weekType": 0,
+                "semesterId": 7,
+                "colorIndex": 8,
+                "note": "虚构备注",
+                "reminderMinutes": 15,
+                "createTime": 100
+              }
+            ]
+          }
+        ],
+        "deletions": [],
+        "queriedCourses": [],
+        "undo": false,
+        "additionReminders": {}
+      },
+      "usage": {
+        "prompt_tokens": 2193,
+        "completion_tokens": 471,
+        "total_tokens": 2664,
+        "prompt_tokens_details": {
+          "cached_tokens": 1920
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 346
+        },
+        "prompt_cache_hit_tokens": 1920,
+        "prompt_cache_miss_tokens": 273
+      },
+      "elapsed_ms": 2303
+    },
+    {
+      "case": "下周五查课",
+      "request_chars": 4997,
+      "passed": true,
+      "normalized": {
+        "reply": "为你查询下周五的课程。",
+        "courses": [],
+        "updates": [],
+        "deletions": [],
+        "queriedCourses": [],
+        "undo": false,
+        "additionReminders": {},
+        "query": {
+          "dayOfWeek": 5,
+          "weekScope": "next_week"
+        }
+      },
+      "usage": {
+        "prompt_tokens": 2176,
+        "completion_tokens": 143,
+        "total_tokens": 2319,
+        "prompt_tokens_details": {
+          "cached_tokens": 1920
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 79
+        },
+        "prompt_cache_hit_tokens": 1920,
+        "prompt_cache_miss_tokens": 256
+      },
+      "elapsed_ms": 1370
+    },
+    {
+      "case": "查指定周星期",
+      "request_chars": 5000,
+      "passed": true,
+      "normalized": {
+        "reply": "为你查询第5周周三（2026-10-07）的课程。",
+        "courses": [],
+        "updates": [],
+        "deletions": [],
+        "queriedCourses": [],
+        "undo": false,
+        "additionReminders": {},
+        "query": {
+          "date": "2026-10-07"
+        }
+      },
+      "usage": {
+        "prompt_tokens": 2178,
+        "completion_tokens": 283,
+        "total_tokens": 2461,
+        "prompt_tokens_details": {
+          "cached_tokens": 1920
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 213
+        },
+        "prompt_cache_hit_tokens": 1920,
+        "prompt_cache_miss_tokens": 258
+      },
+      "elapsed_ms": 1582
+    },
+    {
+      "case": "按教师查课",
+      "request_chars": 4997,
+      "passed": true,
+      "normalized": {
+        "reply": "为你查询李老师的课程。",
+        "courses": [],
+        "updates": [],
+        "deletions": [],
+        "queriedCourses": [],
+        "undo": false,
+        "additionReminders": {},
+        "query": {
+          "teacher": "李老师"
+        }
+      },
+      "usage": {
+        "prompt_tokens": 2175,
+        "completion_tokens": 167,
+        "total_tokens": 2342,
+        "prompt_tokens_details": {
+          "cached_tokens": 1920
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 112
+        },
+        "prompt_cache_hit_tokens": 1920,
+        "prompt_cache_miss_tokens": 255
+      },
+      "elapsed_ms": 1147
+    },
+    {
+      "case": "补充备注保留原文",
+      "request_chars": 5012,
+      "passed": true,
+      "normalized": {
+        "reply": "将为周三第1-2节的高等数学（张老师，A101）的备注补充“带教材”，保留原备注内容。",
+        "courses": [],
+        "updates": [
+          {
+            "original": {
+              "id": 42,
+              "courseName": "高等数学",
+              "teacher": "张老师",
+              "classroom": "A101",
+              "dayOfWeek": 3,
+              "startSection": 1,
+              "endSection": 2,
+              "startWeek": 1,
+              "endWeek": 16,
+              "weekType": 0,
+              "semesterId": 7,
+              "colorIndex": 8,
+              "note": "虚构备注",
+              "reminderMinutes": 15,
+              "createTime": 100
+            },
+            "replacements": [
+              {
+                "id": 42,
+                "courseName": "高等数学",
+                "teacher": "张老师",
+                "classroom": "A101",
+                "dayOfWeek": 3,
+                "startSection": 1,
+                "endSection": 2,
+                "startWeek": 1,
+                "endWeek": 16,
+                "weekType": 0,
+                "semesterId": 7,
+                "colorIndex": 8,
+                "note": "虚构备注\n带教材",
+                "reminderMinutes": 15,
+                "createTime": 100
+              }
+            ]
+          }
+        ],
+        "deletions": [],
+        "queriedCourses": [],
+        "undo": false,
+        "additionReminders": {}
+      },
+      "usage": {
+        "prompt_tokens": 2186,
+        "completion_tokens": 117,
+        "total_tokens": 2303,
+        "prompt_tokens_details": {
+          "cached_tokens": 1920
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 33
+        },
+        "prompt_cache_hit_tokens": 1920,
+        "prompt_cache_miss_tokens": 266
+      },
+      "elapsed_ms": 1179
+    },
+    {
+      "case": "设置提醒保留课程",
+      "request_chars": 5015,
+      "passed": true,
+      "normalized": {
+        "reply": "将周三第1-2节的高等数学（张老师，A101）的课前提醒改为提前10分钟，其他信息保持不变。",
+        "courses": [],
+        "updates": [
+          {
+            "original": {
+              "id": 42,
+              "courseName": "高等数学",
+              "teacher": "张老师",
+              "classroom": "A101",
+              "dayOfWeek": 3,
+              "startSection": 1,
+              "endSection": 2,
+              "startWeek": 1,
+              "endWeek": 16,
+              "weekType": 0,
+              "semesterId": 7,
+              "colorIndex": 8,
+              "note": "虚构备注",
+              "reminderMinutes": 15,
+              "createTime": 100
+            },
+            "replacements": [
+              {
+                "id": 42,
+                "courseName": "高等数学",
+                "teacher": "张老师",
+                "classroom": "A101",
+                "dayOfWeek": 3,
+                "startSection": 1,
+                "endSection": 2,
+                "startWeek": 1,
+                "endWeek": 16,
+                "weekType": 0,
+                "semesterId": 7,
+                "colorIndex": 8,
+                "note": "虚构备注",
+                "reminderMinutes": 10,
+                "createTime": 100
+              }
+            ]
+          }
+        ],
+        "deletions": [],
+        "queriedCourses": [],
+        "undo": false,
+        "additionReminders": {}
+      },
+      "usage": {
+        "prompt_tokens": 2187,
+        "completion_tokens": 137,
+        "total_tokens": 2324,
+        "prompt_tokens_details": {
+          "cached_tokens": 1920
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 53
+        },
+        "prompt_cache_hit_tokens": 1920,
+        "prompt_cache_miss_tokens": 267
+      },
+      "elapsed_ms": 1052
+    },
+    {
+      "case": "跨学期应解释范围",
+      "request_chars": 5000,
+      "passed": true,
+      "normalized": {
+        "reply": "本助手只支持管理本学期（2026-09-07 开始，共 16 周）的课程，无法删除或查看下学期的课程。如需删除本学期的课程，请告诉我具体课名、星期和节次。",
+        "courses": [],
+        "updates": [],
+        "deletions": [],
+        "queriedCourses": [],
+        "undo": false,
+        "additionReminders": {}
+      },
+      "usage": {
+        "prompt_tokens": 2176,
+        "completion_tokens": 158,
+        "total_tokens": 2334,
+        "prompt_tokens_details": {
+          "cached_tokens": 1920
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 62
+        },
+        "prompt_cache_hit_tokens": 1920,
+        "prompt_cache_miss_tokens": 256
+      },
+      "elapsed_ms": 986
+    },
+    {
+      "case": "时间不能猜测",
+      "request_chars": 5005,
+      "passed": true,
+      "normalized": {
+        "reply": "没有08:00开始的节次（第1节为08:30开始），无法匹配“早八”。请问体育课安排在第几节？",
+        "courses": [],
+        "updates": [],
+        "deletions": [],
+        "queriedCourses": [],
+        "undo": false,
+        "additionReminders": {}
+      },
+      "usage": {
+        "prompt_tokens": 2182,
+        "completion_tokens": 212,
+        "total_tokens": 2394,
+        "prompt_tokens_details": {
+          "cached_tokens": 1024
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 135
+        },
+        "prompt_cache_hit_tokens": 1024,
+        "prompt_cache_miss_tokens": 1158
+      },
+      "elapsed_ms": 1651
+    },
+    {
+      "case": "可撤销操作",
+      "request_chars": 4998,
+      "passed": true,
+      "normalized": {
+        "reply": "好的，正在撤销最近一次对“高等数学”的操作。",
+        "courses": [],
+        "updates": [],
+        "deletions": [],
+        "queriedCourses": [],
+        "undo": true,
+        "additionReminders": {}
+      },
+      "usage": {
+        "prompt_tokens": 2174,
+        "completion_tokens": 101,
+        "total_tokens": 2275,
+        "prompt_tokens_details": {
+          "cached_tokens": 1024
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 43
+        },
+        "prompt_cache_hit_tokens": 1024,
+        "prompt_cache_miss_tokens": 1150
+      },
+      "elapsed_ms": 881
+    },
+    {
+      "case": "没有撤销记录",
+      "request_chars": 4997,
+      "passed": true,
+      "normalized": {
+        "reply": "当前没有可撤销的操作，最近一次操作无法撤销。",
+        "courses": [],
+        "updates": [],
+        "deletions": [],
+        "queriedCourses": [],
+        "undo": false,
+        "additionReminders": {}
+      },
+      "usage": {
+        "prompt_tokens": 2174,
+        "completion_tokens": 87,
+        "total_tokens": 2261,
+        "prompt_tokens_details": {
+          "cached_tokens": 1920
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 29
+        },
+        "prompt_cache_hit_tokens": 1920,
+        "prompt_cache_miss_tokens": 254
+      },
+      "elapsed_ms": 1211
+    },
+    {
+      "case": "修改尚未执行的方案",
+      "request_chars": 5272,
+      "passed": true,
+      "normalized": {
+        "reply": "已将待确认方案中的教室由 B201 改为 C201，周次保持第 1-16 周，其余安排不变。请确认后执行。",
+        "courses": [],
+        "updates": [
+          {
+            "original": {
+              "id": 42,
+              "courseName": "高等数学",
+              "teacher": "张老师",
+              "classroom": "A101",
+              "dayOfWeek": 3,
+              "startSection": 1,
+              "endSection": 2,
+              "startWeek": 1,
+              "endWeek": 16,
+              "weekType": 0,
+              "semesterId": 7,
+              "colorIndex": 8,
+              "note": "虚构备注",
+              "reminderMinutes": 15,
+              "createTime": 100
+            },
+            "replacements": [
+              {
+                "id": 42,
+                "courseName": "高等数学",
+                "teacher": "张老师",
+                "classroom": "C201",
+                "dayOfWeek": 3,
+                "startSection": 1,
+                "endSection": 2,
+                "startWeek": 1,
+                "endWeek": 16,
+                "weekType": 0,
+                "semesterId": 7,
+                "colorIndex": 8,
+                "note": "虚构备注",
+                "reminderMinutes": 15,
+                "createTime": 100
+              }
+            ]
+          }
+        ],
+        "deletions": [],
+        "queriedCourses": [],
+        "undo": false,
+        "additionReminders": {}
+      },
+      "usage": {
+        "prompt_tokens": 2306,
+        "completion_tokens": 346,
+        "total_tokens": 2652,
+        "prompt_tokens_details": {
+          "cached_tokens": 1536
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 222
+        },
+        "prompt_cache_hit_tokens": 1536,
+        "prompt_cache_miss_tokens": 770
+      },
+      "elapsed_ms": 2030
+    },
+    {
+      "case": "学期外本周不能加课",
+      "request_chars": 5011,
+      "passed": true,
+      "normalized": {
+        "reply": "今天（2026-10-02）不在本学期内（本学期自2026-10-30开始），所以“本周周三”无法对应到本学期的任何一周，我不能直接套用第1周或最后一周。请告诉我这门高等数学要排在哪一周（1-16周），或给出具体日期。另外你只说了第1节，未指定结束节次，默认按一节课（第1节 08:00-08:45）安排，如需连堂请说明。",
+        "courses": [],
+        "updates": [],
+        "deletions": [],
+        "queriedCourses": [],
+        "undo": false,
+        "additionReminders": {}
+      },
+      "usage": {
+        "prompt_tokens": 2182,
+        "completion_tokens": 383,
+        "total_tokens": 2565,
+        "prompt_tokens_details": {
+          "cached_tokens": 1024
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 231
+        },
+        "prompt_cache_hit_tokens": 1024,
+        "prompt_cache_miss_tokens": 1158
+      },
+      "elapsed_ms": 2136
+    },
+    {
+      "case": "已执行操作不能重放",
+      "request_chars": 5093,
+      "passed": true,
+      "normalized": {
+        "reply": "好的，有需要随时找我。",
+        "courses": [],
+        "updates": [],
+        "deletions": [],
+        "queriedCourses": [],
+        "undo": false,
+        "additionReminders": {}
+      },
+      "usage": {
+        "prompt_tokens": 2200,
+        "completion_tokens": 177,
+        "total_tokens": 2377,
+        "prompt_tokens_details": {
+          "cached_tokens": 2048
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 124
+        },
+        "prompt_cache_hit_tokens": 2048,
+        "prompt_cache_miss_tokens": 152
+      },
+      "elapsed_ms": 981
+    }
+  ],
+  "passed": 21,
+  "total": 21,
+  "unauthorized_change_plans": 0,
+  "network_retries": 1
+}

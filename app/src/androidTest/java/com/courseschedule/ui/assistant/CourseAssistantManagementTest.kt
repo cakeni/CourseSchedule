@@ -7,8 +7,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.action.ViewActions.scrollTo
+
 import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -42,19 +43,21 @@ class CourseAssistantManagementTest {
                 "updates":[{"id":${math.id},"classroom":"B201","reminderMinutes":10}]}""", semester, original)
             withContext(Dispatchers.Main) { model.receiveReply(patch, semester) }
             assertEquals(original, database.courseDao().getCoursesBySemesterSync(semester.id))
-            onView(withId(R.id.btnSend)).check(matches(not(isEnabled())))
-            onView(withId(R.id.pendingCard)).perform(scrollTo()).check(matches(isDisplayed()))
+            onView(withId(R.id.btnSend)).check(matches(isEnabled()))
+            onView(withId(R.id.pendingCard)).check(matches(isDisplayed()))
+            onView(withId(R.id.btnConfirmPending)).check(matches(isCompletelyDisplayed()))
             screenshot("assistant-edit-preview")
             scenario.recreate()
             scenario.onActivity {
                 assertSame(model, ViewModelProvider(it)[CourseAssistantViewModel::class.java])
                 assertEquals(patch.updates, model.pendingChanges.value?.updates)
             }
-            onView(withId(R.id.btnConfirmPending)).perform(scrollTo(), click())
+            onView(withId(R.id.btnConfirmPending)).perform(historyScrollTo(), click())
             awaitIdle(model)
             val edited = database.courseDao().getCourseById(math.id)!!
             assertEquals(math.copy(classroom = "B201", reminderMinutes = 10), edited)
-            onView(withId(R.id.pendingCard)).check(matches(withEffectiveVisibility(Visibility.GONE)))
+            assertNull(model.pendingChanges.value)
+            onView(org.hamcrest.Matchers.allOf(withId(R.id.pendingCard), isDisplayed())).check(doesNotExist())
             screenshot("assistant-edit-result")
             val rows = database.courseDao().getCoursesBySemesterSync(semester.id)
             withContext(Dispatchers.Main) {
@@ -72,11 +75,11 @@ class CourseAssistantManagementTest {
             val deletion = decode("""{"reply":"删除数学","courses":[],"deleteIds":[${math.id}]}""",
                 semester, original)
             withContext(Dispatchers.Main) { model.receiveReply(deletion, semester) }
-            onView(withId(R.id.btnCancelPending)).perform(scrollTo(), click())
+            onView(withId(R.id.btnCancelPending)).perform(historyScrollTo(), click())
             awaitIdle(model)
             assertEquals(original, database.courseDao().getCoursesBySemesterSync(semester.id))
             withContext(Dispatchers.Main) { model.receiveReply(deletion, semester) }
-            onView(withId(R.id.btnConfirmPending)).perform(scrollTo()).check(matches(withText(R.string.assistant_confirm_delete)))
+            onView(withId(R.id.btnConfirmPending)).perform(historyScrollTo()).check(matches(withText(R.string.assistant_confirm_delete)))
             screenshot("assistant-delete-preview")
             onView(withId(R.id.btnConfirmPending)).perform(click())
             awaitIdle(model)

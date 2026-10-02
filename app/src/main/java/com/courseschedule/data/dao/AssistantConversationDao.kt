@@ -25,6 +25,12 @@ interface AssistantConversationDao {
     @Query("SELECT * FROM assistant_messages WHERE conversationId = :id ORDER BY id DESC LIMIT :limit")
     suspend fun messages(id: String, limit: Int): List<AssistantChatMessage>
 
+    @Query("SELECT * FROM assistant_messages WHERE conversationId = :id AND id < :beforeId ORDER BY id DESC LIMIT :limit")
+    suspend fun messagesBefore(id: String, beforeId: Long, limit: Int): List<AssistantChatMessage>
+
+    @Query("SELECT EXISTS(SELECT 1 FROM assistant_messages WHERE conversationId = :id AND id < :beforeId)")
+    suspend fun hasMessagesBefore(id: String, beforeId: Long): Boolean
+
     @Query("SELECT COUNT(*) FROM assistant_messages WHERE conversationId = :id")
     suspend fun messageCount(id: String): Int
 

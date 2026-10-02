@@ -13,6 +13,7 @@
 -keep class com.courseschedule.ui.assistant.AssistantRetryRequest { *; }
 -keep class com.courseschedule.ui.assistant.AssistantCourseReply { *; }
 -keep class com.courseschedule.ui.assistant.AssistantCourseUpdate { *; }
+-keep class com.courseschedule.ui.assistant.AssistantCourseQuery { *; }
 -keep class com.courseschedule.data.backup.SemesterSnapshot { *; }
 -keep class com.courseschedule.data.backup.SettingsSnapshot { *; }
 -keep class com.courseschedule.data.backup.ScheduleBackup { *; }
