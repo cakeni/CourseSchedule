@@ -1,6 +1,6 @@
 # 课程助手
 
-在“导入课程”页选择“AI 对话导入”，或从课表页菜单打开“课程助手”。填写服务商提供的 HTTPS API 地址、支持 Chat Completions 的模型名称和 API Key。地址支持基础路径或完整的 `/chat/completions` 地址；密钥默认仅在当前页面使用，也可选择在本机加密保存并随时清除。
+在“导入课程”页选择“AI 对话导入”，或从课表页菜单打开“课程助手”。默认使用 DeepSeek，地址为 `https://api.deepseek.com`、模型为 `deepseek-flash`，并开启 JSON 格式约束；填写自己的 DeepSeek API Key 即可使用。也可改为其他兼容 Chat Completions 的服务商。地址支持基础路径或完整的 `/chat/completions` 地址；密钥默认仅在当前页面使用，也可选择在本机加密保存并随时清除。
 
 ## 示例
 

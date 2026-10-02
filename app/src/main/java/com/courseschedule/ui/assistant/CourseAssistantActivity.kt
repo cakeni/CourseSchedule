@@ -108,8 +108,7 @@ class CourseAssistantActivity : AppCompatActivity() {
         }
         viewModel.configured.observe(this) { configured ->
             binding.tvApiStatus.setText(if (configured) R.string.assistant_api_ready else R.string.assistant_api_needed)
-            binding.tvApiModel.text = if (configured) viewModel.config.model
-                else getString(R.string.assistant_unconfigured)
+            binding.tvApiModel.text = viewModel.config.model
             binding.apiStatusIcon.setImageResource(if (configured) R.drawable.ic_check else R.drawable.ic_settings)
         }
         viewModel.pendingChanges.observe(this) { pending ->
