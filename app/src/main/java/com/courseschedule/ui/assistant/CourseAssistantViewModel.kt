@@ -50,6 +50,8 @@ internal class CourseAssistantViewModel @JvmOverloads constructor(application: A
     val sessionTitle = MutableLiveData("新对话")
     val draft = MutableLiveData("")
     val pendingChanges = MutableLiveData<AssistantCourseReply?>(null)
+    var initialConversationLoaded = false
+        private set
     internal val conversationId: String? get() = conversation?.id
 
     init {
@@ -63,7 +65,7 @@ internal class CourseAssistantViewModel @JvmOverloads constructor(application: A
             removeOrphanDrafts()
             ensureConversation(currentSemester())
             if (configError) append("assistant", "保存的 API 配置无法解密，请重新填写。", "error")
-        }
+        }.invokeOnCompletion { initialConversationLoaded = true }
     }
 
     fun configure(value: AssistantApiConfig, remember: Boolean) {

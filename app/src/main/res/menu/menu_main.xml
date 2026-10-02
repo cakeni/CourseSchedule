@@ -9,14 +9,15 @@
         app:showAsAction="always" />
 
     <item
-        android:id="@+id/action_course_assistant"
-        android:title="@string/assistant_title"
-        app:showAsAction="never" />
-
-    <item
         android:id="@+id/action_today"
         android:title="@string/current_week"
         app:actionLayout="@layout/action_duck_mascot"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/action_course_assistant"
+        android:title="@string/course_tools"
+        app:actionLayout="@layout/action_course_tools"
         app:showAsAction="always" />
 
 </menu>

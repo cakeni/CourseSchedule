@@ -47,6 +47,10 @@
 
     <style name="Theme.CourseSchedule" parent="Theme.CourseSchedule.Base" />
 
+    <style name="Theme.CourseSchedule.Assistant" parent="Theme.CourseSchedule">
+        <item name="android:windowDisablePreview">true</item>
+    </style>
+
     <style name="ShapeAppearance.CourseSchedule.Dialog" parent="ShapeAppearance.MaterialComponents.LargeComponent">
         <item name="cornerSize">20dp</item>
     </style>
