@@ -1,6 +1,8 @@
 # 晴课表 · HarmonyOS NEXT
 
-以本仓库 Android **1.0.13** 的界面、资源、交互和数据格式为对照的原生 ArkTS/ArkUI 工程。开发版 **0.1.0**，Stage 模型，最低 API **17**；当前使用 DevEco Studio 26 和 HarmonyOS SDK 26 构建。
+原生 ArkTS/ArkUI 工程，课表与导入以 Android **1.0.13** 为初始对照，课程助手同步 Android **1.0.19** 的主要功能。开发版 **0.2.0**，Stage 模型，最低 API **17**；当前使用 DevEco Studio 26 和 HarmonyOS SDK 26 构建。
+
+应用包名为 `com.courseschedule.qingke`，用于 AGC APP ID、Profile、课程提醒跳转和模拟器运行。
 
 ## 已实现
 
@@ -13,6 +15,9 @@
 - JSON、CSV、HTML、XLSX、文本导入；预览、无效项/重复/冲突检查、追加/替换、可选学期及设置恢复、导入撤销；系统文件选择器导入及 Android v2 格式导出。
 - 可选 DeepSeek/OpenAI 网页识别。使用者自行输入 Key，按服务商分别保存到系统加密资产存储；重新打开或重启自动填回，可随时清除，不进入课表备份。
 - 原生系统通知授权与代理提醒调度：提前量、单双周排除、学期起止、临近课程补发、重新排程与测试提醒。
+- 对话课程助手：本地快捷查询、自然语言添加/修改/删除、单次取消与调课、课前提醒设置；修改、删除、批量新增先核对，再一次保存课程、回执与撤销记录。
+- 助手独立界面：浅色与深色会话、示例入口、历史对话、草稿保存、停止和显式重试；长方案独立滚动，确认按钮固定，原生文字选择有明确底色，补充要求发送前暂停确认。
+- 助手默认 `https://api.deepseek.com` / `deepseek-flash`，兼容 Chat Completions 的 HTTPS 服务。Key 默认仅当前页面使用；勾选“在本机保存 Key”后存入独立 AssetStore 项，不进入课表备份。可明确选择复用网页识别保存的 DeepSeek Key。
 
 ## 验证范围与待验收项
 
@@ -21,10 +26,10 @@
 仍需单独验收：
 
 - 当前未签名模拟器构建发布代理提醒返回 **1700002**；通知授权和调度代码已实现，**提醒送达尚未通过**。需要在具备相应应用能力和签名配置的环境中复验。
-- 没有使用学校账号或真实 API Key，因此各校登录后导入、真实识别请求及真机后台运行尚未验证。目录条目数量不代表每所学校都经过登录实测。
+- 学校账号登录、各校实际导入、真机后台运行尚未验证。课程助手的真实 DeepSeek 对话与原生网络请求单独记录于下方验收文档；这不代表每所学校的网页识别或全部自然语言输入都经过验证。
 - ArkUI 原生输入、下拉框、文件选择器等系统控件与 Android 系统控件存在平台差异；目前没有逐像素一致或所有设备恒定 60 FPS 的测量结论。
 
-详细记录见 [完整移植验收记录](docs/full-port-20260930/README.md)。早期 [UI 对齐记录](docs/ui-alignment-20260930/README.md) 保留作为历史记录。
+详细记录见 [课程助手验收记录](docs/course-assistant-20261002/README.md) 和 [完整移植验收记录](docs/full-port-20260930/README.md)。早期 [UI 对齐记录](docs/ui-alignment-20260930/README.md) 保留作为历史记录。
 
 ## 打开和构建
 
@@ -39,7 +44,10 @@ $env:DEVECO_SDK_HOME='D:/devco/DevEco Studio/sdk'
 & 'D:/devco/DevEco Studio/tools/node/node.exe' 'D:/devco/DevEco Studio/tools/hvigor/bin/hvigorw.js' assembleHap --mode module -p module=entry -p product=default --no-daemon --no-incremental
 node tests/FullPort.cjs
 node tests/AiRecognition.cjs
+node --test tests/CourseAssistant.cjs tests/AssistantPlatform.cjs
 node --test tests/ScheduleCore.test.ts
 ```
 
 模拟器已允许安装上述未签名 HAP；真机调试和发布需配置签名。核心校验脚本使用 DevEco 随附 TypeScript，其他安装路径可通过 `HARMONY_TYPESCRIPT` 指定。
+
+已接入可选 `signing.local.json` 或 `HARMONY_SIGNING_CONFIG` 本地签名配置；`HARMONY_REQUIRE_SIGNING=1` 会在缺少签名配置时停止构建。另外提供 Windows DPAPI 发布签名脚本 `scripts/sign-release.ps1`：已使用华为发布证书和 Profile 生成签名 HAP，并通过官方校验。证书、私钥、密码和 HAP 保留在本机；代理提醒服务仍在审核，尚无鸿蒙真机安装和后台送达验证。生成证书、构建和凭证保管见 [签名配置说明](docs/signing-20261002/README.md)。

@@ -3,6 +3,7 @@
 *.iml
 .gradle/
 .kotlin/
+.hvigor/
 local.properties
 .externalNativeBuild/
 .cxx/
@@ -31,6 +32,14 @@ captures/
 *.keystore
 keystore.properties
 signing.properties
+*.p12
+*.p7b
+*.csr
+*.cer
+*.dpapi
+/harmonyos/signing/
+/harmonyos/signing.local.json
+/harmonyos/release-signing.local.json
 .env
 .env.*
 

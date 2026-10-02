@@ -1,0 +1,5 @@
+*.class
+*.log
+update-*.py
+pr-description.md
+screenshots/keyboard-light.png

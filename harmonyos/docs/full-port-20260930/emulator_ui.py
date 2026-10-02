@@ -14,7 +14,7 @@ def command(*args):
     return result.stdout
 def snapshot():
     args = ['shell', 'uitest', 'dumpLayout', '-p', '/data/local/tmp/full-port.json']
-    if not sys.argv[1].startswith('sys'): args += ['-b', 'com.courseschedule.harmonyos']
+    if not sys.argv[1].startswith('sys'): args += ['-b', 'com.courseschedule.qingke']
     command(*args)
     local = folder / 'layout.json'
     command('file', 'recv', '/data/local/tmp/full-port.json', local)

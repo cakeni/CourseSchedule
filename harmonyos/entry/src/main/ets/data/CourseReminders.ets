@@ -17,7 +17,7 @@ function request(course: Course, date: Date, last: Date): reminderAgentManager.R
     dateTime: localDate(date), endDateTime: localDate(last), daysOfWeek: [(date.getDay() + 6) % 7 + 1],
     title: course.courseName, content: `第${course.startSection}-${course.endSection}节 · ${course.classroom || '未提供教室'}${course.teacher ? ' · ' + course.teacher : ''}`,
     expiredContent: '课程即将开始', notificationId: course.id, ringDuration: 0,
-    wantAgent: { pkgName: 'com.courseschedule.harmonyos', abilityName: 'EntryAbility' },
+    wantAgent: { pkgName: 'com.courseschedule.qingke', abilityName: 'EntryAbility' },
     actionButton: [{ title: '关闭', type: reminderAgentManager.ActionButtonType.ACTION_BUTTON_TYPE_CLOSE }],
     slotType: notificationManager.SlotType.SOCIAL_COMMUNICATION
   };
@@ -106,7 +106,7 @@ export async function testReminder(context: common.UIAbilityContext): Promise<vo
   const reminder: reminderAgentManager.ReminderRequestTimer = {
     reminderType: reminderAgentManager.ReminderType.REMINDER_TYPE_TIMER, triggerTimeInSeconds: 10,
     title: '测试提醒', content: '提醒已送达。课程提醒会按课程设置发送。', ringDuration: 0,
-    notificationId: 2147480000, wantAgent: { pkgName: 'com.courseschedule.harmonyos', abilityName: 'EntryAbility' },
+    notificationId: 2147480000, wantAgent: { pkgName: 'com.courseschedule.qingke', abilityName: 'EntryAbility' },
     actionButton: [{ title: '关闭', type: reminderAgentManager.ActionButtonType.ACTION_BUTTON_TYPE_CLOSE }]
   };
   await reminderAgentManager.publishReminder(reminder);

@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.action.ViewActions.scrollTo
+
 import androidx.test.espresso.action.ViewActions.closeSoftKeyboard
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.*
@@ -36,7 +36,7 @@ class CourseAssistantFlowTest {
                 .apply { mkdirs() }
         }
         val store = AssistantConfigStore(isolated)
-        val config = AssistantApiConfig("https://example.com/v1", "test-model", "synthetic-test-value")
+        val config = AssistantApiConfig("https://example.com/v1", "test-model", "synthetic-test-value", jsonMode = true)
         try {
             store.save(config, true)
             assertEquals(config, store.load())
@@ -121,16 +121,26 @@ class CourseAssistantFlowTest {
         }
     }
 
-    @Test fun importPageOpensAssistantAndExampleKeepsDraftWhileConfiguring() {
+    @Test fun importPageOpensAssistantAndExampleKeepsDraftWhileConfiguring(): Unit = runBlocking {
+        val database = AppDatabase.getDatabase(context)
+        val previous = database.semesterDao().getCurrentSemesterSync()
+        val store = AssistantConfigStore(context)
+        val previousConfig = store.load()
+        val semesterId = database.semesterDao().insertSemester(com.courseschedule.data.entity.Semester(
+            name = "导入入口测试学期", startDate = System.currentTimeMillis(), totalWeeks = 16))
+        database.semesterDao().switchCurrentSemester(semesterId)
+        store.save(previousConfig.copy(apiKey = "synthetic-test-value"), false)
+        try {
         ActivityScenario.launch<ImportActivity>(Intent(context, ImportActivity::class.java)).use {
-            onView(withId(R.id.cardImportAssistant)).perform(scrollTo()).check(matches(isDisplayed()))
+            onView(withId(R.id.cardImportAssistant)).perform(historyScrollTo()).check(matches(isDisplayed()))
             screenshot("assistant-import-page")
             onView(withId(R.id.cardImportAssistant)).perform(click())
             InstrumentationRegistry.getInstrumentation().waitForIdleSync()
             onView(withId(R.id.starterContent)).check(matches(isDisplayed()))
-            onView(withId(R.id.btnExampleSimple)).perform(scrollTo(), click())
+            onView(withId(R.id.btnExampleSimple)).perform(historyScrollTo(), click())
             onView(withId(R.id.etMessage)).check(matches(withText(R.string.assistant_example_simple)))
-            onView(withId(R.id.messagesContainer)).check(matches(hasChildCount(0)))
+            onView(withId(R.id.conversationList)).check(matches(isDisplayed()))
+            onView(withId(R.id.starterContent)).check(matches(isDisplayed()))
             onView(withId(R.id.etMessage)).perform(click())
             onView(withId(R.id.etMessage)).perform(object : androidx.test.espresso.ViewAction {
                 override fun getConstraints() = isDisplayed()
@@ -160,6 +170,11 @@ class CourseAssistantFlowTest {
             androidx.test.espresso.Espresso.pressBack()
             onView(withId(R.id.cardImportAssistant)).check(matches(isDisplayed()))
         }
+        } finally {
+            database.semesterDao().getSemesterById(semesterId)?.let { database.semesterDao().deleteSemester(it) }
+            previous?.let { database.semesterDao().switchCurrentSemester(it.id) }
+            store.save(previousConfig.copy(apiKey = previousConfig.apiKey.ifBlank { "synthetic-test-value" }), previousConfig.apiKey.isNotBlank())
+        }
     }
 
     private fun awaitLoaded(model: CourseAssistantViewModel) {
@@ -185,7 +200,7 @@ class CourseAssistantFlowTest {
             onView(withId(R.id.btnConfigureApi)).perform(click())
             onView(withId(R.id.etApiUrl)).check(matches(isDisplayed()))
             onView(withId(R.id.etApiModel)).check(matches(isDisplayed()))
-            onView(withId(R.id.etApiKey)).check(matches(isDisplayed()))
+            onView(withId(R.id.etApiKey)).perform(historyScrollTo()).check(matches(isDisplayed()))
             screenshot("assistant-api-config")
             onView(withText(R.string.cancel)).perform(click())
             onView(withId(R.id.btnSend)).check(matches(isDisplayed()))

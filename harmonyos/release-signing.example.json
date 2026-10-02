@@ -1,0 +1,10 @@
+{
+  "bundleName": "com.courseschedule.qingke",
+  "keyAlias": "course-schedule-release",
+  "storeFile": "material/course-schedule-release.p12",
+  "passwordFile": "material/release-password.dpapi",
+  "certpath": "material/course-schedule-release.cer",
+  "profile": "material/qingke-release.p7b",
+  "javaHome": "C:/path/to/jdk-17",
+  "signToolJar": "D:/path/to/DevEco Studio/sdk/default/openharmony/toolchains/lib/hap-sign-tool.jar"
+}

@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent" android:layout_height="wrap_content">
+    <com.google.android.material.card.MaterialCardView android:id="@+id/pendingCard" android:layout_width="match_parent" android:layout_height="wrap_content" android:visibility="gone" app:cardBackgroundColor="@color/surface" app:cardCornerRadius="18dp" app:cardElevation="0dp" app:strokeColor="@color/primary_variant" app:strokeWidth="1dp">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/assistant_pending_title" android:textColor="@color/text_primary" android:textSize="16sp" android:textStyle="bold" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:text="@string/assistant_pending_hint" android:textColor="@color/text_secondary" android:textSize="12sp" />
+            <com.courseschedule.ui.assistant.AssistantPreviewScrollView android:id="@+id/pendingSummaryScroll" android:layout_width="match_parent" android:layout_height="120dp" android:layout_marginTop="12dp" android:scrollbars="vertical" android:fadeScrollbars="false">
+                <TextView android:id="@+id/tvPendingSummary" android:layout_width="match_parent" android:layout_height="wrap_content" android:lineSpacingExtra="4dp" android:textColor="@color/text_primary" android:textColorHighlight="@color/assistant_selection_surface" android:textSize="14sp" android:textIsSelectable="true" />
+            </com.courseschedule.ui.assistant.AssistantPreviewScrollView>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:gravity="end" android:orientation="horizontal">
+                <com.google.android.material.button.MaterialButton android:id="@+id/btnCancelPending" style="@style/Widget.MaterialComponents.Button.TextButton" android:layout_width="wrap_content" android:layout_height="48dp" android:text="@string/cancel" android:textColor="@color/primary_variant" />
+                <com.google.android.material.button.MaterialButton android:id="@+id/btnConfirmPending" android:layout_width="wrap_content" android:layout_height="48dp" android:layout_marginStart="8dp" android:text="@string/assistant_confirm_changes" app:cornerRadius="12dp" />
+            </LinearLayout>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+</FrameLayout>

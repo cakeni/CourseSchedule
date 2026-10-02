@@ -1,0 +1,19 @@
+{
+  "date": "2026-10-02",
+  "baseline": "413f476c379e4917b180171f2be4aecc826d044c",
+  "unit_tests": 162,
+  "unit_failures": 0,
+  "flow_tests": 13,
+  "small_dark_ui_tests": 4,
+  "restart_prepare_tests": 1,
+  "restart_verify_tests": 1,
+  "live_semantic_cases": 21,
+  "network_retries": 1,
+  "accepted_unauthorized_plans": 0,
+  "lint_errors": 0,
+  "lint_warnings": 131,
+  "debug_build": "passed",
+  "release_build": "passed",
+  "local_utp": "failed before tests; same APK tests passed via AndroidJUnitRunner",
+  "apk_sha256": "b06c237e9addc3fc1034dcd6182f95568901bcb0ed280f7b3d64cb37003d75f5"
+}

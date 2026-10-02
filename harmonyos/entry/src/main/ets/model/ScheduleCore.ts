@@ -40,6 +40,8 @@ export interface ScheduleState {
   settings: ScheduleSettings;
   courses: Course[];
   archives?: SemesterArchive[];
+  // Conversation state is saved with courses, but excluded from exported timetable backups.
+  assistantChats?: string;
 }
 
 export interface SemesterArchive { semester: Semester; courses: Course[] }

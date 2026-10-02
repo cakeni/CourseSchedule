@@ -1,0 +1,4 @@
+*.log
+*.hap
+*.json
+!*.example.json

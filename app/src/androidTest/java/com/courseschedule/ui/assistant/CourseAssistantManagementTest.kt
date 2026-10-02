@@ -7,8 +7,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.action.ViewActions.scrollTo
+
 import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -34,6 +35,97 @@ import java.util.concurrent.TimeUnit
 class CourseAssistantManagementTest {
     private val context = InstrumentationRegistry.getInstrumentation().targetContext
 
+    @Test fun pendingPreviewSwipesIndependentlyAndKeepsConfirmationButtonsVisible(): Unit = runBlocking {
+        withFixture { database, semester, scenario, model ->
+            val original = database.courseDao().getCoursesBySemesterSync(semester.id).first()
+            val updated = original.copy(classroom = "B201", note = (1..20).joinToString("\n") { "请核对第${it}项课程安排与课堂资料。" })
+            withContext(Dispatchers.Main) {
+                model.receiveReply(AssistantCourseReply("改教室并补充备注", emptyList(), updates = listOf(
+                    AssistantCourseUpdate(original, listOf(updated)))), semester)
+            }
+            lateinit var scroll: androidx.core.widget.NestedScrollView
+            lateinit var list: androidx.recyclerview.widget.RecyclerView
+            var buttonTop = 0
+            scenario.onActivity {
+                scroll = it.findViewById<android.widget.TextView>(R.id.tvPendingSummary).parent as androidx.core.widget.NestedScrollView
+                list = it.findViewById(R.id.conversationList)
+                buttonTop = screenTop(it.findViewById(R.id.btnConfirmPending))
+                assertTrue(scroll.getChildAt(0).height > scroll.height)
+            }
+            val historyOffset = list.computeVerticalScrollOffset()
+            onView(isAssignableFrom(androidx.core.widget.NestedScrollView::class.java))
+                .perform(androidx.test.espresso.action.ViewActions.swipeUp())
+            scenario.onActivity {
+                assertTrue("Dragging the preview must scroll its content", scroll.scrollY > 0)
+                assertEquals("The conversation must stay still while reading the preview", historyOffset, list.computeVerticalScrollOffset())
+                assertEquals(buttonTop, screenTop(it.findViewById(R.id.btnConfirmPending)))
+            }
+            repeat(5) { onView(isAssignableFrom(androidx.core.widget.NestedScrollView::class.java))
+                .perform(androidx.test.espresso.action.ViewActions.swipeUp()) }
+            scenario.onActivity {
+                assertFalse("All details must be reachable", scroll.canScrollVertically(1))
+            }
+            onView(withId(R.id.btnConfirmPending)).check(matches(isCompletelyDisplayed()))
+            onView(withId(R.id.btnCancelPending)).check(matches(isCompletelyDisplayed()))
+            assertEquals(original, database.courseDao().getCourseById(original.id))
+            screenshot("assistant-preview-scrolled")
+            onView(isAssignableFrom(androidx.core.widget.NestedScrollView::class.java))
+                .perform(androidx.test.espresso.action.ViewActions.longClick())
+            onView(withId(R.id.tvPendingSummary)).check { view, error ->
+                if (error != null) throw error
+                copySelectedText(view as android.widget.TextView)
+            }
+            withContext(Dispatchers.Main) {
+                model.receiveReply(AssistantCourseReply("修正为C201", emptyList(), updates = listOf(
+                    AssistantCourseUpdate(original, listOf(updated.copy(classroom = "C201"))))), semester, refining = true)
+            }
+            scenario.onActivity { assertEquals("Revised plans must start at the beginning", 0, scroll.scrollY) }
+            onView(withId(R.id.btnCancelPending)).perform(click())
+            awaitIdle(model)
+            assertEquals(original, database.courseDao().getCourseById(original.id))
+        }
+    }
+
+    @Test fun selectedMessageRangeIsVisibleAndReadableForBothSpeakers(): Unit = runBlocking {
+        withFixture { _, _, scenario, model ->
+            val texts = listOf("把周二这门课换到周四第五节", "请选择并核对课程安排，确认后执行。")
+            scenario.onActivity { model.messages.value = listOf(
+                AssistantMessage("user", texts[0]), AssistantMessage("assistant", texts[1])) }
+            texts.forEachIndexed { index, text ->
+                onView(org.hamcrest.Matchers.allOf(withId(R.id.tvMessageBody), withText(text)))
+                    .perform(historyScrollTo(), androidx.test.espresso.action.ViewActions.longClick())
+                    .check { view, error ->
+                        if (error != null) throw error
+                        val body = view as android.widget.TextView
+                        assertTrue("Long press must select text", body.selectionEnd > body.selectionStart)
+                        val background = androidx.core.content.ContextCompat.getColor(body.context,
+                            if (index == 0) R.color.primary else R.color.surface)
+                        val selected = androidx.core.graphics.ColorUtils.compositeColors(body.highlightColor, background)
+                        assertTrue("Selection must be distinct from its bubble",
+                            androidx.core.graphics.ColorUtils.calculateContrast(selected, background) >= 1.4)
+                        assertTrue("Selected text must remain readable",
+                            androidx.core.graphics.ColorUtils.calculateContrast(body.currentTextColor, selected) >= 4.5)
+                    }
+                screenshot(if (index == 0) "assistant-user-selection" else "assistant-reply-selection")
+                onView(org.hamcrest.Matchers.allOf(withId(R.id.tvMessageBody), withText(text)))
+                    .check { view, error ->
+                        if (error != null) throw error
+                        copySelectedText(view as android.widget.TextView)
+                    }
+            }
+        }
+    }
+
+    private fun screenTop(view: android.view.View): Int = IntArray(2).also(view::getLocationOnScreen)[1]
+
+    private fun copySelectedText(view: android.widget.TextView) {
+        assertTrue("Long press must still select text", view.selectionEnd > view.selectionStart)
+        val expected = view.text.substring(view.selectionStart, view.selectionEnd)
+        assertTrue(view.onTextContextMenuItem(android.R.id.copy))
+        val clipboard = view.context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+        assertEquals(expected, clipboard.primaryClip!!.getItemAt(0).text.toString())
+    }
+
     @Test fun editsQueriesDeletesAndUndoPreserveMetadataAndPendingSurvivesRotation(): Unit = runBlocking {
         withFixture { database, semester, scenario, model ->
             val original = database.courseDao().getCoursesBySemesterSync(semester.id)
@@ -42,19 +134,21 @@ class CourseAssistantManagementTest {
                 "updates":[{"id":${math.id},"classroom":"B201","reminderMinutes":10}]}""", semester, original)
             withContext(Dispatchers.Main) { model.receiveReply(patch, semester) }
             assertEquals(original, database.courseDao().getCoursesBySemesterSync(semester.id))
-            onView(withId(R.id.btnSend)).check(matches(not(isEnabled())))
-            onView(withId(R.id.pendingCard)).perform(scrollTo()).check(matches(isDisplayed()))
+            onView(withId(R.id.btnSend)).check(matches(isEnabled()))
+            onView(withId(R.id.pendingCard)).check(matches(isDisplayed()))
+            onView(withId(R.id.btnConfirmPending)).check(matches(isCompletelyDisplayed()))
             screenshot("assistant-edit-preview")
             scenario.recreate()
             scenario.onActivity {
                 assertSame(model, ViewModelProvider(it)[CourseAssistantViewModel::class.java])
                 assertEquals(patch.updates, model.pendingChanges.value?.updates)
             }
-            onView(withId(R.id.btnConfirmPending)).perform(scrollTo(), click())
+            onView(withId(R.id.btnConfirmPending)).perform(historyScrollTo(), click())
             awaitIdle(model)
             val edited = database.courseDao().getCourseById(math.id)!!
             assertEquals(math.copy(classroom = "B201", reminderMinutes = 10), edited)
-            onView(withId(R.id.pendingCard)).check(matches(withEffectiveVisibility(Visibility.GONE)))
+            assertNull(model.pendingChanges.value)
+            onView(org.hamcrest.Matchers.allOf(withId(R.id.pendingCard), isDisplayed())).check(doesNotExist())
             screenshot("assistant-edit-result")
             val rows = database.courseDao().getCoursesBySemesterSync(semester.id)
             withContext(Dispatchers.Main) {
@@ -72,11 +166,11 @@ class CourseAssistantManagementTest {
             val deletion = decode("""{"reply":"删除数学","courses":[],"deleteIds":[${math.id}]}""",
                 semester, original)
             withContext(Dispatchers.Main) { model.receiveReply(deletion, semester) }
-            onView(withId(R.id.btnCancelPending)).perform(scrollTo(), click())
+            onView(withId(R.id.btnCancelPending)).perform(historyScrollTo(), click())
             awaitIdle(model)
             assertEquals(original, database.courseDao().getCoursesBySemesterSync(semester.id))
             withContext(Dispatchers.Main) { model.receiveReply(deletion, semester) }
-            onView(withId(R.id.btnConfirmPending)).perform(scrollTo()).check(matches(withText(R.string.assistant_confirm_delete)))
+            onView(withId(R.id.btnConfirmPending)).perform(historyScrollTo()).check(matches(withText(R.string.assistant_confirm_delete)))
             screenshot("assistant-delete-preview")
             onView(withId(R.id.btnConfirmPending)).perform(click())
             awaitIdle(model)

@@ -25,6 +25,7 @@
     <color name="text_primary">#F2F2F2</color>
     <color name="text_secondary">#B8B8B8</color>
     <color name="text_tertiary">#858585</color>
+    <color name="assistant_selection_surface">#315A86</color>
 
     <!-- Course blocks stay colorful, but deep enough for high-contrast white labels. -->
     <color name="course_red">#A84F58</color>
