@@ -115,6 +115,7 @@ class CourseAssistantActivity : AppCompatActivity() {
             footer.pendingCard.visibility = if (pending == null) View.GONE else View.VISIBLE
             if (pending != null) {
                 footer.tvPendingSummary.text = viewModel.pendingSummary(pending)
+                footer.pendingSummaryScroll.scrollTo(0, 0)
                 footer.btnConfirmPending.setText(if (pending.courses.isEmpty() && pending.updates.isEmpty())
                     R.string.assistant_confirm_delete else R.string.assistant_confirm_changes)
                 binding.root.requestFocus()

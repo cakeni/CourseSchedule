@@ -47,6 +47,20 @@
 
     <style name="Theme.CourseSchedule" parent="Theme.CourseSchedule.Base" />
 
+    <style name="ThemeOverlay.CourseSchedule.AssistantSelection" parent="">
+        <item name="android:textColorHighlight">@color/assistant_selection_surface</item>
+        <item name="android:colorAccent">@color/primary_variant</item>
+        <item name="android:colorControlActivated">@color/primary_variant</item>
+        <item name="colorControlActivated">@color/primary_variant</item>
+    </style>
+
+    <style name="ThemeOverlay.CourseSchedule.AssistantSelection.OnPrimary">
+        <item name="android:textColorHighlight">@color/assistant_selection_on_primary</item>
+        <item name="android:colorAccent">@color/on_primary</item>
+        <item name="android:colorControlActivated">@color/on_primary</item>
+        <item name="colorControlActivated">@color/on_primary</item>
+    </style>
+
     <style name="ShapeAppearance.CourseSchedule.Dialog" parent="ShapeAppearance.MaterialComponents.LargeComponent">
         <item name="cornerSize">20dp</item>
     </style>

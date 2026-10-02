@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
+import androidx.appcompat.view.ContextThemeWrapper
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -23,7 +24,12 @@ internal class AssistantMessageAdapter : ListAdapter<AssistantMessage, Assistant
     private val format = SimpleDateFormat("MM-dd HH:mm", Locale.getDefault())
     init { setHasStableIds(true) }
     override fun getItemId(position: Int) = getItem(position).id.takeIf { it > 0 } ?: -(position + 1L)
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = Holder(ItemAssistantMessageBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+    override fun getItemViewType(position: Int) = if (getItem(position).role == "user") 1 else 0
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder {
+        val context = ContextThemeWrapper(parent.context, if (viewType == 1)
+            R.style.ThemeOverlay_CourseSchedule_AssistantSelection_OnPrimary else R.style.ThemeOverlay_CourseSchedule_AssistantSelection)
+        return Holder(ItemAssistantMessageBinding.inflate(LayoutInflater.from(context), parent, false))
+    }
     override fun onBindViewHolder(holder: Holder, position: Int) {
         val row = holder.binding
         val context = row.root.context

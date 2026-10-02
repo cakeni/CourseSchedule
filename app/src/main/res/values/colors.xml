@@ -27,6 +27,8 @@
     <color name="text_primary">#1C2733</color>
     <color name="text_secondary">#667487</color>
     <color name="text_tertiary">#8A96A5</color>
+    <color name="assistant_selection_surface">#B9D4F2</color>
+    <color name="assistant_selection_on_primary">#142F52</color>
 
     <!-- 课程表颜色 -->
     <color name="course_red">#E78387</color>
