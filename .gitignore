@@ -36,8 +36,10 @@ signing.properties
 *.p7b
 *.csr
 *.cer
+*.dpapi
 /harmonyos/signing/
 /harmonyos/signing.local.json
+/harmonyos/release-signing.local.json
 .env
 .env.*
 
