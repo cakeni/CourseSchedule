@@ -1,0 +1,2 @@
+dbae59acb0ff233cdf114b3f3f12e8818855b9354a3a4844ca12c0011e185c28  CourseSchedule-HarmonyOS-0.2.0-debug-unsigned.hap
+1fa7c1f88182fa5c5b5651d31aa04140d04d723ab887c8120555b38e48bc00d3  CourseSchedule-HarmonyOS-0.2.0-release-unsigned.hap

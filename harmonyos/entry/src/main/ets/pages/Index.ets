@@ -4,6 +4,7 @@ import { pasteboard } from '@kit.BasicServicesKit';
 import { util } from '@kit.ArkTS';
 import { i18n } from '@kit.LocalizationKit';
 import { AcademicImport } from './AcademicImport';
+import { CourseAssistant } from './CourseAssistant';
 import { DUCK_FRAMES } from './DuckFrames';
 import { DateHeader } from './DateHeader';
 import { NavigationItem } from './NavigationItem';
@@ -89,6 +90,15 @@ struct Index {
   @State private timeEnds: string[] = END_TIMES.slice();
   private semesterEditingId: number = 0;
   private academicBack: () => boolean = () => false;
+  private assistantBack: () => boolean = () => false;
+  private assistantReturn: string = 'schedule';
+
+  private openAssistant(origin: string): void {
+    this.assistantReturn = origin; this.message = ''; this.navigate('assistant');
+  }
+  private async closeAssistant(target: string): Promise<void> {
+    await this.load(); this.navigate(target);
+  }
 
   @State private editingId: number = 0;
   @State private formName: string = '';
@@ -659,6 +669,7 @@ struct Index {
   onBackPress(): boolean {
     if (this.semesterDatePicker) { this.semesterDatePicker = false; return true; }
     if (this.screen === 'academic' && this.academicBack()) return true;
+    if (this.screen === 'assistant' && this.assistantBack()) return true;
     if (this.quickDay) { this.quickDay = 0; return true; }
     if (this.semesterPicker) { this.setSemesterPicker(false); return true; }
     if (this.detailCourse) { this.closeDetails(); return true; }
@@ -710,6 +721,9 @@ struct Index {
       Row() {
         DateHeader({ date: this.dateTitle(), summary: `第${this.week}周 · ${DAYS[(this.displayedDate().getDay() + 6) % 7]}`,
           forward: this.dateForward, color: this.palette().text, secondary: this.palette().secondary }).layoutWeight(1);
+        Button({ type: ButtonType.Normal }) { Image($rawfile('ic_assistant.svg')).width(23).height(23).fillColor(this.palette().primary); }
+          .id('course-assistant-entry').width(42).height(48).backgroundColor(Color.Transparent)
+          .accessibilityText('课程助手').enabled(this.ready).onClick(() => this.openAssistant('schedule'));
         Button({ type: ButtonType.Normal }) { Image($rawfile('ic_add.svg')).width(24).height(24).fillColor(this.palette().primary).objectFit(ImageFit.Contain); }
           .id('add-course').width(48).height(48).backgroundColor(Color.Transparent)
           .accessibilityText('添加课程').enabled(this.ready).onClick(() => this.openCourse(null));
@@ -1307,6 +1321,17 @@ struct Index {
           .onTouch((event: TouchEvent) => this.pressedAction = event.type === TouchType.Down ? 'school-import' : '')
           .opacity(0.16 + 0.84 * this.pageEntrance).translate({ y: 30 * (1 - this.pageEntrance) }).scale({ x: (0.9 + 0.1 * this.pageEntrance) * (this.pressedAction === 'school-import' ? 0.98 : 1),
             y: (0.9 + 0.1 * this.pageEntrance) * (this.pressedAction === 'school-import' ? 0.98 : 1) }).animation(this.entranceAnimating ? this.entryAnimation(2) : { duration: this.pressedAction === 'school-import' ? 115 : 245, curve: this.pressCurve });
+        Row({ space: 14 }) {
+          Stack() { Image($rawfile('ic_assistant.svg')).width(25).height(25).fillColor(this.palette().primary); }
+            .width(52).height(52).backgroundColor(this.palette().container).borderRadius(16);
+          Column({ space: 5 }) {
+            Text('课程助手').fontSize(17).fontWeight(FontWeight.Bold).fontColor(this.palette().text).width('100%');
+            Text('对话查课、调整安排与课前提醒').fontSize(12).fontColor(this.palette().secondary).width('100%');
+          }.layoutWeight(1);
+          Image($rawfile('ic_chevron_right.svg')).width(20).height(20).fillColor(this.palette().tertiary);
+        }.id('course-assistant-import-entry').height(96).padding(18).width('100%').borderRadius(22)
+          .backgroundColor(this.palette().surface).border({ width: 1, radius: 22, color: this.palette().divider })
+          .onClick(() => this.openAssistant('backup'));
         Text('其他导入方式').fontSize(12).fontWeight(FontWeight.Bold).fontColor(this.palette().secondary)
           .width('100%').margin({ top: 14 })
           .opacity(0.16 + 0.84 * this.pageEntrance).translate({ y: 30 * (1 - this.pageEntrance) }).animation(this.entryAnimation(3));
@@ -1498,6 +1523,10 @@ struct Index {
           this.backupPage();
         } else if (this.baseScreen() === 'schools') {
           this.schoolsPage();
+        } else if (this.baseScreen() === 'assistant') {
+          CourseAssistant({ dark: this.dark, displayedWeek: this.week, reminderStatus: this.reminderStatus,
+            onClose: () => this.closeAssistant(this.assistantReturn), onSettings: () => this.closeAssistant('settings'),
+            onBackHandler: (handler: () => boolean) => this.assistantBack = handler });
         } else if (this.baseScreen() === 'academic') {
           AcademicImport({ school: this.selectedSchool, definitions: this.schoolDefinitions, totalWeeks: this.state.semester.totalWeeks,
             dark: this.dark, onImported: (parsed: ParsedImport) => this.previewImport(parsed), onClose: () => this.navigate('schools'),

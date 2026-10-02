@@ -14,8 +14,16 @@ export async function loadState(context: common.UIAbilityContext): Promise<Sched
 
 export async function saveState(context: common.UIAbilityContext, state: ScheduleState): Promise<void> {
   const store = await preferences.getPreferences(context, STORE_NAME);
-  await store.put(STATE_KEY, serializeState(state));
-  await store.flush();
+  const previous = await store.get(STATE_KEY, '') as string;
+  try {
+    await store.put(STATE_KEY, serializeState(state));
+    await store.flush();
+  } catch (error) {
+    // Preferences.put changes the in-memory cache before flush succeeds.
+    await store.put(STATE_KEY, previous);
+    try { await store.flush(); } catch (_) {}
+    throw error as Error;
+  }
 }
 
 export async function loadDarkMode(context: common.UIAbilityContext): Promise<boolean> {
