@@ -2,6 +2,8 @@
 
 原生 ArkTS/ArkUI 工程，课表与导入以 Android **1.0.13** 为初始对照，课程助手同步 Android **1.0.19** 的主要功能。开发版 **0.2.0**，Stage 模型，最低 API **17**；当前使用 DevEco Studio 26 和 HarmonyOS SDK 26 构建。
 
+应用包名为 `com.courseschedule.qingke`，用于 AGC APP ID、Profile、课程提醒跳转和模拟器运行。
+
 ## 已实现
 
 - 周课表、日期和周次、左右切周、进度拖动、回到当前周、各周滚动位置；显示周末、节次时间及非本周课程。
@@ -48,4 +50,4 @@ node --test tests/ScheduleCore.test.ts
 
 模拟器已允许安装上述未签名 HAP；真机调试和发布需配置签名。核心校验脚本使用 DevEco 随附 TypeScript，其他安装路径可通过 `HARMONY_TYPESCRIPT` 指定。
 
-已接入可选 `signing.local.json` 或 `HARMONY_SIGNING_CONFIG` 本地签名配置；`HARMONY_REQUIRE_SIGNING=1` 会在缺少签名配置时停止构建。当前没有华为签名材料和鸿蒙真机，交付包仍未签名。生成证书、构建和凭证保管见 [签名配置说明](docs/signing-20261002/README.md)。
+已接入可选 `signing.local.json` 或 `HARMONY_SIGNING_CONFIG` 本地签名配置；`HARMONY_REQUIRE_SIGNING=1` 会在缺少签名配置时停止构建。当前已申请华为发布证书，发布 Profile 和本机签名配置仍在办理中，交付包仍未签名；尚无鸿蒙真机验证。生成证书、构建和凭证保管见 [签名配置说明](docs/signing-20261002/README.md)。

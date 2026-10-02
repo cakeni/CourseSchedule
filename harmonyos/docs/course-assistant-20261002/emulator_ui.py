@@ -18,7 +18,7 @@ def command(*args):
 
 def snapshot(system=False):
     args = ['shell', 'uitest', 'dumpLayout', '-p', '/data/local/tmp/assistant-layout.json']
-    if not system: args += ['-b', 'com.courseschedule.harmonyos']
+    if not system: args += ['-b', 'com.courseschedule.qingke']
     command(*args)
     local = folder / 'layout.json'
     command('file', 'recv', '/data/local/tmp/assistant-layout.json', local)

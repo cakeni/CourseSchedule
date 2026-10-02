@@ -18,7 +18,7 @@ def run(*args):
     return r.stdout
 
 def snapshot(label):
-    run('shell', 'uitest', 'dumpLayout', '-p', '/data/local/tmp/semester-week-check.json', '-b', 'com.courseschedule.harmonyos')
+    run('shell', 'uitest', 'dumpLayout', '-p', '/data/local/tmp/semester-week-check.json', '-b', 'com.courseschedule.qingke')
     path = ROOT / (label + '.json')
     run('file', 'recv', '/data/local/tmp/semester-week-check.json', path)
     tree = json.loads(path.read_text(encoding='utf-8'))
