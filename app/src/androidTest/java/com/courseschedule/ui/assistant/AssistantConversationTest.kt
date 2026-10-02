@@ -115,7 +115,12 @@ class AssistantConversationTest {
                 assertEquals(id, model.conversationId)
                 assertTrue(model.canUndo.value == true)
                 onView(withId(R.id.etMessage)).check(matches(withText("下一条草稿")))
-                onView(withContentDescription(R.string.assistant_history)).perform(click())
+                try {
+                    onView(withContentDescription(R.string.assistant_history)).perform(click())
+                } catch (_: androidx.test.espresso.NoMatchingViewException) {
+                    androidx.test.espresso.Espresso.openActionBarOverflowOrOptionsMenu(context)
+                    onView(withText(R.string.assistant_history)).perform(click())
+                }
                 onView(withText(R.string.assistant_history)).check(matches(isDisplayed()))
                 val historyImage = instrumentation.uiAutomation.takeScreenshot()
                 java.io.File(context.getExternalFilesDir(null), "assistant-conversation-history.png").outputStream().use {
