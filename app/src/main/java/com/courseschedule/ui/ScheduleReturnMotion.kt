@@ -11,5 +11,5 @@ internal object ScheduleReturnMotion {
     fun duration(count: Int): Long = MOVE_MS.toLong() + delay((count - 1).coerceAtLeast(0))
     fun fraction(elapsed: Float, duration: Float): Float = (elapsed / duration).coerceIn(0f, 1f)
     fun accepts(source: String?): Boolean =
-        source == ScheduleReturnSource.SETTINGS.name || source == ScheduleReturnSource.IMPORT.name
+        source == ScheduleReturnSource.SETTINGS.name || source == ScheduleReturnSource.IMPORT.name || source == ScheduleReturnSource.TODO.name
 }

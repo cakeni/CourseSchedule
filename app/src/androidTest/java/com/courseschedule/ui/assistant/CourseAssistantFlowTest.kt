@@ -121,7 +121,16 @@ class CourseAssistantFlowTest {
         }
     }
 
-    @Test fun importPageOpensAssistantAndExampleKeepsDraftWhileConfiguring() {
+    @Test fun importPageOpensAssistantAndExampleKeepsDraftWhileConfiguring(): Unit = runBlocking {
+        val database = AppDatabase.getDatabase(context)
+        val original = database.semesterDao().getCurrentSemesterSync()
+        val semester = com.courseschedule.data.entity.Semester(name = "导入助手入口验证", startDate = System.currentTimeMillis())
+            .let { it.copy(id = database.semesterDao().insertSemester(it)) }
+        database.semesterDao().switchCurrentSemester(semester.id)
+        val configFile = File(context.noBackupFilesDir, "course-assistant-api")
+        val storedConfig = configFile.takeIf { it.exists() }?.readBytes()
+        AssistantConfigStore(context).clear()
+        try {
         ActivityScenario.launch<ImportActivity>(Intent(context, ImportActivity::class.java)).use {
             onView(withId(R.id.cardImportAssistant)).perform(scrollTo()).check(matches(isDisplayed()))
             screenshot("assistant-import-page")
@@ -159,6 +168,12 @@ class CourseAssistantFlowTest {
             onView(withId(R.id.etMessage)).check(matches(withText(R.string.assistant_example_simple)))
             androidx.test.espresso.Espresso.pressBack()
             onView(withId(R.id.cardImportAssistant)).check(matches(isDisplayed()))
+        }
+        } finally {
+            database.courseDao().deleteCoursesBySemester(semester.id)
+            database.semesterDao().deleteSemester(semester)
+            original?.let { database.semesterDao().switchCurrentSemester(it.id) }
+            if (storedConfig != null) configFile.writeBytes(storedConfig) else configFile.delete()
         }
     }
 

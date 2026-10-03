@@ -7,6 +7,7 @@ class ScheduleReturnMotionTest {
     @Test fun onlyExplicitReturnSourcesAreAccepted() {
         assertTrue(ScheduleReturnMotion.accepts("SETTINGS"))
         assertTrue(ScheduleReturnMotion.accepts("IMPORT"))
+        assertTrue(ScheduleReturnMotion.accepts("TODO"))
         listOf(null, "", "HOME", "RESUME", "REFRESH", "WEEK", "DETAIL").forEach {
             assertFalse(ScheduleReturnMotion.accepts(it))
         }

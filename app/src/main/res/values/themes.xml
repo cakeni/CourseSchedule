@@ -29,6 +29,16 @@
         <item name="colorAccent">@color/primary</item>
         <item name="colorControlActivated">@color/primary</item>
         <item name="colorControlNormal">@color/text_secondary</item>
+        <item name="colorControlHighlight">@android:color/transparent</item>
+        <item name="android:colorControlHighlight">@android:color/transparent</item>
+        <item name="selectableItemBackground">@drawable/control_focus</item>
+        <item name="selectableItemBackgroundBorderless">@drawable/control_focus</item>
+        <item name="materialButtonStyle">@style/CourseSchedule.Button</item>
+        <item name="imageButtonStyle">@style/CourseSchedule.ImageButton</item>
+        <item name="android:imageButtonStyle">@style/CourseSchedule.ImageButton</item>
+        <item name="toolbarNavigationButtonStyle">@style/CourseSchedule.ToolbarButton</item>
+        <item name="actionButtonStyle">@style/CourseSchedule.ActionButton</item>
+        <item name="actionOverflowButtonStyle">@style/CourseSchedule.OverflowButton</item>
         <item name="alertDialogTheme">@style/ThemeOverlay.CourseSchedule.Dialog.Alert</item>
         <item name="materialAlertDialogTheme">@style/ThemeOverlay.CourseSchedule.MaterialAlertDialog</item>
 
@@ -199,6 +209,7 @@
     </style>
 
     <style name="CourseScheduleSettingsRow">
+        <item name="android:stateListAnimator">@animator/press_feedback_row</item>
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">62dp</item>
         <item name="android:gravity">center_vertical</item>
@@ -229,7 +240,7 @@
     <style name="CourseScheduleBottomNavigationActiveIndicator" parent="">
         <item name="android:width">58dp</item>
         <item name="android:height">34dp</item>
-        <item name="android:color">@color/primary_container</item>
+        <item name="android:color">@android:color/transparent</item>
         <item name="shapeAppearance">@style/ShapeAppearance.CourseSchedule.NavigationIndicator</item>
         <item name="marginHorizontal">4dp</item>
     </style>
@@ -241,11 +252,11 @@
     </style>
 
     <!-- 按钮样式 -->
-    <style name="PrimaryButton" parent="Widget.MaterialComponents.Button">
+    <style name="PrimaryButton" parent="CourseSchedule.Button">
         <item name="backgroundTint">@color/primary</item>
     </style>
 
-    <style name="SecondaryButton" parent="Widget.MaterialComponents.Button.OutlinedButton">
+    <style name="SecondaryButton" parent="CourseSchedule.OutlinedButton">
         <item name="strokeColor">@color/primary</item>
         <item name="android:textColor">@color/primary</item>
     </style>

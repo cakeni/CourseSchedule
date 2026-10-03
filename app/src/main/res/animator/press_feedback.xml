@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_pressed="true" android:state_enabled="true">
+        <set android:ordering="together">
+            <objectAnimator android:propertyName="scaleX" android:valueTo="0.975" android:valueType="floatType" android:duration="110" android:interpolator="@interpolator/motion_settle" />
+            <objectAnimator android:propertyName="scaleY" android:valueTo="0.975" android:valueType="floatType" android:duration="110" android:interpolator="@interpolator/motion_settle" />
+        </set>
+    </item>
+    <item>
+        <set android:ordering="together">
+            <objectAnimator android:propertyName="scaleX" android:valueTo="1" android:valueType="floatType" android:duration="220" android:interpolator="@interpolator/motion_settle" />
+            <objectAnimator android:propertyName="scaleY" android:valueTo="1" android:valueType="floatType" android:duration="220" android:interpolator="@interpolator/motion_settle" />
+        </set>
+    </item>
+</selector>

@@ -6,7 +6,7 @@
         <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
             android:text="@string/assistant_history" android:textSize="17sp" android:fontFamily="sans-serif-medium" android:textColor="@color/assistant_text" />
         <com.google.android.material.button.MaterialButton android:id="@+id/btnCloseHistory"
-            style="@style/Widget.MaterialComponents.Button.TextButton" android:layout_width="48dp" android:layout_height="48dp"
+            style="@style/CourseSchedule.TextButton" android:layout_width="48dp" android:layout_height="48dp"
             android:minWidth="0dp" android:padding="0dp" android:contentDescription="@string/assistant_close_history"
             app:icon="@drawable/ic_back" app:iconTint="@color/assistant_text_secondary" app:iconPadding="0dp" app:iconGravity="textStart" />
     </LinearLayout>
@@ -21,22 +21,27 @@
                 android:textColor="@color/assistant_text" android:textColorHint="@color/assistant_text_secondary" />
         </com.google.android.material.textfield.TextInputLayout>
         <com.google.android.material.button.MaterialButton android:id="@+id/btnHistorySearch"
-            style="@style/Widget.MaterialComponents.Button.TextButton" android:layout_width="48dp" android:layout_height="48dp"
+            style="@style/CourseSchedule.TextButton" android:layout_width="48dp" android:layout_height="48dp"
             android:minWidth="0dp" android:padding="0dp" android:contentDescription="@string/assistant_history_search"
             app:icon="@drawable/ic_search" app:iconTint="@color/assistant_text_secondary" app:iconPadding="0dp" app:iconGravity="textStart" />
     </LinearLayout>
     <com.google.android.material.button.MaterialButton android:id="@+id/btnDrawerNewConversation"
-        style="@style/Widget.MaterialComponents.Button.TextButton" android:layout_width="match_parent" android:layout_height="48dp"
+        style="@style/CourseSchedule.TextButton" android:layout_width="match_parent" android:layout_height="48dp"
         android:text="@string/assistant_new_conversation" android:textSize="14sp" android:textColor="@color/assistant_text" android:gravity="start|center_vertical"
         app:icon="@drawable/ic_assistant_new_chat" app:iconSize="20dp" app:iconTint="@color/assistant_text" app:cornerRadius="16dp" />
+    <com.google.android.material.button.MaterialButton android:id="@+id/btnDrawerStudyTasks"
+        style="@style/CourseSchedule.TextButton" android:layout_width="match_parent" android:layout_height="48dp"
+        android:text="@string/study_title" android:textSize="14sp" android:textColor="@color/assistant_text" android:gravity="start|center_vertical"
+        app:icon="@drawable/ic_assistant_schedule" app:iconSize="20dp" app:iconTint="@color/assistant_text" app:cornerRadius="16dp" />
     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
         <TextView android:id="@+id/tvHistoryStatus" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
             android:paddingVertical="6dp" android:textColor="@color/assistant_text_secondary" android:textSize="12sp" />
         <com.google.android.material.button.MaterialButton android:id="@+id/btnHistoryAll"
-            style="@style/Widget.MaterialComponents.Button.TextButton" android:layout_width="wrap_content" android:layout_height="40dp"
+            style="@style/CourseSchedule.TextButton" android:layout_width="wrap_content" android:layout_height="40dp"
             android:minHeight="40dp" android:text="@string/assistant_clear_search" android:textSize="12sp" android:visibility="gone" />
     </LinearLayout>
     <ListView android:id="@+id/historyResults" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"
+        android:listSelector="@drawable/control_focus"
         android:divider="@android:color/transparent" android:dividerHeight="4dp" android:clipToPadding="false" android:paddingBottom="8dp" />
     <LinearLayout android:id="@+id/historyFooter" android:layout_width="match_parent" android:layout_height="wrap_content"
         android:orientation="vertical" android:paddingTop="12dp" android:paddingBottom="8dp">
@@ -55,15 +60,15 @@
                     android:maxLines="1" android:ellipsize="end" />
             </LinearLayout>
             <com.google.android.material.button.MaterialButton android:id="@+id/btnConfigureApi"
-                style="@style/Widget.MaterialComponents.Button.TextButton" android:layout_width="wrap_content" android:layout_height="48dp"
+                style="@style/CourseSchedule.TextButton" android:layout_width="wrap_content" android:layout_height="48dp"
                 android:minWidth="0dp" android:paddingHorizontal="8dp" android:text="@string/assistant_service_settings" android:textSize="12sp" />
         </LinearLayout>
         <com.google.android.material.button.MaterialButton android:id="@+id/btnDrawerReminders"
-            style="@style/Widget.MaterialComponents.Button.TextButton" android:layout_width="match_parent" android:layout_height="48dp"
+            style="@style/CourseSchedule.TextButton" android:layout_width="match_parent" android:layout_height="48dp"
             android:text="@string/assistant_reminder_settings" android:textSize="14sp" android:gravity="start|center_vertical" android:textColor="@color/assistant_text_secondary"
             app:icon="@drawable/ic_assistant_reminder" app:iconSize="20dp" app:iconTint="@color/assistant_text_secondary" />
         <com.google.android.material.button.MaterialButton android:id="@+id/btnReturnSchedule"
-            style="@style/Widget.MaterialComponents.Button.TextButton" android:layout_width="match_parent" android:layout_height="48dp"
+            style="@style/CourseSchedule.TextButton" android:layout_width="match_parent" android:layout_height="48dp"
             android:text="@string/assistant_return_schedule" android:textSize="14sp" android:gravity="start|center_vertical" android:textColor="@color/assistant_text_secondary"
             app:icon="@drawable/ic_assistant_schedule" app:iconSize="20dp" app:iconTint="@color/assistant_text_secondary" />
     </LinearLayout>

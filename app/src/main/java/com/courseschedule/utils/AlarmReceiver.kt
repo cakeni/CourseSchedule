@@ -12,6 +12,8 @@ import com.courseschedule.R
 import com.courseschedule.data.AppDatabase
 import com.courseschedule.domain.ReminderTimeCalculator
 import com.courseschedule.ui.MainActivity
+import com.courseschedule.ui.assistant.StudyTasksActivity
+import com.courseschedule.domain.StudyTaskRules
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -38,13 +40,36 @@ class AlarmReceiver : BroadcastReceiver() {
                     return@launch
                 }
                 ReminderManager.schedulingMutex.withLock {
-                    deliverCourseReminder(context, intent)
+                    if (intent.hasExtra("study_task_id")) deliverStudyReminder(context, intent)
+                    else deliverCourseReminder(context, intent)
                 }
             } catch (error: Exception) {
                 Log.e(TAG, "Reminder delivery/rescheduling failed", error)
             } finally {
                 pendingResult.finish()
             }
+        }
+    }
+
+    private suspend fun deliverStudyReminder(context: Context, intent: Intent) {
+        val id = intent.getLongExtra("study_task_id", 0)
+        if (id <= 0) return
+        val db = AppDatabase.getDatabase(context)
+        val task = db.studyTaskDao().find(id)
+        val manager = ReminderManager(context)
+        val stamp = intent.getStringExtra("study_stamp")
+        val now = System.currentTimeMillis()
+        if (task == null || task.completedAt != null || task.reminderMinutes < 0 || task.dueAt + 15 * 60_000L < now ||
+            db.semesterDao().getCurrentSemesterSync()?.id != task.semesterId || !SchedulePreferences(context).reminderEnabled) {
+            manager.cancelStudyReminder(id); return
+        }
+        val expected = "${task.dueAt}:${task.reminderMinutes}:${task.updatedAt}"
+        if (stamp != expected || now < task.dueAt - task.reminderMinutes * 60_000L) {
+            manager.setStudyReminder(task); return
+        }
+        if (manager.studyDelivered(id, expected)) return
+        if (showNotification(context, "study_$id", StudyTaskRules.describe(task), id)) {
+            manager.markStudyDelivered(id, expected)
         }
     }
 
@@ -88,26 +113,29 @@ class AlarmReceiver : BroadcastReceiver() {
         }
     }
 
-    private fun showNotification(context: Context, tag: String, content: String): Boolean {
+    private fun showNotification(context: Context, tag: String, content: String, taskId: Long? = null): Boolean {
         val manager = context.getSystemService(NotificationManager::class.java)
         manager.createNotificationChannel(NotificationChannel(CHANNEL_ID, "课程提醒",
             NotificationManager.IMPORTANCE_HIGH).apply {
-            description = "课程开始前的提醒通知"
+            description = "课程开始前及学习事项截止的提醒通知"
             enableVibration(true)
         })
         if (!notificationsAvailable(context)) {
             Log.w(TAG, "Notification blocked tag=$tag")
             return false
         }
-        val mainIntent = Intent(context, MainActivity::class.java).apply {
+        val mainIntent = Intent(context, if (taskId == null) MainActivity::class.java else StudyTasksActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            if (taskId != null) putExtra("study_task_id", taskId)
+            data = taskId?.let { android.net.Uri.parse("courseschedule://study/$it") }
         }
         val pending = PendingIntent.getActivity(context, 0, mainIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification)
-            .setContentTitle(context.getString(if (tag == "test") R.string.reminder_test_title else R.string.course_reminders))
+            .setContentTitle(if (taskId != null) "学习事项提醒" else context.getString(if (tag == "test") R.string.reminder_test_title else R.string.course_reminders))
             .setContentText(content)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(content))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setContentIntent(pending)
             .setAutoCancel(true)

@@ -40,7 +40,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 app:cardBackgroundColor="@color/primary_container"
-                app:rippleColor="@color/surface">
+                app:rippleColor="@color/control_focus_overlay" android:stateListAnimator="@animator/press_feedback">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -86,7 +86,7 @@
                     android:layout_height="72dp"
                     android:clickable="true"
                     android:focusable="true"
-                    android:foreground="?attr/selectableItemBackground">
+                    android:foreground="@drawable/control_focus" android:stateListAnimator="@animator/press_feedback_row">
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -134,7 +134,7 @@
                 style="@style/CourseScheduleSettingsCard"
                 android:clickable="true"
                 android:focusable="true"
-                app:rippleColor="@color/primary_container">
+                app:rippleColor="@color/control_focus_overlay" android:stateListAnimator="@animator/press_feedback">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -146,7 +146,7 @@
                     <FrameLayout
                         android:layout_width="44dp"
                         android:layout_height="44dp"
-                        android:background="@drawable/bg_icon_tile">
+                        android:background="@android:color/transparent">
 
                         <ImageView
                             android:layout_width="24dp"
@@ -205,7 +205,7 @@
                         style="@style/CourseScheduleSettingsRow"
                         android:clickable="true"
                         android:focusable="true"
-                        android:foreground="?attr/selectableItemBackground">
+                        android:foreground="@drawable/control_focus" android:stateListAnimator="@animator/press_feedback_row">
                         <TextView style="@style/CourseScheduleSettingsLabel" android:text="@string/show_weekend" />
                         <com.google.android.material.switchmaterial.SwitchMaterial
                             android:id="@+id/switchShowWeekend"
@@ -222,7 +222,7 @@
                         style="@style/CourseScheduleSettingsRow"
                         android:clickable="true"
                         android:focusable="true"
-                        android:foreground="?attr/selectableItemBackground">
+                        android:foreground="@drawable/control_focus" android:stateListAnimator="@animator/press_feedback_row">
                         <TextView
                             style="@style/CourseScheduleSettingsLabel"
                             android:text="@string/show_inactive_courses" />
@@ -241,7 +241,7 @@
                         style="@style/CourseScheduleSettingsRow"
                         android:clickable="true"
                         android:focusable="true"
-                        android:foreground="?attr/selectableItemBackground">
+                        android:foreground="@drawable/control_focus" android:stateListAnimator="@animator/press_feedback_row">
                         <TextView style="@style/CourseScheduleSettingsLabel" android:text="@string/show_section_time" />
                         <com.google.android.material.switchmaterial.SwitchMaterial
                             android:id="@+id/switchShowTime"
@@ -279,7 +279,7 @@
                         style="@style/CourseScheduleSettingsRow"
                         android:clickable="true"
                         android:focusable="true"
-                        android:foreground="?attr/selectableItemBackground">
+                        android:foreground="@drawable/control_focus" android:stateListAnimator="@animator/press_feedback_row">
                         <TextView style="@style/CourseScheduleSettingsLabel" android:text="@string/enable_reminders" />
                         <com.google.android.material.switchmaterial.SwitchMaterial
                             android:id="@+id/switchReminder"
@@ -316,19 +316,19 @@
                         android:textColor="?android:attr/textColorSecondary"
                         android:clickable="true"
                         android:focusable="true"
-                        android:foreground="?attr/selectableItemBackground"
-                        android:text="@string/reminder_status_loading" />
+                        android:foreground="@drawable/control_focus"
+                        android:text="@string/reminder_status_loading"  android:stateListAnimator="@animator/press_feedback_row" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/buttonReminderTest"
-                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        style="@style/CourseSchedule.TextButton"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/reminder_test_action" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/buttonApplyReminders"
-                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        style="@style/CourseSchedule.TextButton"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/reminder_apply_action" />
@@ -342,7 +342,7 @@
                         style="@style/CourseScheduleSettingsRow"
                         android:clickable="true"
                         android:focusable="true"
-                        android:foreground="?attr/selectableItemBackground">
+                        android:foreground="@drawable/control_focus" android:stateListAnimator="@animator/press_feedback_row">
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -381,7 +381,7 @@
                         style="@style/CourseScheduleSettingsRow"
                         android:clickable="true"
                         android:focusable="true"
-                        android:foreground="?attr/selectableItemBackground">
+                        android:foreground="@drawable/control_focus" android:stateListAnimator="@animator/press_feedback_row">
                         <TextView style="@style/CourseScheduleSettingsLabel" android:text="@string/export_full_backup" />
                         <ImageView android:layout_width="20dp" android:layout_height="20dp" android:contentDescription="@null" android:src="@drawable/ic_chevron_right_gray" />
                     </LinearLayout>
@@ -393,7 +393,7 @@
                         style="@style/CourseScheduleSettingsRow"
                         android:clickable="true"
                         android:focusable="true"
-                        android:foreground="?attr/selectableItemBackground">
+                        android:foreground="@drawable/control_focus" android:stateListAnimator="@animator/press_feedback_row">
                         <TextView style="@style/CourseScheduleSettingsLabel" android:text="@string/import_or_restore" />
                         <ImageView android:layout_width="20dp" android:layout_height="20dp" android:contentDescription="@null" android:src="@drawable/ic_chevron_right_gray" />
                     </LinearLayout>
@@ -408,7 +408,7 @@
                     style="@style/CourseScheduleSettingsRow"
                     android:clickable="true"
                     android:focusable="true"
-                    android:foreground="?attr/selectableItemBackground">
+                    android:foreground="@drawable/control_focus" android:stateListAnimator="@animator/press_feedback_row">
                     <TextView style="@style/CourseScheduleSettingsLabel" android:text="@string/about_app" />
                     <ImageView android:layout_width="20dp" android:layout_height="20dp" android:contentDescription="@null" android:src="@drawable/ic_chevron_right_gray" />
                 </LinearLayout>
@@ -425,8 +425,11 @@
         app:itemActiveIndicatorStyle="@style/CourseScheduleBottomNavigationActiveIndicator"
         app:itemIconSize="22dp"
         app:itemIconTint="@color/nav_item_color"
-        app:itemRippleColor="@color/primary_container"
+        app:itemRippleColor="@color/control_focus_overlay"
         app:itemTextColor="@color/nav_item_color"
         app:labelVisibilityMode="labeled"
-        app:menu="@menu/menu_bottom_navigation" />
+        app:menu="@menu/menu_bottom_navigation"
+        app:itemTextAppearanceActive="@style/CourseSchedule.NavigationLabel" app:itemTextAppearanceInactive="@style/CourseSchedule.NavigationLabel"
+        app:itemPaddingTop="12dp" app:itemPaddingBottom="12dp"
+        app:itemHorizontalTranslationEnabled="false" />
 </LinearLayout>

@@ -4,7 +4,7 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 
 internal const val EXTRA_SCHEDULE_RETURN_SOURCE = "schedule_return_source"
-internal enum class ScheduleReturnSource { SETTINGS, IMPORT }
+internal enum class ScheduleReturnSource { SETTINGS, IMPORT, TODO }
 
 internal fun AppCompatActivity.returnToSchedule(source: ScheduleReturnSource) {
     startActivity(Intent(this, MainActivity::class.java).apply {

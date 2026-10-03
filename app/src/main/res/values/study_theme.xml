@@ -1,0 +1,19 @@
+<resources>
+    <style name="Theme.CourseSchedule.Study" parent="Theme.CourseSchedule.Assistant">
+        <item name="colorPrimary">@color/study_accent</item>
+        <item name="colorPrimaryVariant">@color/study_accent</item>
+        <item name="colorOnPrimary">@color/study_on_accent</item>
+        <item name="colorSecondary">@color/study_accent</item>
+        <item name="colorOnSecondary">@color/study_on_accent</item>
+        <item name="colorSurface">@color/study_background</item>
+        <item name="colorOnSurface">@color/study_text</item>
+        <item name="colorOnBackground">@color/study_text</item>
+        <item name="colorControlNormal">@color/study_text_secondary</item>
+        <item name="colorControlActivated">@color/study_accent</item>
+        <item name="android:colorAccent">@color/study_accent</item>
+        <item name="android:colorBackground">@color/study_background</item>
+        <item name="android:windowBackground">@color/study_background</item>
+        <item name="android:textColorPrimary">@color/study_text</item>
+        <item name="android:textColorSecondary">@color/study_text_secondary</item>
+    </style>
+</resources>

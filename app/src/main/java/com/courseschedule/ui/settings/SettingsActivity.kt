@@ -30,6 +30,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.doOnPreDraw
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import com.courseschedule.ui.assistant.StudyTasksActivity
 import com.courseschedule.R
 import com.courseschedule.BuildConfig
 import com.courseschedule.data.backup.ScheduleBackup
@@ -344,6 +345,13 @@ class SettingsActivity : AppCompatActivity() {
             when (item.itemId) {
                 R.id.nav_home -> {
                     returnToSchedule(ScheduleReturnSource.SETTINGS)
+                    true
+                }
+                R.id.nav_study -> {
+                    startActivity(Intent(this, StudyTasksActivity::class.java).putExtra(StudyTasksActivity.EXTRA_PRIMARY_PAGE, true))
+                    overridePendingTransition(0, 0)
+                    finish()
+                    overridePendingTransition(0, 0)
                     true
                 }
                 R.id.nav_import -> {
@@ -666,7 +674,8 @@ class SettingsActivity : AppCompatActivity() {
                 val backup = ScheduleBackup(
                     semester = SemesterSnapshot.from(semester),
                     settings = preferences.snapshot(),
-                    courses = courseViewModel.getCurrentSemesterCourses()
+                    courses = courseViewModel.getCurrentSemesterCourses(),
+                    studyTasks = com.courseschedule.data.AppDatabase.getDatabase(this@SettingsActivity).studyTaskDao().forSemester(semester.id)
                 )
                 val json = GsonBuilder().setPrettyPrinting().create().toJson(backup)
                 withContext(Dispatchers.IO) {

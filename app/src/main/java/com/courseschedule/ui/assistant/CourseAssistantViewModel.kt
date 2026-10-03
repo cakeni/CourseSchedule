@@ -26,6 +26,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.UUID
 import java.time.LocalDate
+import android.net.Uri
+import com.courseschedule.domain.StudyTaskRules
 
 internal class CourseAssistantViewModel @JvmOverloads constructor(application: Application,
     private val clientFactory: () -> AssistantCourseClient = { AssistantCourseClient() },
@@ -35,12 +37,14 @@ internal class CourseAssistantViewModel @JvmOverloads constructor(application: A
     private val database = AppDatabase.getDatabase(application)
     private val conversations = database.assistantConversationDao()
     private val preferences = application.getSharedPreferences("assistant_conversations", Context.MODE_PRIVATE)
+    private val images = AssistantImages(application)
     private var conversation: AssistantConversation? = null
     private var state = AssistantConversationState()
     private var messageLimit = 60
     private var messageWindowEnd: Long? = null
     private var activeClient: AssistantCourseClient? = null
     private var requestJob: Job? = null
+    private lateinit var initialLoadJob: Job
     var config = AssistantApiConfig()
         private set
     var remembersKey = false
@@ -58,6 +62,7 @@ internal class CourseAssistantViewModel @JvmOverloads constructor(application: A
     val conversationTitle = MutableLiveData("新对话")
     val semesterName = MutableLiveData("")
     val draft = MutableLiveData("")
+    val imageDraft = MutableLiveData<String?>(null)
     val pendingChanges = MutableLiveData<AssistantCourseReply?>(null)
     val targetChoice = MutableLiveData<AssistantTargetChoice?>(null)
     var initialConversationLoaded = false
@@ -71,11 +76,11 @@ internal class CourseAssistantViewModel @JvmOverloads constructor(application: A
             remembersKey = config.apiKey.isNotBlank()
             configured.value = remembersKey
         } catch (_: Exception) { configError = true }
-        launchOperation {
+        initialLoadJob = launchOperation {
             removeOrphanDrafts()
             ensureConversation(currentSemester())
             if (configError) append("assistant", "保存的 API 配置无法解密，请重新填写。", "error")
-        }.invokeOnCompletion { initialConversationLoaded = true }
+        }.also { job -> job.invokeOnCompletion { initialConversationLoaded = true } }
     }
 
     fun configure(value: AssistantApiConfig, remember: Boolean) {
@@ -97,6 +102,27 @@ internal class CourseAssistantViewModel @JvmOverloads constructor(application: A
         if (draft.value == text) return
         draft.value = text
         preferences.edit().putString("draft_$id", text.take(2000)).apply()
+    }
+
+    fun selectImage(uri: Uri) {
+        if (!initialConversationLoaded) {
+            viewModelScope.launch { initialLoadJob.join(); selectImage(uri) }
+            return
+        }
+        if (busy.value == true || state.pending != null || state.targetChoice != null) return
+        launchOperation {
+            val id = requireNotNull(conversationId)
+            val ref = withContext(Dispatchers.IO) { images.import(uri, id) }
+            require(conversationId == id)
+            imageDraft.value = ref
+            preferences.edit().putString("image_$id", ref).apply()
+        }
+    }
+
+    fun removeImage() {
+        if (busy.value == true) return
+        imageDraft.value = null
+        conversationId?.let { preferences.edit().remove("image_$it").apply() }
     }
 
     fun refreshSemester() {
@@ -161,7 +187,8 @@ internal class CourseAssistantViewModel @JvmOverloads constructor(application: A
         val old = conversation ?: return
         launchOperation {
             conversations.deleteConversation(old.id)
-            preferences.edit().remove("draft_${old.id}").remove("active_${old.semesterId}").apply()
+            preferences.edit().remove("draft_${old.id}").remove("image_${old.id}").remove("active_${old.semesterId}").apply()
+            withContext(Dispatchers.IO) { images.deleteConversation(old.id) }
             conversation = null
             ensureConversation(currentSemester())
         }
@@ -183,13 +210,14 @@ internal class CourseAssistantViewModel @JvmOverloads constructor(application: A
     }
 
     fun send(text: String, displayedWeek: Int) {
-        if (busy.value == true || text.isBlank()) return
+        if (busy.value == true || (text.isBlank() && imageDraft.value == null)) return
+        val message = text.ifBlank { "请读取图片中的课表或通知，整理成待确认方案；不清楚或缺少的信息请先问我。" }
         val bound = state.selectedTarget?.takeIf { selected ->
             Regex("它|这门|那门|这节|刚才.*课").containsMatchIn(text) &&
                 !Regex("它们|这些|那些|全部|所有|都").containsMatchIn(text) &&
                 (state.targetChoice == null || selected in state.targetChoice!!.candidates)
         }
-        sendRequest(AssistantRetryRequest(text, displayedWeek, todayProvider().toString()), bound)
+        sendRequest(AssistantRetryRequest(message, displayedWeek, todayProvider().toString(), imageDraft.value), bound)
     }
 
     private fun sendRequest(request: AssistantRetryRequest, bound: Course? = null, choiceSemester: Semester? = null) {
@@ -200,10 +228,12 @@ internal class CourseAssistantViewModel @JvmOverloads constructor(application: A
         requestJob = launchOperation(retryable = true) {
             val semester = currentSemester()
             ensureConversation(semester)
+            request.imageRef?.let { require(it.substringBefore('/') == conversationId) { "图片不属于当前对话，请重新选择。" } }
             val pending = state.pending
             val requestDate = LocalDate.parse(requireNotNull(request.requestDate))
             val retry = request.copy(displayedWeek = request.displayedWeek.coerceIn(1, semester.totalWeeks))
             val existing = database.courseDao().getCoursesBySemesterSync(semester.id)
+            val tasks = database.studyTaskDao().forSemester(semester.id)
             val semesterChanged = choiceSemester != null && (choiceSemester.id != semester.id ||
                 choiceSemester.startDate != semester.startDate || choiceSemester.totalWeeks != semester.totalWeeks)
             if (semesterChanged || (bound != null && existing.find { it.id == bound.id } != bound)) {
@@ -213,24 +243,38 @@ internal class CourseAssistantViewModel @JvmOverloads constructor(application: A
                     state.copy(pending = null, targetChoice = null, selectedTarget = null, retryRequest = null, requestRunning = false))
                 return@launchOperation
             }
-            append("user", request.text, next = state.copy(retryRequest = retry, requestRunning = true,
+            append("user", request.imageRef?.let { AssistantImageMessage.encode(request.text, it) } ?: request.text,
+                kind = if (request.imageRef != null) "image" else "chat", next = state.copy(retryRequest = retry, requestRunning = true,
                 targetChoice = null, selectedTarget = bound))
             updateDraft("")
+            removeImageForSentRequest()
             val schedule = SchedulePreferences(getApplication())
             val context = conversations.messages(conversation!!.id, 24).asReversed().map { it.toMessage() }
-            val request = AssistantCourseClient.createRequest(requestConfig.model, context, semester,
+            val imageData = withContext(Dispatchers.IO) {
+                val refs = context.mapNotNull { it.imageRef }.filter { it.substringBefore('/') == conversationId }.distinct().takeLast(2)
+                refs.mapNotNull { ref ->
+                    if (ref == retry.imageRef) ref to images.dataUrl(ref)
+                    else runCatching { ref to images.dataUrl(ref) }.getOrNull()
+                }.toMap()
+            }
+            val apiRequest = withContext(Dispatchers.Default) { AssistantCourseClient.createRequest(requestConfig.model, context, semester,
                 retry.displayedWeek, schedule.sectionTimes, schedule.sectionEndTimes, existing,
-                state.lastUndo != null, schedule.defaultReminderMinutes, pending?.reply, requestDate, bound)
+                state.lastUndo != null, schedule.defaultReminderMinutes, pending?.reply, requestDate, bound, imageData, tasks) }
             val client = clientFactory()
             activeClient = client
             canStop.value = true
             val reply = try {
-                withContext(Dispatchers.IO) { client.chat(requestConfig, request, semester.totalWeeks, existing,
-                    semester, retry.displayedWeek, pending?.reply, requestDate, bound) }
+                withContext(Dispatchers.IO) { client.chat(requestConfig, apiRequest, semester.totalWeeks, existing,
+                    semester, retry.displayedWeek, pending?.reply, requestDate, bound, tasks) }
             } finally { canStop.value = false; activeClient = null }
             currentCoroutineContext().ensureActive()
             receiveReply(reply, semester, pending, requestDate)
         }
+    }
+
+    private fun removeImageForSentRequest() {
+        imageDraft.value = null
+        conversationId?.let { preferences.edit().remove("image_$it").apply() }
     }
 
     fun retry() {
@@ -276,6 +320,41 @@ internal class CourseAssistantViewModel @JvmOverloads constructor(application: A
         ensureConversation(semester)
         require(state.pending == expectedPending) { "待确认方案已在其他页面变化，请重新补充。" }
         val completed = state.copy(retryRequest = null, requestRunning = false)
+        if (!reply.studyChanges.isNullOrEmpty() || reply.studyQuery != null) {
+            require(reply.courses.isEmpty() && reply.updates.isEmpty() && reply.deletions.isEmpty() && !reply.undo &&
+                reply.query == null && reply.queriedCourses.isEmpty() && !reply.queryRequested && reply.targetCandidates == null)
+            if (reply.studyQuery != null) {
+                require(state.pending == null && reply.studyChanges.isNullOrEmpty()) { "请先确认或取消原方案。" }
+                val found = AssistantStudyProtocol.query(reply.studyQuery, database.studyTaskDao().forSemester(semester.id), today)
+                val scope = when (reply.studyQuery.window) {
+                    "week" -> {
+                        val monday = today.minusDays((today.dayOfWeek.value - 1).toLong()).plusWeeks(reply.studyQuery.weekOffset.toLong())
+                        "$monday 至 ${monday.plusDays(6)}"
+                    }
+                    "upcoming" -> "今天起${reply.studyQuery.daysAhead}天内"
+                    "overdue" -> "已逾期"
+                    "range" -> "${reply.studyQuery.startDate}至${reply.studyQuery.endDate}"
+                    else -> "全部日期"
+                }
+                val status = when (reply.studyQuery.status) { "completed" -> "已完成"; "all" -> "全部状态"; else -> "待完成" }
+                append("assistant", "日期基准：$today\n学习事项：$scope · $status\n" +
+                    if (found.isEmpty()) "没有符合条件的学习事项。" else "找到${found.size}项：\n\n" +
+                        found.take(200).joinToString("\n\n") { "事项 #${it.id}\n${StudyTaskRules.describe(it)}" } +
+                        if (found.size > 200) "\n仅显示前200项，请缩小查询范围。" else "", "result", completed)
+                return
+            }
+            val changes = reply.studyChanges!!
+            AssistantStudyProtocol.validateChanges(changes, semester.id)
+            state.pending?.let { previous ->
+                val old = previous.reply.studyChanges ?: throw IllegalArgumentException("补充不能改为其他类型的操作。")
+                require(reply.revisedPending && changes.size == old.size && changes.map { it.original } == old.map { it.original })
+            } ?: require(!reply.revisedPending)
+            require(changes.all { it.original == null || database.studyTaskDao().find(it.original.id) == it.original }) { "学习事项已变化，请重新描述。" }
+            val pendingReply = reply.copy(revisedPending = false)
+            append("assistant", "学习事项已整理好，请核对截止时间与提醒，确认后才保存。\n日期基准：$today\n\n" + pendingSummary(pendingReply),
+                "confirmation", completed.copy(pending = AssistantPendingOperation(semester, pendingReply), targetChoice = null, selectedTarget = null))
+            return
+        }
         if (state.pending != null) {
             require(reply.revisedPending || (!reply.requiresConfirmation && !reply.undo && reply.query == null &&
                 !reply.queryRequested && reply.queriedCourses.isEmpty())) { "请先确认或取消原方案，补充消息只能修正原方案。" }
@@ -364,20 +443,24 @@ internal class CourseAssistantViewModel @JvmOverloads constructor(application: A
     }
 
     fun confirmPending() {
-        if (busy.value == true) return
+        if (busy.value == true || !draft.value.isNullOrBlank() || imageDraft.value != null) return
         val pending = state.pending ?: return
-        launchOperation(clearPendingOnFailure = true) { executeChanges(pending.reply, pending.semester) }
+        launchOperation(clearPendingOnFailure = true) {
+            if (!pending.reply.studyChanges.isNullOrEmpty()) executeStudyChanges(pending.reply, pending.semester)
+            else executeChanges(pending.reply, pending.semester)
+        }
     }
 
     fun cancelPending() {
         if (busy.value == true || (state.pending == null && state.targetChoice == null)) return
         launchOperation {
-            append("assistant", "已取消待执行操作，本次没有更改课表。", "cancel",
+            append("assistant", "已取消待执行操作，本次没有更改课表或学习事项。", "cancel",
                 state.copy(pending = null, retryRequest = null, requestRunning = false, targetChoice = null))
         }
     }
 
     fun pendingSummary(reply: AssistantCourseReply): String = buildList {
+        reply.studyChanges?.let { add(AssistantStudyProtocol.summary(it)) }
         addAll(reply.scopeNotes.orEmpty())
         reply.courses.forEach { add("新增\n${describe(it)}") }
         reply.updates.forEach {
@@ -385,6 +468,33 @@ internal class CourseAssistantViewModel @JvmOverloads constructor(application: A
         }
         reply.deletions.forEach { add("删除整条安排\n${describe(it)}") }
     }.joinToString("\n\n")
+
+    private suspend fun executeStudyChanges(reply: AssistantCourseReply, semester: Semester) {
+        val changes = requireNotNull(reply.studyChanges)
+        AssistantStudyProtocol.validateChanges(changes, semester.id)
+        val next = state.copy(pending = null, retryRequest = null, requestRunning = false, targetChoice = null, selectedTarget = null, lastUndo = null)
+        val updated = database.withTransaction {
+            requireCurrentSemester(semester)
+            val existing = database.studyTaskDao().forSemester(semester.id)
+            val additions = changes.filter { it.original == null }.mapNotNull { it.after }
+            require(additions.map { listOf(it.title, it.courseName, it.kind, it.dueAt.toString()) }.distinct().size == additions.size) { "方案中包含重复学习事项，请修改后重试。" }
+            val courses = database.courseDao().getCoursesBySemesterSync(semester.id)
+            changes.forEach { change ->
+                val old = change.original
+                val after = change.after
+                require(old == null || database.studyTaskDao().find(old.id) == old) { "事项已被修改或删除，本次未保存，请重新描述。" }
+                if (after == null) database.studyTaskDao().delete(requireNotNull(old).id) else {
+                    if (after.courseName.isNotBlank() && after.courseName != old?.courseName) require(courses.any { it.courseName == after.courseName }) { "关联课程已变化，请重新选择。" }
+                    require(old != null || existing.none { it.title == after.title && it.courseName == after.courseName && it.kind == after.kind && it.dueAt == after.dueAt }) { "已有相同学习事项，请勿重复添加。" }
+                    if (old == null) database.studyTaskDao().insert(after) else require(database.studyTaskDao().update(after) == 1)
+                }
+            }
+            writeMessage("assistant", "已保存${changes.size}项学习事项变更。\n\n${AssistantStudyProtocol.summary(changes)}\n\n可在菜单的「学习事项」中查看、编辑或重新打开。", "result", next)
+        }
+        applyWritten(updated, next)
+        changes.filter { it.after == null }.forEach { ReminderManager(getApplication()).cancelStudyReminder(it.original!!.id) }
+        syncReminders(emptyList())
+    }
 
     private suspend fun executeChanges(reply: AssistantCourseReply, semester: Semester) {
         val originals = reply.updates.map { it.original } + reply.deletions
@@ -539,8 +649,10 @@ internal class CourseAssistantViewModel @JvmOverloads constructor(application: A
 
     private suspend fun removeOrphanDrafts() {
         val ids = conversations.conversationIds().toSet()
+        withContext(Dispatchers.IO) { images.removeOrphans(ids) }
         val orphanKeys = preferences.all.filter { (key, value) ->
             (key.startsWith("draft_") && key.removePrefix("draft_") !in ids) ||
+                (key.startsWith("image_") && key.removePrefix("image_") !in ids) ||
                 (key.startsWith("active_") && (value !is String || value !in ids))
         }.keys
         if (orphanKeys.isNotEmpty()) preferences.edit().apply { orphanKeys.forEach { remove(it) } }.apply()
@@ -570,6 +682,9 @@ internal class CourseAssistantViewModel @JvmOverloads constructor(application: A
         conversationTitle.value = selected.title
         semesterName.value = semester.name
         draft.value = preferences.getString("draft_${selected.id}", "").orEmpty()
+        imageDraft.value = preferences.getString("image_${selected.id}", null)?.takeIf {
+            AssistantImageMessage.valid(it) && it.substringBefore('/') == selected.id && images.file(it).isFile
+        }
         publishState()
         refreshMessages()
         if (damaged) append("assistant", "操作状态无法读取，聊天记录仍保留。请重新描述，课表不会自动更改。", "error")
@@ -581,6 +696,7 @@ internal class CourseAssistantViewModel @JvmOverloads constructor(application: A
             val existing = database.courseDao().getCoursesBySemesterSync(semester.id).associateBy { it.id }
             if (pending.semester.id != semester.id || pending.semester.startDate != semester.startDate ||
                 pending.semester.totalWeeks != semester.totalWeeks ||
+                pending.reply.studyChanges.orEmpty().any { it.original != null && database.studyTaskDao().find(it.original.id) != it.original } ||
                 (pending.reply.updates.map { it.original } + pending.reply.deletions).any { existing[it.id] != it }) {
                 append("assistant", "原待确认方案已过期，课程或学期设置已变化。请重新描述，本次没有更改课表。", "error",
                     state.copy(pending = null))

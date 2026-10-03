@@ -10,6 +10,9 @@ import android.util.Log
 import com.courseschedule.data.AppDatabase
 import com.courseschedule.data.entity.Course
 import com.courseschedule.data.entity.Semester
+import com.courseschedule.data.entity.StudyTask
+import com.courseschedule.domain.StudyTaskRules
+import android.net.Uri
 import com.courseschedule.domain.ReminderTimeCalculator
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -87,6 +90,45 @@ class ReminderManager(private val context: Context) {
 
     fun cancelAllReminders(courses: List<Course>) = courses.forEach { cancelReminder(it.id) }
 
+    private fun studyIntent(id: Long) = Intent(context, AlarmReceiver::class.java).apply {
+        action = "com.courseschedule.STUDY_REMINDER"
+        data = Uri.parse("courseschedule://study/$id")
+        putExtra("study_task_id", id)
+    }
+
+    fun setStudyReminder(task: StudyTask, now: Long = System.currentTimeMillis()) {
+        val trigger = StudyTaskRules.trigger(task, now)
+        val stamp = "${task.dueAt}:${task.reminderMinutes}:${task.updatedAt}"
+        if (!SchedulePreferences(context).reminderEnabled || task.completedAt != null || task.reminderMinutes < 0) {
+            cancelStudyReminder(task.id)
+            return
+        }
+        if (history.getString("study_delivered_${task.id}", null) == stamp) {
+            cancelStudyAlarm(task.id)
+            return
+        }
+        if (trigger == null) { cancelStudyReminder(task.id); return }
+        schedule(trigger, pendingIntent(0, studyIntent(task.id).putExtra("study_stamp", stamp)))
+    }
+
+    fun cancelStudyReminder(id: Long) {
+        cancelStudyAlarm(id)
+        context.getSystemService(android.app.NotificationManager::class.java).cancel("study_$id", 1000)
+    }
+
+    private fun cancelStudyAlarm(id: Long) {
+        val pending = PendingIntent.getBroadcast(context, 0, studyIntent(id),
+            PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE)
+        if (pending != null) { alarmManager.cancel(pending); pending.cancel() }
+    }
+
+    internal fun studyDelivered(id: Long, stamp: String) = history.getString("study_delivered_$id", null) == stamp
+
+    @SuppressLint("ApplySharedPref")
+    internal fun markStudyDelivered(id: Long, stamp: String) {
+        history.edit().putString("study_delivered_$id", stamp).commit()
+    }
+
     fun rescheduleReminders(courses: List<Course>, semester: Semester) {
         courses.forEach { setReminder(it, semester) }
     }
@@ -101,6 +143,9 @@ class ReminderManager(private val context: Context) {
             } else {
                 cancelReminder(course.id)
             }
+        }
+        database.studyTaskDao().all().forEach { task ->
+            if (semester?.id == task.semesterId) setStudyReminder(task) else cancelStudyReminder(task.id)
         }
     }
 }

@@ -2,6 +2,7 @@ package com.courseschedule.data.backup
 
 import com.courseschedule.data.entity.Course
 import com.courseschedule.data.entity.Semester
+import com.courseschedule.data.entity.StudyTask
 
 data class SemesterSnapshot(
     val name: String,
@@ -33,9 +34,10 @@ data class ScheduleBackup(
     val exportedAt: Long = System.currentTimeMillis(),
     val semester: SemesterSnapshot,
     val settings: SettingsSnapshot,
-    val courses: List<Course>
+    val courses: List<Course>,
+    val studyTasks: List<StudyTask>? = null
 ) {
     companion object {
-        const val CURRENT_SCHEMA_VERSION = 2
+        const val CURRENT_SCHEMA_VERSION = 3
     }
 }

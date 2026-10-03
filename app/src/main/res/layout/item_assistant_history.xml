@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" android:layout_height="wrap_content"
-    android:orientation="vertical" android:paddingVertical="12dp" android:paddingHorizontal="12dp" android:minHeight="56dp">
+    android:orientation="vertical" android:paddingVertical="12dp" android:paddingHorizontal="12dp" android:minHeight="56dp"
+    android:stateListAnimator="@animator/press_feedback_row">
     <TextView android:id="@+id/tvHistoryTitle" android:layout_width="match_parent" android:layout_height="wrap_content"
         android:textColor="@color/assistant_text" android:textSize="15sp"
         android:maxLines="2" android:ellipsize="end" />

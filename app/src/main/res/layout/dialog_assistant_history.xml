@@ -13,16 +13,17 @@
     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
         android:gravity="end" android:orientation="horizontal">
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnHistoryAll" style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:id="@+id/btnHistoryAll" style="@style/CourseSchedule.TextButton"
             android:layout_width="wrap_content" android:layout_height="48dp"
             android:text="@string/assistant_history_search_all" />
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnHistorySearch" style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:id="@+id/btnHistorySearch" style="@style/CourseSchedule.TextButton"
             android:layout_width="wrap_content" android:layout_height="48dp"
             android:text="@string/assistant_history_search" />
     </LinearLayout>
     <TextView android:id="@+id/tvHistoryStatus" android:layout_width="match_parent" android:layout_height="wrap_content"
         android:paddingVertical="6dp" android:textColor="@color/text_secondary" android:textSize="12sp" />
     <ListView android:id="@+id/historyResults" android:layout_width="match_parent" android:layout_height="260dp"
+        android:listSelector="@drawable/control_focus"
         android:divider="@color/divider" android:dividerHeight="1dp" />
 </LinearLayout>

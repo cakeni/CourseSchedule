@@ -1,0 +1,7 @@
+<resources>
+    <style name="CourseSchedule.NavigationLabel" parent="TextAppearance.MaterialComponents.Caption">
+        <item name="android:textSize">11sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+</resources>
