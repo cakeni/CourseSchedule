@@ -4,15 +4,21 @@ import com.courseschedule.data.entity.Course
 import com.courseschedule.data.entity.Semester
 import com.courseschedule.domain.ScheduleRules
 import com.google.gson.Gson
+import java.time.LocalDate
 
 internal data class AssistantPendingOperation(val semester: Semester, val reply: AssistantCourseReply)
-internal data class AssistantUndoBatch(val semester: Semester, val before: List<Course>, val after: List<Course>)
-internal data class AssistantRetryRequest(val text: String, val displayedWeek: Int)
+internal data class AssistantUndoBatch(val semester: Semester, val before: List<Course>, val after: List<Course>,
+    val conflictBaseline: List<Course>? = null)
+internal data class AssistantRetryRequest(val text: String, val displayedWeek: Int, val requestDate: String? = null)
+internal data class AssistantTargetChoice(val semester: Semester, val request: AssistantRetryRequest,
+    val candidates: List<Course>)
 internal data class AssistantConversationState(
     val pending: AssistantPendingOperation? = null,
     val lastUndo: AssistantUndoBatch? = null,
     val retryRequest: AssistantRetryRequest? = null,
-    val requestRunning: Boolean = false
+    val requestRunning: Boolean = false,
+    val targetChoice: AssistantTargetChoice? = null,
+    val selectedTarget: Course? = null
 )
 
 internal object AssistantConversationCodec {
@@ -33,7 +39,7 @@ internal object AssistantConversationCodec {
         }
         state.pending?.let {
             val reply = it.reply
-            require(reply.reply.isNotBlank() && reply.requiresConfirmation && !reply.undo && reply.queriedCourses.isEmpty())
+            require(reply.reply.isNotBlank() && reply.requiresConfirmation && !reply.undo && reply.queriedCourses.isEmpty() && reply.query == null && !reply.queryRequested)
             validate(it.semester, reply.courses + reply.deletions + reply.updates.flatMap { row ->
                 require(row.replacements.isNotEmpty())
                 listOf(row.original) + row.replacements
@@ -41,11 +47,26 @@ internal object AssistantConversationCodec {
         }
         state.lastUndo?.let {
             require((it.before + it.after).isNotEmpty())
-            validate(it.semester, it.before + it.after)
+            validate(it.semester, it.before + it.after + it.conflictBaseline.orEmpty())
             require((it.before + it.after).all { course -> course.id > 0 })
         }
-        state.retryRequest?.let { require(it.text.isNotBlank() && it.text.length <= 2000 && it.displayedWeek in 1..52) }
-        require(!state.requestRunning || (state.retryRequest != null && state.pending == null))
+        fun validateRequest(request: AssistantRetryRequest) {
+            require(request.text.isNotBlank() && request.text.length <= 2000 && request.displayedWeek in 1..52)
+            request.requestDate?.let { LocalDate.parse(it) }
+        }
+        state.retryRequest?.let(::validateRequest)
+        state.targetChoice?.let {
+            require(state.pending == null && !state.requestRunning)
+            validateRequest(it.request)
+            requireNotNull(it.request.requestDate)
+            validate(it.semester, it.candidates)
+            require(it.candidates.size in 2..200 && it.candidates.all { row -> row.id > 0 } &&
+                it.candidates.map { row -> row.id }.distinct().size == it.candidates.size)
+        }
+        state.selectedTarget?.let {
+            require(it.id > 0 && it.semesterId == semesterId && ScheduleRules.isValidCourse(it, 52))
+        }
+        require(!state.requestRunning || state.retryRequest != null)
         return state
     }
 }

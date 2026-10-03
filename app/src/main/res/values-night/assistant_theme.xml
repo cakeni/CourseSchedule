@@ -1,0 +1,16 @@
+<resources>
+    <color name="assistant_background">#000000</color>
+    <color name="assistant_soft_surface">#1C1C1E</color>
+    <color name="assistant_selected_surface">#2C2C2E</color>
+    <color name="assistant_accent">#F5F5F7</color>
+    <color name="assistant_on_accent">#1C1C1E</color>
+    <color name="assistant_text">#F5F5F7</color>
+    <color name="assistant_text_secondary">#98989D</color>
+    <color name="assistant_divider">#38383A</color>
+    <color name="assistant_hero_surface">#F5F5F7</color>
+    <color name="assistant_prompt_add">#1C1C1E</color>
+    <color name="assistant_prompt_query">#1C1C1E</color>
+    <color name="assistant_prompt_change">#1C1C1E</color>
+    <color name="assistant_prompt_delete">#1C1C1E</color>
+    <color name="assistant_hero_highlight">#1C1C1E</color>
+</resources>

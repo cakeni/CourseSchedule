@@ -47,6 +47,10 @@ class AssistantProcessRestartTest {
             withContext(Dispatchers.Main) {
                 model.receiveReply(AssistantCourseReply("新增化学", listOf(course.copy(id = 0,
                     courseName = "化学", dayOfWeek = 5, startSection = 3, endSection = 4))), semester)
+                model.confirmPending()
+            }
+            awaitIdle(model)
+            withContext(Dispatchers.Main) {
                 model.receiveReply(AssistantCourseReply("改教室", emptyList(), updates = listOf(
                     AssistantCourseUpdate(original, listOf(original.copy(classroom = "B201"))))), semester)
                 model.updateDraft("接下来查周三的课")
@@ -68,7 +72,7 @@ class AssistantProcessRestartTest {
                 awaitIdle(model!!)
                 assertEquals(fixture.conversationId, model!!.conversationId)
                 assertEquals("接下来查周三的课", model!!.draft.value)
-                assertEquals(2, model!!.messages.value!!.size)
+                assertEquals(3, model!!.messages.value!!.size)
                 assertNotNull(model!!.pendingChanges.value)
                 assertTrue(model!!.canUndo.value == true)
                 assertFalse(model!!.canRetry.value == true)
@@ -78,7 +82,7 @@ class AssistantProcessRestartTest {
                 awaitIdle(model!!)
                 assertEquals(fixture.original.copy(classroom = "B201"), database.courseDao().getCourseById(fixture.original.id))
                 assertNull(model!!.pendingChanges.value)
-                assertEquals(3, database.assistantConversationDao().messageCount(fixture.conversationId))
+                assertEquals(4, database.assistantConversationDao().messageCount(fixture.conversationId))
             }
             ActivityScenario.launch<CourseAssistantActivity>(Intent(context, CourseAssistantActivity::class.java)).use { scenario ->
                 scenario.onActivity { model = ViewModelProvider(it)[CourseAssistantViewModel::class.java] }

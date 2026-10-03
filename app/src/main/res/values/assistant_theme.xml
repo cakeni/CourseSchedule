@@ -1,0 +1,23 @@
+<resources>
+    <color name="assistant_background">#FFFFFF</color>
+    <color name="assistant_soft_surface">#F5F5F7</color>
+    <color name="assistant_selected_surface">#EDEDF0</color>
+    <color name="assistant_accent">#1C1C1E</color>
+    <color name="assistant_on_accent">#FFFFFF</color>
+    <color name="assistant_text">#1C1C1E</color>
+    <color name="assistant_text_secondary">#74747A</color>
+    <color name="assistant_divider">#E5E5EA</color>
+    <color name="assistant_hero_surface">#1C1C1E</color>
+    <color name="assistant_prompt_add">#F5F5F7</color>
+    <color name="assistant_prompt_query">#F5F5F7</color>
+    <color name="assistant_prompt_change">#F5F5F7</color>
+    <color name="assistant_prompt_delete">#F5F5F7</color>
+    <color name="assistant_hero_highlight">#FFFFFF</color>
+    <style name="Assistant.ToolbarTitle" parent="TextAppearance.MaterialComponents.Subtitle1">
+        <item name="android:textSize">17sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+    <style name="Assistant.ToolbarSubtitle" parent="TextAppearance.MaterialComponents.Caption">
+        <item name="android:textSize">11sp</item>
+    </style>
+</resources>

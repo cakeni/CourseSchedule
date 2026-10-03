@@ -187,6 +187,7 @@ class CourseAssistantFlowTest {
             onView(withContentDescription(R.string.course_tools)).perform(click())
             onView(withText(R.string.assistant_title)).perform(click())
             screenshot("assistant-chat")
+            onView(withContentDescription(R.string.assistant_history)).perform(click())
             onView(withId(R.id.btnConfigureApi)).perform(click())
             onView(withId(R.id.etApiUrl)).check(matches(isDisplayed()))
             onView(withId(R.id.etApiModel)).check(matches(isDisplayed()))

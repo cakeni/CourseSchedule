@@ -14,7 +14,8 @@ class AssistantConversationStateTest {
         val after = before.copy(classroom = "B201")
         val state = AssistantConversationState(pending = AssistantPendingOperation(semester,
             AssistantCourseReply("准备修改", emptyList(), updates = listOf(AssistantCourseUpdate(before, listOf(after))))),
-            lastUndo = AssistantUndoBatch(semester, listOf(before), listOf(after)))
+            lastUndo = AssistantUndoBatch(semester, listOf(before), listOf(after),
+                listOf(before.copy(id = 13, courseName = "原有冲突课程"))))
         assertEquals(state, AssistantConversationCodec.decode(AssistantConversationCodec.encode(state), 7))
         val retry = AssistantConversationState(retryRequest = AssistantRetryRequest("周三早八加课", 2), requestRunning = true)
         assertEquals(retry, AssistantConversationCodec.decode(AssistantConversationCodec.encode(retry), 7))
