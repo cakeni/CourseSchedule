@@ -7,6 +7,7 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.Path
 import android.graphics.Rect
 import android.graphics.RectF
 import android.text.Layout
@@ -25,6 +26,7 @@ import androidx.core.graphics.ColorUtils
 import androidx.core.view.ViewCompat
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import androidx.customview.widget.ExploreByTouchHelper
+import com.courseschedule.ui.SchedulePageMotion
 import com.courseschedule.ui.ScheduleReturnMotion
 import com.courseschedule.R
 import com.courseschedule.data.entity.Course
@@ -32,7 +34,6 @@ import com.courseschedule.domain.ScheduleRules
 import com.courseschedule.utils.SchedulePreferences
 import kotlin.math.abs
 import kotlin.math.roundToInt
-import kotlin.math.sin
 
 /**
  * Weekly timetable canvas. Dimensions are density-aware so the grid stays
@@ -58,31 +59,28 @@ class CourseTableView @JvmOverloads constructor(
 
     // Only explicit navigation starts this clock; data binding never resets it.
     private var returnAnimator: ValueAnimator? = null
-    private var returnElapsed = 560f
+    private var returnElapsed = ScheduleReturnMotion.MOVE_MS
     private var returnDelays: Map<Long, Long> = emptyMap()
-    private val returnInterpolator = PathInterpolator(0.22f, 0.65f, 0.3f, 1f)
 
-    fun playReturnEntrance(onFrame: (Float) -> Unit) {
+    fun playReturnEntrance() {
         cancelReturnEntrance()
-        if (!ValueAnimator.areAnimatorsEnabled()) {
-            onFrame(1f)
-            return
-        }
+        if (!ValueAnimator.areAnimatorsEnabled()) return
         val viewport = Rect()
         if (!getLocalVisibleRect(viewport)) return
+        val firstVisibleRow = (viewport.top / sectionHeight).toInt()
         returnDelays = visibleCourses().filter {
             RectF.intersects(courseBounds(it), RectF(viewport))
-        }.sortedWith(compareBy<Course> { courseBounds(it).top }.thenBy { courseBounds(it).left })
-            .mapIndexed { index, course -> course.id to ScheduleReturnMotion.delay(index) }.toMap()
-        val total = ScheduleReturnMotion.duration(returnDelays.size)
+        }.associate { course ->
+            course.id to ScheduleReturnMotion.delay(course.dayOfWeek,
+                course.startSection - 1 - firstVisibleRow)
+        }
+        val total = ScheduleReturnMotion.duration(returnDelays.values.maxOrNull() ?: 0L)
         returnElapsed = 0f
-        onFrame(0f)
         returnAnimator = ValueAnimator.ofFloat(0f, total.toFloat()).apply {
             duration = total
             interpolator = android.view.animation.LinearInterpolator()
             addUpdateListener {
                 returnElapsed = it.animatedValue as Float
-                onFrame(ScheduleReturnMotion.fraction(returnElapsed, ScheduleReturnMotion.HEADER_MS))
                 invalidate()
             }
             start()
@@ -94,7 +92,7 @@ class CourseTableView @JvmOverloads constructor(
         returnAnimator?.cancel()
         returnAnimator = null
         returnDelays = emptyMap()
-        returnElapsed = 560f
+        returnElapsed = ScheduleReturnMotion.MOVE_MS
         invalidate()
     }
 
@@ -228,6 +226,8 @@ class CourseTableView @JvmOverloads constructor(
     private var pressedCourse: Course? = null
     private val coursePressMotion = CoursePressMotion()
     private var pagerOffset = 0f
+    private var continuityCourseIds: Set<Long> = emptySet()
+    private var continuityTimeColumn = false
     private var touchDownX = 0f
     private var touchDownY = 0f
     private var touchMoved = false
@@ -237,6 +237,7 @@ class CourseTableView @JvmOverloads constructor(
     private val courseBoundsCache = mutableMapOf<Course, RectF>()
     private val courseTextLayoutCache = mutableMapOf<CourseTextLayoutKey, CourseTextLayout>()
     private val cardDrawBounds = RectF()
+    private val transitionClip = Path()
 
     private data class QuickAddSelection(
         val dayOfWeek: Int,
@@ -419,15 +420,7 @@ class CourseTableView @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        canvas.drawRect(0f, 0f, timeColumnWidth, totalHeight, backgroundPaint)
-        if (returnElapsed < ScheduleReturnMotion.HEADER_MS) {
-            val timeLayer = canvas.saveLayerAlpha(0f, 0f, timeColumnWidth, height.toFloat(),
-                (255 * returnElapsed / ScheduleReturnMotion.HEADER_MS).roundToInt())
-            drawTimeColumn(canvas)
-            canvas.restoreToCount(timeLayer)
-        } else {
-            drawTimeColumn(canvas)
-        }
+        if (!continuityTimeColumn) drawContinuityTimeColumn(canvas)
         drawCourses(canvas)
         drawQuickAddSelection(canvas)
     }
@@ -477,49 +470,15 @@ class CourseTableView @JvmOverloads constructor(
     private fun drawCourses(canvas: Canvas) {
         val visibleCourses = visibleCourses()
         visibleCourses.forEach { course ->
+            if (course.id in continuityCourseIds) return@forEach
             val bounds = courseBounds(course)
             val isCurrentWeek = ScheduleRules.isCourseInWeek(course, currentWeek)
-            val sectionSpan = (course.endSection - course.startSection + 1).coerceAtLeast(1)
-            val motionVariant = Math.floorMod(
-                course.dayOfWeek * 7 + course.startSection * 11 + course.endSection * 3,
-                5
-            )
-            val arcDirection = if ((course.dayOfWeek + course.startSection) % 2 == 0) -1f else 1f
-            val motionDistance = abs(pagerOffset)
-            val travelDistance = dp(
-                8f + motionVariant * 2.2f + sectionSpan.coerceAtMost(4) * 0.7f
-            )
             val saveCount = canvas.save()
-
-            canvas.translate(
-                -pagerOffset * travelDistance,
-                sin(motionDistance * Math.PI).toFloat() *
-                    arcDirection * dp(0.8f + motionVariant * 0.32f)
-            )
-
-            canvas.rotate(
-                -pagerOffset * arcDirection * (0.25f + motionVariant * 0.1f),
-                bounds.centerX(),
-                bounds.centerY()
-            )
-
-            val motionScale = 1f - motionDistance *
-                (0.006f + motionVariant * 0.0015f + sectionSpan.coerceAtMost(4) * 0.001f)
-            canvas.scale(
-                motionScale,
-                motionScale,
-                bounds.centerX(),
-                bounds.centerY()
-            )
-
             val pressProgress = if (course == pressedCourse) coursePressMotion.progress else 0f
-            val motionAlpha = (255f * (1f - motionDistance * (0.08f + motionVariant * 0.008f)))
-                .roundToInt()
-                .coerceIn(0, 255)
-            val alpha = if (isCurrentWeek) motionAlpha else (motionAlpha * 0.46f).roundToInt()
+            val alpha = if (isCurrentWeek) 255 else (255 * 0.46f).roundToInt()
             val delay = returnDelays[course.id]
-            val elapsed = if (delay == null) 420f else (returnElapsed - delay).coerceAtLeast(0f)
-            val progress = returnInterpolator.getInterpolation(ScheduleReturnMotion.fraction(elapsed, ScheduleReturnMotion.MOVE_MS))
+            val elapsed = if (delay == null) ScheduleReturnMotion.MOVE_MS else (returnElapsed - delay).coerceAtLeast(0f)
+            val progress = ScheduleReturnMotion.progress(elapsed)
             val entranceAlpha = ScheduleReturnMotion.fraction(elapsed, ScheduleReturnMotion.FADE_MS)
             canvas.translate(0f, dp(ScheduleReturnMotion.OFFSET_DP) * (1f - progress))
             val entranceScale = ScheduleReturnMotion.INITIAL_SCALE + (1f - ScheduleReturnMotion.INITIAL_SCALE) * progress
@@ -610,16 +569,24 @@ class CourseTableView @JvmOverloads constructor(
         course: Course,
         alpha: Int,
         isCurrentWeek: Boolean,
-        pressProgress: Float
+        pressProgress: Float,
+        boundsOverride: RectF? = null
     ) {
-        val bounds = courseBounds(course)
+        val bounds = boundsOverride ?: courseBounds(course)
+        if (bounds.width() <= 0f || bounds.height() <= 0f) return
+        drawCourseBackground(canvas, bounds, alpha, pressProgress, courseColor(course))
+        drawCourseText(canvas, course, bounds, alpha, isCurrentWeek, pressProgress)
+    }
+
+    private fun courseColor(course: Course): Int = courseColors[Math.floorMod(course.colorIndex, courseColors.size)]
+
+    private fun drawCourseBackground(canvas: Canvas, bounds: RectF, alpha: Int, pressProgress: Float, baseColor: Int) {
         val left = bounds.left
         val top = bounds.top
         val right = bounds.right
         val bottom = bounds.bottom
         if (right <= left || bottom <= top) return
 
-        val baseColor = courseColors[Math.floorMod(course.colorIndex, courseColors.size)]
         coursePaint.color = ColorUtils.blendARGB(baseColor, Color.BLACK, 0.08f * pressProgress)
         coursePaint.alpha = alpha
         val pressScaleX = 1f - (1f - PRESSED_SCALE_X) * pressProgress
@@ -651,10 +618,18 @@ class CourseTableView @JvmOverloads constructor(
             )
         }
 
+    }
+
+    private fun drawCourseText(canvas: Canvas, course: Course, bounds: RectF, alpha: Int,
+        isCurrentWeek: Boolean, pressProgress: Float = 0f) {
+        if (alpha <= 0) return
+        val left = bounds.left
+        val top = bounds.top
+        val bottom = bounds.bottom
         val textLayout = courseTextLayoutCache.getOrPut(
             CourseTextLayoutKey(course, isCurrentWeek)
         ) {
-            buildCourseTextLayout(course, isCurrentWeek, bounds)
+            buildCourseTextLayout(course, isCurrentWeek, courseBounds(course))
         }
         textLayout.name.paint.alpha = alpha
         textLayout.room?.paint?.alpha = 220 * alpha / 255
@@ -1079,6 +1054,7 @@ class CourseTableView @JvmOverloads constructor(
 
     override fun onDetachedFromWindow() {
         cancelReturnEntrance()
+        resetPagerMotion()
         clearQuickAddSelection()
         resetCoursePress()
         super.onDetachedFromWindow()
@@ -1104,7 +1080,70 @@ class CourseTableView @JvmOverloads constructor(
 
     fun resetPagerMotion() {
         pagerOffset = 0f
+        setContinuityCourses(emptySet(), false)
         invalidate()
+    }
+
+    internal fun continuityCourses(): List<Course> = visibleCourses()
+
+    internal fun setContinuityCourses(ids: Set<Long>, hideTimeColumn: Boolean) {
+        if (continuityCourseIds == ids && continuityTimeColumn == hideTimeColumn) return
+        continuityCourseIds = ids
+        continuityTimeColumn = hideTimeColumn
+        invalidate()
+    }
+
+    internal fun continuityBounds(course: Course): RectF = RectF(courseBounds(course))
+
+    internal fun drawContinuityCourse(canvas: Canvas, course: Course, bounds: RectF, opacity: Float = 1f) {
+        val active = ScheduleRules.isCourseInWeek(course, currentWeek)
+        val alpha = (255 * opacity * if (active) 1f else 0.46f).roundToInt().coerceIn(0, 255)
+        drawCourse(canvas, course, alpha, active, 0f, bounds)
+    }
+
+    internal fun drawTransitionCourse(canvas: Canvas, from: Course, destination: CourseTableView,
+        to: Course, bounds: RectF, progress: Float) {
+        val fromActive = ScheduleRules.isCourseInWeek(from, currentWeek)
+        val toActive = ScheduleRules.isCourseInWeek(to, destination.currentWeek)
+        val phase = SchedulePageMotion.phase(progress)
+        val fromOpacity = if (fromActive) 1f else 0.46f
+        val toOpacity = if (toActive) 1f else 0.46f
+        val alpha = (255 * (fromOpacity + (toOpacity - fromOpacity) * phase)).roundToInt()
+        val fromColor = courseColor(from)
+        val toColor = destination.courseColor(to)
+        val sameText = from.courseName == to.courseName && from.teacher == to.teacher &&
+            from.classroom == to.classroom && fromActive == toActive &&
+            from.endSection - from.startSection == to.endSection - to.startSection
+        if (sameText && fromColor == toColor) {
+            drawCourse(canvas, from, alpha, fromActive, 0f, bounds)
+            return
+        }
+        drawCourseBackground(canvas, bounds, alpha, 0f,
+            if (fromColor == toColor) fromColor else ColorUtils.blendARGB(fromColor, toColor, phase))
+
+        val save = canvas.save()
+        transitionClip.reset()
+        transitionClip.addRoundRect(bounds, courseCornerRadius, courseCornerRadius, Path.Direction.CW)
+        canvas.clipPath(transitionClip)
+        if (sameText) {
+            drawCourseText(canvas, from, bounds, alpha, fromActive)
+        } else {
+            val offset = if (ValueAnimator.areAnimatorsEnabled()) dp(SchedulePageMotion.TEXT_DP) else 0f
+            val outgoing = SchedulePageMotion.outgoingText(progress)
+            val incoming = SchedulePageMotion.incomingText(progress)
+            val oldText = canvas.save()
+            canvas.translate(0f, -offset * (1f - outgoing))
+            drawCourseText(canvas, from, bounds, (alpha * outgoing).roundToInt(), fromActive)
+            canvas.restoreToCount(oldText)
+            canvas.translate(0f, offset * (1f - incoming))
+            destination.drawCourseText(canvas, to, bounds, (alpha * incoming).roundToInt(), toActive)
+        }
+        canvas.restoreToCount(save)
+    }
+
+    internal fun drawContinuityTimeColumn(canvas: Canvas) {
+        canvas.drawRect(0f, 0f, timeColumnWidth, totalHeight, backgroundPaint)
+        drawTimeColumn(canvas)
     }
 
     fun setCurrentWeek(week: Int) {

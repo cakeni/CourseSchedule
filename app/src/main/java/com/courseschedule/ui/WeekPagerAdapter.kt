@@ -1,5 +1,6 @@
 package com.courseschedule.ui
 
+import android.animation.ValueAnimator
 import android.graphics.Typeface
 import android.graphics.RectF
 import android.view.LayoutInflater
@@ -18,6 +19,7 @@ import com.courseschedule.databinding.ItemWeekScheduleBinding
 import com.courseschedule.domain.ScheduleRules
 import com.courseschedule.domain.SemesterPhase
 import com.courseschedule.domain.SemesterWeekStatus
+import com.courseschedule.domain.WeekMotionStyle
 import com.courseschedule.utils.SchedulePreferences
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -29,7 +31,8 @@ data class WeekPageSettings(
     val showInactiveCourses: Boolean = true,
     val sectionHeightDp: Int = 64,
     val sectionTimes: List<String> = SchedulePreferences.DEFAULT_SECTION_TIMES,
-    val sectionEndTimes: List<String> = SchedulePreferences.DEFAULT_SECTION_END_TIMES
+    val sectionEndTimes: List<String> = SchedulePreferences.DEFAULT_SECTION_END_TIMES,
+    val weekMotionStyle: WeekMotionStyle = WeekMotionStyle.SOFT_SLIDE
 )
 
 class WeekPagerAdapter(
@@ -106,12 +109,16 @@ class WeekPagerAdapter(
         holder.binding.courseTableView.cancelReturnEntrance()
         holder.resetSelectionMotion()
         holder.binding.courseTableView.resetPagerMotion()
+        holder.binding.weekDayHeader.visibility = View.VISIBLE
         super.onViewRecycled(holder)
     }
 
     fun currentHolder(pager: ViewPager2): WeekViewHolder? =
+        holderAt(pager, pager.currentItem)
+
+    fun holderAt(pager: ViewPager2, position: Int): WeekViewHolder? =
         (pager.getChildAt(0) as? RecyclerView)
-            ?.findViewHolderForAdapterPosition(pager.currentItem) as? WeekViewHolder
+            ?.findViewHolderForAdapterPosition(position) as? WeekViewHolder
 
     fun playSelectionMotion(pager: ViewPager2, position: Int, forward: Boolean): Boolean {
         val recyclerView = pager.getChildAt(0) as? RecyclerView ?: return false
@@ -138,6 +145,7 @@ class WeekPagerAdapter(
             if (previousWeek != week) {
                 resetSelectionMotion()
                 binding.courseTableView.resetPagerMotion()
+                binding.weekDayHeader.visibility = View.VISIBLE
             }
             boundWeek = week
             val displayCourses = ScheduleRules.selectCoursesForWeek(
@@ -188,7 +196,7 @@ class WeekPagerAdapter(
             resetSelectionMotion()
             val density = binding.root.resources.displayMetrics.density
             val dayLabels = binding.weekDayHeader.children.filter { it.visibility != View.GONE }.toList()
-            (if (forward) dayLabels else dayLabels.reversed()).forEachIndexed { index, label ->
+            if (ValueAnimator.areAnimatorsEnabled()) (if (forward) dayLabels else dayLabels.reversed()).forEachIndexed { index, label ->
                 label.alpha = 0.72f
                 label.translationY = 6f * density
                 label.animate()

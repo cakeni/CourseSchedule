@@ -339,6 +339,11 @@
     <string name="inactive_course_name_format">[非本周]\n%1$s</string>
     <string name="show_section_time">显示节次时间</string>
     <string name="course_block_height">课程块高度</string>
+    <string name="week_motion_title">课程切周动效</string>
+    <string name="week_motion_soft">轻层滑页</string>
+    <string name="week_motion_continuity">位置接续</string>
+    <string name="week_motion_soft_summary">轻层滑页 · 日期与整周课程一起滑动</string>
+    <string name="week_motion_continuity_summary">位置接续 · 相同课程保持连续位置</string>
     <string name="height_dp_format">%d dp</string>
     <string name="course_reminders">课程提醒</string>
     <string name="enable_reminders">启用课程提醒</string>

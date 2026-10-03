@@ -18,6 +18,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.courseschedule.R
 import com.courseschedule.ui.importdata.ImportActivity
+import com.courseschedule.ui.settings.SettingsActivity
 import com.google.android.material.card.MaterialCardView
 import com.google.gson.Gson
 import org.junit.Assert.*
@@ -48,6 +49,49 @@ class ControlPressFeedbackTest {
 
     private fun shot(name: String): Bitmap = instrumentation.uiAutomation.takeScreenshot().also { bitmap ->
         File(folder, "$name-$suffix.png").outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
+    }
+
+    @Test fun projectNoticePressShowsItsHighlightAndCancellationRestoresItRepeatedly() {
+        ActivityScenario.launch(SettingsActivity::class.java).use { scenario ->
+            settle(1000L)
+            lateinit var card: MaterialCardView
+            val bounds = Rect()
+            scenario.onActivity { activity ->
+                card = activity.findViewById(R.id.cardOpenSource)
+                card.getGlobalVisibleRect(bounds)
+                assertTrue("The project notice must retain a visible press highlight",
+                    Color.alpha(card.rippleColor.getColorForState(intArrayOf(android.R.attr.state_pressed,
+                        android.R.attr.state_enabled), Color.TRANSPARENT)) > 0)
+            }
+            val before = shot("notice-normal")
+            var changed = 0
+            repeat(3) { cycle ->
+                val down = SystemClock.uptimeMillis()
+                scenario.onActivity { touch(card, MotionEvent.ACTION_DOWN, down) }
+                // Let the native ripple reach its held state before sampling. In
+                // dark mode its early fade can quantize to the resting RGB value.
+                settle(360L)
+                val pressed = shot("notice-pressed-$cycle")
+                // Sample the hotspot: the first ripple need not reach distant edges yet.
+                val x = bounds.centerX()
+                val y = bounds.centerY()
+                if (before.getPixel(x, y) != pressed.getPixel(x, y)) changed++
+                pressed.recycle()
+                scenario.onActivity {
+                    assertTrue(card.isPressed)
+                    touch(card, MotionEvent.ACTION_CANCEL, down)
+                }
+                settle(420L)
+                scenario.onActivity {
+                    assertFalse(card.isPressed)
+                    assertEquals(1f, card.scaleX, .001f)
+                }
+            }
+            assertEquals("Each press must visibly highlight the card", 3, changed)
+            shot("notice-released").recycle()
+            File(folder, "notice-press-$suffix.json").writeText(Gson().toJson(mapOf("highlightedPresses" to changed)))
+            before.recycle()
+        }
     }
 
     @Test fun toolbarPressHasNoGrayHaloAndPopupReleaseRestoresTheButton() {

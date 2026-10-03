@@ -44,6 +44,7 @@ import kotlinx.coroutines.Job
 import com.courseschedule.databinding.ActivitySettingsBinding
 import com.courseschedule.domain.ScheduleRules
 import com.courseschedule.domain.SemesterPhase
+import com.courseschedule.domain.WeekMotionStyle
 import com.courseschedule.ui.installPressScale
 import com.courseschedule.ui.playNavigationMotion
 import com.courseschedule.ui.selectItemWithoutAnimation
@@ -129,6 +130,20 @@ class SettingsActivity : AppCompatActivity() {
         )
         updateReminderControlState(preferences.reminderEnabled, animate = false)
         updateSectionTimesSummary()
+        updateWeekMotionSummary()
+        binding.rowWeekMotion.setOnClickListener {
+            val choices = WeekMotionStyle.entries
+            MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.week_motion_title)
+                .setSingleChoiceItems(arrayOf(getString(R.string.week_motion_soft), getString(R.string.week_motion_continuity)),
+                    choices.indexOf(preferences.weekMotionStyle)) { dialog, selected ->
+                    preferences.weekMotionStyle = choices[selected]
+                    updateWeekMotionSummary()
+                    dialog.dismiss()
+                }
+                .setNegativeButton(R.string.cancel, null)
+                .show()
+        }
 
         binding.rowDarkMode.setOnClickListener {
             binding.switchDarkMode.toggle()
@@ -188,6 +203,11 @@ class SettingsActivity : AppCompatActivity() {
         ArrayAdapter(this, android.R.layout.simple_spinner_item, values).also {
             it.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         }
+
+    private fun updateWeekMotionSummary() {
+        binding.tvWeekMotionSummary.setText(if (preferences.weekMotionStyle == WeekMotionStyle.SOFT_SLIDE)
+            R.string.week_motion_soft_summary else R.string.week_motion_continuity_summary)
+    }
 
     private fun onItemSelected(action: (Int) -> Unit): AdapterView.OnItemSelectedListener {
         return object : AdapterView.OnItemSelectedListener {
@@ -324,6 +344,7 @@ class SettingsActivity : AppCompatActivity() {
         listOf(
             binding.cardOpenSource,
             binding.rowDarkMode,
+            binding.rowWeekMotion,
             binding.cardSemester,
             binding.rowShowWeekend,
             binding.rowShowInactiveCourses,
