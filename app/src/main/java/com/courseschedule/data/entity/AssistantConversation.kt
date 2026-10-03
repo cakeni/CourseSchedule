@@ -1,6 +1,7 @@
 package com.courseschedule.data.entity
 
 import androidx.room.Entity
+import androidx.room.Embedded
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
@@ -27,4 +28,9 @@ data class AssistantChatMessage(
     val content: String,
     val kind: String = "chat",
     val createdAt: Long = System.currentTimeMillis()
+)
+
+data class AssistantHistoryMessage(
+    @Embedded val message: AssistantChatMessage,
+    val title: String
 )

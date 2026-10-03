@@ -1,6 +1,7 @@
 package com.courseschedule.ui.settings
 
 import android.app.DatePickerDialog
+import android.graphics.Rect
 import android.os.Build
 import android.provider.Settings
 import android.util.Log
@@ -83,7 +84,9 @@ class SettingsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        onBackPressedDispatcher.addCallback(this) { returnToSchedule(ScheduleReturnSource.SETTINGS) }
+        onBackPressedDispatcher.addCallback(this) {
+            if (intent.getBooleanExtra(EXTRA_FOCUS_REMINDERS, false)) finish() else returnToSchedule(ScheduleReturnSource.SETTINGS)
+        }
         binding = ActivitySettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -93,6 +96,9 @@ class SettingsActivity : AppCompatActivity() {
         preferences = SchedulePreferences(this)
 
         initSettingsControls()
+        if (intent.getBooleanExtra(EXTRA_FOCUS_REMINDERS, false)) binding.rowReminder.doOnPreDraw {
+            binding.rowReminder.requestRectangleOnScreen(Rect(0, 0, binding.rowReminder.width, binding.rowReminder.height), true)
+        }
         initActions()
         initBottomNavigation()
         observeData()
@@ -717,6 +723,10 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()
+
+    companion object {
+        const val EXTRA_FOCUS_REMINDERS = "focus_reminders"
+    }
 
     override fun onResume() {
         super.onResume()

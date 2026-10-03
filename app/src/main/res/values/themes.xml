@@ -49,6 +49,57 @@
 
     <style name="Theme.CourseSchedule.Assistant" parent="Theme.CourseSchedule">
         <item name="android:windowDisablePreview">true</item>
+        <item name="colorPrimary">@color/assistant_accent</item>
+        <item name="colorPrimaryVariant">@color/assistant_accent</item>
+        <item name="colorOnPrimary">@color/assistant_on_accent</item>
+        <item name="colorSecondary">@color/assistant_accent</item>
+        <item name="colorOnSecondary">@color/assistant_on_accent</item>
+        <item name="colorSurface">@color/assistant_background</item>
+        <item name="colorOnSurface">@color/assistant_text</item>
+        <item name="colorOnBackground">@color/assistant_text</item>
+        <item name="colorControlNormal">@color/assistant_text_secondary</item>
+        <item name="colorControlActivated">@color/assistant_accent</item>
+        <item name="android:colorAccent">@color/assistant_accent</item>
+        <item name="android:colorBackground">@color/assistant_background</item>
+        <item name="android:windowBackground">@color/assistant_background</item>
+        <item name="android:textColorPrimary">@color/assistant_text</item>
+        <item name="android:textColorSecondary">@color/assistant_text_secondary</item>
+        <item name="alertDialogTheme">@style/ThemeOverlay.CourseSchedule.AssistantDialog</item>
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.CourseSchedule.AssistantDialog</item>
+        <item name="bottomSheetDialogTheme">@style/ThemeOverlay.CourseSchedule.AssistantSheet</item>
+    </style>
+
+    <style name="ThemeOverlay.CourseSchedule.AssistantSheet" parent="ThemeOverlay.MaterialComponents.BottomSheetDialog">
+        <item name="colorPrimary">@color/assistant_accent</item>
+        <item name="colorOnPrimary">@color/assistant_on_accent</item>
+        <item name="colorSurface">@color/assistant_background</item>
+        <item name="colorOnSurface">@color/assistant_text</item>
+        <item name="bottomSheetStyle">@style/Assistant.BottomSheet</item>
+    </style>
+
+    <style name="Assistant.BottomSheet" parent="Widget.MaterialComponents.BottomSheet.Modal">
+        <item name="backgroundTint">@color/assistant_background</item>
+        <item name="shapeAppearanceOverlay">@style/Assistant.SheetShape</item>
+        <item name="android:elevation">0dp</item>
+    </style>
+
+    <style name="Assistant.SheetShape" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopLeft">28dp</item>
+        <item name="cornerSizeTopRight">28dp</item>
+    </style>
+
+    <style name="ThemeOverlay.CourseSchedule.AssistantDialog" parent="ThemeOverlay.CourseSchedule.MaterialAlertDialog">
+        <item name="colorPrimary">@color/assistant_accent</item>
+        <item name="colorSurface">@color/assistant_background</item>
+        <item name="colorOnSurface">@color/assistant_text</item>
+        <item name="android:colorBackground">@color/assistant_background</item>
+        <item name="android:colorBackgroundFloating">@color/assistant_background</item>
+        <item name="alertDialogStyle">@style/Assistant.Dialog</item>
+    </style>
+
+    <style name="Assistant.Dialog" parent="CourseScheduleAlertDialog">
+        <item name="backgroundTint">@color/assistant_background</item>
     </style>
 
     <style name="ShapeAppearance.CourseSchedule.Dialog" parent="ShapeAppearance.MaterialComponents.LargeComponent">
