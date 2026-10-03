@@ -3,8 +3,8 @@
     android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:background="@color/study_background">
     <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="vertical">
         <androidx.core.widget.NestedScrollView android:id="@+id/taskScroll" android:layout_width="match_parent" android:layout_height="match_parent" android:fillViewport="true" android:clipToPadding="false">
-            <LinearLayout android:id="@+id/taskContent" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingHorizontal="20dp" android:paddingTop="22dp" android:paddingBottom="20dp">
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical">
+            <LinearLayout android:id="@+id/taskContent" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingHorizontal="20dp" android:paddingTop="22dp" android:paddingBottom="20dp" android:clipChildren="false" android:clipToPadding="false">
+                <LinearLayout android:id="@+id/taskHeader" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical">
                     <ImageButton android:id="@+id/btnStudyBack" android:layout_width="40dp" android:layout_height="48dp" android:layout_marginEnd="4dp" android:background="@drawable/control_focus"
                         android:src="@drawable/ic_back" app:tint="@color/study_text" android:contentDescription="@string/back"  android:stateListAnimator="@animator/press_feedback_icon" />
                     <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical">
@@ -18,18 +18,18 @@
                 </LinearLayout>
                 <TextView android:id="@+id/tvTaskReminderStatus" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp"
                     android:minHeight="36dp" android:gravity="center_vertical" android:textColor="@color/study_text_secondary" android:textSize="12sp" android:lineSpacingExtra="3dp" android:visibility="gone" />
-                <LinearLayout android:id="@+id/taskFilters" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginTop="22dp">
+                <LinearLayout android:id="@+id/taskFilters" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginTop="22dp" android:clipChildren="false" android:clipToPadding="false">
                     <com.google.android.material.button.MaterialButton android:id="@+id/btnTasksToday" style="@style/Study.OverviewTile" android:text="@string/study_today" android:layout_marginEnd="8dp" />
                     <com.google.android.material.button.MaterialButton android:id="@+id/btnTasksUpcoming" style="@style/Study.OverviewTile" android:text="@string/study_upcoming" android:layout_marginEnd="8dp" />
                     <com.google.android.material.button.MaterialButton android:id="@+id/btnTasksPending" style="@style/Study.OverviewTile" android:text="@string/study_all" />
                 </LinearLayout>
-                <com.google.android.material.textfield.TextInputLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp"
+                <com.google.android.material.textfield.TextInputLayout android:id="@+id/taskSearch" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp"
                     android:background="@drawable/bg_study_group" app:boxBackgroundMode="none" app:hintEnabled="false" app:startIconDrawable="@drawable/ic_search"
                     app:startIconTint="@color/study_text_secondary" app:endIconMode="clear_text">
                     <com.google.android.material.textfield.TextInputEditText android:id="@+id/etTaskSearch" android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@null"
                         android:paddingVertical="10dp" android:paddingHorizontal="12dp" android:minHeight="46dp" android:hint="@string/study_search" android:inputType="text" android:maxLines="1" android:maxLength="120" android:textSize="14sp" />
                 </com.google.android.material.textfield.TextInputLayout>
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="18dp" android:gravity="center_vertical">
+                <LinearLayout android:id="@+id/taskListHeader" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="18dp" android:gravity="center_vertical">
                     <TextView android:id="@+id/tvTaskListTitle" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
                         android:text="全部待办" android:textSize="17sp" android:fontFamily="sans-serif-medium" android:textColor="@color/study_text" />
                     <com.google.android.material.button.MaterialButton android:id="@+id/btnTasksCompleted" style="@style/CourseSchedule.TextButton" android:layout_width="wrap_content"
