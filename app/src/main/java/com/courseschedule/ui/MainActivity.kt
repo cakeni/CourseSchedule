@@ -1,6 +1,7 @@
 package com.courseschedule.ui
 
 import android.Manifest
+import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -72,7 +73,12 @@ class MainActivity : AppCompatActivity() {
 
     private var returnPreDraw: android.view.ViewTreeObserver.OnPreDrawListener? = null
     private var returnTable: CourseTableView? = null
-    private var returnDayHeader: View? = null
+    private var continuityPosition = 0
+    private var continuityProgress = 0f
+    private val continuityPreDraw = android.view.ViewTreeObserver.OnPreDrawListener {
+        if (continuityProgress > 0f) updateCourseContinuity()
+        true
+    }
     private var currentWeek = 1
     private var currentSemester: Semester? = null
     private var currentCourses: List<Course> = emptyList()
@@ -94,6 +100,12 @@ class MainActivity : AppCompatActivity() {
     private val headerInterpolator = PathInterpolator(0.2f, 0.8f, 0.2f, 1f)
 
     private val pageChangeCallback = object : ViewPager2.OnPageChangeCallback() {
+        override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
+            continuityPosition = position
+            continuityProgress = positionOffset
+            updateCourseContinuity()
+        }
+
         override fun onPageSelected(position: Int) {
             if (position != lastPagerPosition) cancelScheduleReturnEntrance()
             val previousPosition = lastPagerPosition
@@ -119,6 +131,10 @@ class MainActivity : AppCompatActivity() {
 
         override fun onPageScrollStateChanged(state: Int) {
             if (state == ViewPager2.SCROLL_STATE_DRAGGING) cancelScheduleReturnEntrance()
+            if (state == ViewPager2.SCROLL_STATE_IDLE) {
+                continuityProgress = 0f
+                binding.courseContinuityOverlay.clear()
+            }
             if (state != ViewPager2.SCROLL_STATE_IDLE || pendingPagerMotionPosition < 0) return
             playSelectedPageMotion(pendingPagerMotionPosition, pendingPagerMotionForward)
             pendingPagerMotionPosition = -1
@@ -172,8 +188,9 @@ class MainActivity : AppCompatActivity() {
         binding.weekPager.visibility = View.INVISIBLE
         binding.weekPager.offscreenPageLimit = 1
         binding.weekPager.registerOnPageChangeCallback(pageChangeCallback)
+        binding.root.viewTreeObserver.addOnPreDrawListener(continuityPreDraw)
         binding.weekPager.setPageTransformer { page, position ->
-            // Keep the date row's frame steady while course cards add depth.
+            // Course changes are drawn on the stationary stage above these pages.
             page.findViewById<CourseTableView>(R.id.courseTableView)?.setPagerOffset(position)
         }
 
@@ -219,6 +236,14 @@ class MainActivity : AppCompatActivity() {
         binding.bottomNavigation.setOnItemReselectedListener { item ->
             binding.bottomNavigation.findViewById<View>(item.itemId)?.playNavigationMotion()
         }
+    }
+
+    private fun updateCourseContinuity() {
+        binding.courseContinuityOverlay.updatePages(
+            weekPagerAdapter.holderAt(binding.weekPager, continuityPosition),
+            weekPagerAdapter.holderAt(binding.weekPager, continuityPosition + 1),
+            continuityProgress
+        )
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -337,12 +362,7 @@ class MainActivity : AppCompatActivity() {
                     returnPreDraw = null
                     holder?.let {
                         returnTable = it.binding.courseTableView
-                        returnDayHeader = it.binding.weekDayHeader
-                        returnTable?.playReturnEntrance { alpha ->
-                            binding.dateHeader.alpha = alpha
-                            binding.weekInfo.alpha = alpha
-                            returnDayHeader?.alpha = alpha
-                        }
+                        returnTable?.playReturnEntrance()
                     }
                     true
                 }
@@ -358,8 +378,6 @@ class MainActivity : AppCompatActivity() {
         returnPreDraw = null
         returnTable?.cancelReturnEntrance()
         returnTable = null
-        returnDayHeader?.alpha = 1f
-        returnDayHeader = null
         binding.dateHeader.alpha = 1f
         binding.weekInfo.alpha = 1f
     }
@@ -367,6 +385,8 @@ class MainActivity : AppCompatActivity() {
     override fun onPause() {
         courseToolsPopup?.dismiss()
         cancelScheduleReturnEntrance()
+        continuityProgress = 0f
+        binding.courseContinuityOverlay.clear()
         super.onPause()
     }
 
@@ -464,7 +484,7 @@ class MainActivity : AppCompatActivity() {
             return
         }
         if (binding.weekPager.adapter?.itemCount == semester.totalWeeks) {
-            binding.weekPager.setCurrentItem(targetWeek - 1, smoothScroll)
+            binding.weekPager.setCurrentItem(targetWeek - 1, smoothScroll && ValueAnimator.areAnimatorsEnabled())
         } else {
             currentWeek = targetWeek
             viewModel.setCurrentWeek(targetWeek)
@@ -802,11 +822,15 @@ class MainActivity : AppCompatActivity() {
             showInactiveCourses = prefs.showInactiveCourses,
             sectionHeightDp = prefs.sectionHeightDp,
             sectionTimes = prefs.sectionTimes,
-            sectionEndTimes = prefs.sectionEndTimes
+            sectionEndTimes = prefs.sectionEndTimes,
+            weekMotionStyle = prefs.weekMotionStyle
         )
+        binding.courseContinuityOverlay.motionStyle = prefs.weekMotionStyle
     }
 
     override fun onDestroy() {
+        binding.root.viewTreeObserver.removeOnPreDrawListener(continuityPreDraw)
+        binding.courseContinuityOverlay.clear()
         binding.weekPager.unregisterOnPageChangeCallback(pageChangeCallback)
         super.onDestroy()
     }

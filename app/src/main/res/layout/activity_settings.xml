@@ -40,7 +40,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 app:cardBackgroundColor="@color/primary_container"
-                app:rippleColor="@color/control_focus_overlay" android:stateListAnimator="@animator/press_feedback">
+                app:rippleColor="@color/surface" android:stateListAnimator="@animator/press_feedback">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -199,6 +199,29 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
+
+                    <LinearLayout
+                        android:id="@+id/rowWeekMotion"
+                        style="@style/CourseScheduleSettingsRow"
+                        android:layout_height="80dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:foreground="@drawable/control_focus">
+
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:orientation="vertical">
+                            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                                android:text="@string/week_motion_title" android:textColor="@color/text_primary"
+                                android:textSize="15sp" />
+                            <TextView android:id="@+id/tvWeekMotionSummary" android:layout_width="match_parent"
+                                android:layout_height="wrap_content" android:layout_marginTop="4dp"
+                                android:textColor="@color/text_secondary" android:textSize="12sp" />
+                        </LinearLayout>
+                        <ImageView android:layout_width="24dp" android:layout_height="24dp"
+                            android:layout_marginStart="12dp" android:contentDescription="@null"
+                            android:src="@drawable/ic_chevron_right_gray" />
+                    </LinearLayout>
+                    <View style="@style/CourseScheduleSettingsDivider" />
 
                     <LinearLayout
                         android:id="@+id/rowShowWeekend"

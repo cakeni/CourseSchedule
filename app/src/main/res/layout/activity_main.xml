@@ -157,6 +157,16 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/weekProgress" />
 
+    <com.courseschedule.ui.CourseContinuityOverlay
+        android:id="@+id/courseContinuityOverlay"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:importantForAccessibility="no"
+        app:layout_constraintTop_toTopOf="@id/weekPager"
+        app:layout_constraintBottom_toBottomOf="@id/weekPager"
+        app:layout_constraintStart_toStartOf="@id/weekPager"
+        app:layout_constraintEnd_toEndOf="@id/weekPager" />
+
     <View
         android:id="@+id/weekProgressThumb"
         android:layout_width="12dp"

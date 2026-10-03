@@ -26,7 +26,8 @@ data class SettingsSnapshot(
     val reminderEnabled: Boolean = true,
     val defaultReminderMinutes: Int = 15,
     val sectionTimes: List<String> = emptyList(),
-    val sectionEndTimes: List<String> = emptyList()
+    val sectionEndTimes: List<String> = emptyList(),
+    val weekMotionStyle: String = "soft_slide"
 )
 
 data class ScheduleBackup(

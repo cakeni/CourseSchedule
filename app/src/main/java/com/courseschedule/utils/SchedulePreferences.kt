@@ -2,6 +2,7 @@ package com.courseschedule.utils
 
 import android.content.Context
 import com.courseschedule.data.backup.SettingsSnapshot
+import com.courseschedule.domain.WeekMotionStyle
 import java.util.Locale
 
 class SchedulePreferences(context: Context) {
@@ -33,6 +34,10 @@ class SchedulePreferences(context: Context) {
     var sectionHeightDp: Int
         get() = prefs.getInt(KEY_SECTION_HEIGHT, 64)
         set(value) = prefs.edit().putInt(KEY_SECTION_HEIGHT, value).apply()
+
+    var weekMotionStyle: WeekMotionStyle
+        get() = WeekMotionStyle.fromStoredValue(prefs.getString(KEY_WEEK_MOTION, null))
+        set(value) = prefs.edit().putString(KEY_WEEK_MOTION, value.storedValue).apply()
 
     var reminderEnabled: Boolean
         get() = prefs.getBoolean(KEY_REMINDER_ENABLED, true)
@@ -84,7 +89,8 @@ class SchedulePreferences(context: Context) {
         reminderEnabled = reminderEnabled,
         defaultReminderMinutes = defaultReminderMinutes,
         sectionTimes = sectionTimes,
-        sectionEndTimes = sectionEndTimes
+        sectionEndTimes = sectionEndTimes,
+        weekMotionStyle = weekMotionStyle.storedValue
     )
 
     fun applySnapshot(snapshot: SettingsSnapshot) {
@@ -100,6 +106,7 @@ class SchedulePreferences(context: Context) {
             .putInt(KEY_DEFAULT_REMINDER, snapshot.defaultReminderMinutes)
             .putString(KEY_SECTION_TIMES, times.joinToString(","))
             .putString(KEY_SECTION_END_TIMES, endTimes.joinToString(","))
+            .putString(KEY_WEEK_MOTION, WeekMotionStyle.fromStoredValue(snapshot.weekMotionStyle).storedValue)
             .apply()
     }
 
@@ -110,6 +117,7 @@ class SchedulePreferences(context: Context) {
         private const val KEY_SHOW_TIME = "show_time"
         private const val KEY_SHOW_INACTIVE_COURSES = "show_inactive_courses"
         private const val KEY_SECTION_HEIGHT = "section_height_dp"
+        private const val KEY_WEEK_MOTION = "week_motion_style"
         private const val KEY_COMPACT_DENSITY_MIGRATED = "compact_density_migrated_v2"
         private const val KEY_REMINDER_ENABLED = "reminder_enabled"
         private const val KEY_DEFAULT_REMINDER = "default_reminder_minutes"
