@@ -6,16 +6,16 @@
     android:layout_height="wrap_content"
     android:minHeight="88dp"
     android:background="@drawable/bg_course_tools_popup"
-    android:foreground="?attr/selectableItemBackground"
+    android:foreground="@drawable/control_focus"
     android:clickable="true"
     android:focusable="true"
     android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:padding="16dp">
+    android:padding="16dp" android:stateListAnimator="@animator/press_feedback_row">
 
     <FrameLayout
         android:layout_width="44dp" android:layout_height="44dp"
-        android:background="@drawable/bg_icon_tile">
+        >
         <ImageView
             android:layout_width="24dp" android:layout_height="24dp"
             android:layout_gravity="center" android:contentDescription="@null"

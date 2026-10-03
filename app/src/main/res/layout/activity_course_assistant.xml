@@ -13,7 +13,7 @@
             app:titleTextAppearance="@style/Assistant.ToolbarTitle" app:subtitleTextAppearance="@style/Assistant.ToolbarSubtitle"
             app:titleCentered="true" app:subtitleCentered="true" />
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnLatestMessages" style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:id="@+id/btnLatestMessages" style="@style/CourseSchedule.TextButton"
             android:layout_width="match_parent" android:layout_height="40dp" android:minHeight="40dp" android:visibility="gone"
             android:text="@string/assistant_latest_messages" android:textColor="@color/assistant_accent" />
         <androidx.core.widget.NestedScrollView
@@ -36,7 +36,7 @@
                         <com.google.android.material.card.MaterialCardView android:id="@+id/btnExampleSimple"
                             android:layout_width="0dp" android:layout_height="52dp" android:layout_weight="1"
                             android:clickable="true" android:focusable="true" android:contentDescription="@string/assistant_quick_add"
-                            app:cardBackgroundColor="@color/assistant_prompt_add" app:cardCornerRadius="14dp" app:cardElevation="0dp">
+                            app:cardBackgroundColor="@color/assistant_prompt_add" app:cardCornerRadius="14dp" app:cardElevation="0dp" android:stateListAnimator="@animator/press_feedback" app:rippleColor="@color/control_focus_overlay">
                             <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:padding="12dp" android:orientation="horizontal" android:gravity="center_vertical">
                                 <ImageView android:layout_width="18dp" android:layout_height="18dp" android:src="@drawable/ic_add" android:contentDescription="@null" app:tint="@color/assistant_accent" />
                                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="10dp"
@@ -46,7 +46,7 @@
                         <com.google.android.material.card.MaterialCardView android:id="@+id/btnExampleQuery"
                             android:layout_width="0dp" android:layout_height="52dp" android:layout_weight="1" android:layout_marginStart="10dp"
                             android:clickable="true" android:focusable="true" android:contentDescription="@string/assistant_quick_query"
-                            app:cardBackgroundColor="@color/assistant_prompt_query" app:cardCornerRadius="14dp" app:cardElevation="0dp">
+                            app:cardBackgroundColor="@color/assistant_prompt_query" app:cardCornerRadius="14dp" app:cardElevation="0dp" android:stateListAnimator="@animator/press_feedback" app:rippleColor="@color/control_focus_overlay">
                             <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:padding="12dp" android:orientation="horizontal" android:gravity="center_vertical">
                                 <ImageView android:layout_width="18dp" android:layout_height="18dp" android:src="@drawable/ic_search" android:contentDescription="@null" app:tint="@color/assistant_accent" />
                                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="10dp"
@@ -58,7 +58,7 @@
                         <com.google.android.material.card.MaterialCardView android:id="@+id/btnExampleDetails"
                             android:layout_width="0dp" android:layout_height="52dp" android:layout_weight="1"
                             android:clickable="true" android:focusable="true" android:contentDescription="@string/assistant_quick_change"
-                            app:cardBackgroundColor="@color/assistant_prompt_change" app:cardCornerRadius="14dp" app:cardElevation="0dp">
+                            app:cardBackgroundColor="@color/assistant_prompt_change" app:cardCornerRadius="14dp" app:cardElevation="0dp" android:stateListAnimator="@animator/press_feedback" app:rippleColor="@color/control_focus_overlay">
                             <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:padding="12dp" android:orientation="horizontal" android:gravity="center_vertical">
                                 <ImageView android:layout_width="18dp" android:layout_height="18dp" android:src="@drawable/ic_assistant_edit" android:contentDescription="@null" app:tint="@color/assistant_accent" />
                                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="10dp"
@@ -68,7 +68,7 @@
                         <com.google.android.material.card.MaterialCardView android:id="@+id/btnExampleDelete"
                             android:layout_width="0dp" android:layout_height="52dp" android:layout_weight="1" android:layout_marginStart="10dp"
                             android:clickable="true" android:focusable="true" android:contentDescription="@string/assistant_quick_delete"
-                            app:cardBackgroundColor="@color/assistant_prompt_delete" app:cardCornerRadius="14dp" app:cardElevation="0dp">
+                            app:cardBackgroundColor="@color/assistant_prompt_delete" app:cardCornerRadius="14dp" app:cardElevation="0dp" android:stateListAnimator="@animator/press_feedback" app:rippleColor="@color/control_focus_overlay">
                             <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:padding="12dp" android:orientation="horizontal" android:gravity="center_vertical">
                                 <ImageView android:layout_width="18dp" android:layout_height="18dp" android:src="@drawable/ic_assistant_delete" android:contentDescription="@null" app:tint="@color/assistant_accent" />
                                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="10dp"
@@ -77,18 +77,18 @@
                         </com.google.android.material.card.MaterialCardView>
                     </LinearLayout>
                     <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnConnectService" style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:id="@+id/btnConnectService" style="@style/CourseSchedule.TextButton"
                         android:layout_width="wrap_content" android:layout_height="48dp" android:layout_marginTop="8dp"
                         android:text="@string/assistant_connect_service" android:textColor="@color/assistant_accent" />
                 </LinearLayout>
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnOlderMessages" style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:id="@+id/btnOlderMessages" style="@style/CourseSchedule.TextButton"
                     android:layout_width="match_parent" android:layout_height="48dp" android:visibility="gone"
                     android:text="@string/assistant_older_messages" android:textColor="@color/assistant_accent" />
                 <LinearLayout android:id="@+id/messagesContainer" android:layout_width="match_parent"
                     android:layout_height="wrap_content" android:orientation="vertical" />
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnUndoLastAction" style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:id="@+id/btnUndoLastAction" style="@style/CourseSchedule.TextButton"
                     android:layout_width="wrap_content" android:layout_height="48dp" android:visibility="gone"
                     android:text="@string/assistant_undo_action" android:contentDescription="@string/assistant_undo"
                     android:textColor="@color/assistant_accent" />
@@ -107,14 +107,14 @@
                     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                         android:layout_marginTop="12dp" android:gravity="end" android:orientation="horizontal">
                         <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btnCancelTargetChoice" style="@style/Widget.MaterialComponents.Button.TextButton"
+                            android:id="@+id/btnCancelTargetChoice" style="@style/CourseSchedule.TextButton"
                             android:layout_width="0dp" android:layout_weight="1" android:layout_height="48dp"
                             android:text="@string/cancel" android:textSize="14sp" app:cornerRadius="14dp"
                             android:insetTop="0dp" android:insetBottom="0dp" app:strokeWidth="1dp" app:strokeColor="@color/assistant_divider" />
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btnChooseTarget" android:layout_width="0dp" android:layout_weight="1" android:layout_height="48dp"
                             android:layout_marginStart="10dp" android:text="@string/assistant_choose_target" android:textSize="14sp"
-                            android:insetTop="0dp" android:insetBottom="0dp" android:stateListAnimator="@null" android:elevation="0dp" app:cornerRadius="14dp" />
+                            android:insetTop="0dp" android:insetBottom="0dp" android:stateListAnimator="@animator/press_feedback" android:elevation="0dp" app:cornerRadius="14dp" />
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -125,10 +125,10 @@
                 app:cardElevation="0dp" app:strokeWidth="0dp">
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                     android:orientation="vertical" android:padding="16dp">
-                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                    <TextView android:id="@+id/tvPendingTitle" android:layout_width="match_parent" android:layout_height="wrap_content"
                         android:text="@string/assistant_pending_title" android:textColor="@color/assistant_text"
                         android:textSize="16sp" android:fontFamily="sans-serif-medium" />
-                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                    <TextView android:id="@+id/tvPendingHint" android:layout_width="match_parent" android:layout_height="wrap_content"
                         android:layout_marginTop="6dp" android:text="@string/assistant_pending_hint"
                         android:textColor="@color/assistant_text_secondary" android:textSize="12sp" />
                     <TextView android:id="@+id/tvPendingSummary"
@@ -138,7 +138,7 @@
                     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                         android:layout_marginTop="18dp" android:gravity="end" android:orientation="horizontal">
                         <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btnCancelPending" style="@style/Widget.MaterialComponents.Button.TextButton"
+                            android:id="@+id/btnCancelPending" style="@style/CourseSchedule.TextButton"
                             android:layout_width="0dp" android:layout_weight="1" android:layout_height="48dp"
                             android:text="@string/cancel" android:textSize="14sp" android:textColor="@color/assistant_accent"
                             android:insetTop="0dp" android:insetBottom="0dp" app:cornerRadius="14dp"
@@ -147,7 +147,7 @@
                             android:id="@+id/btnConfirmPending"
                             android:layout_width="0dp" android:layout_weight="1" android:layout_height="48dp" android:layout_marginStart="10dp"
                             android:text="@string/assistant_confirm_changes" android:textSize="14sp" app:cornerRadius="14dp"
-                            android:insetTop="0dp" android:insetBottom="0dp" android:stateListAnimator="@null" android:elevation="0dp" />
+                            android:insetTop="0dp" android:insetBottom="0dp" android:stateListAnimator="@animator/press_feedback" android:elevation="0dp" />
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -155,7 +155,7 @@
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnRetryRequest" style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:id="@+id/btnRetryRequest" style="@style/CourseSchedule.TextButton"
             android:layout_width="match_parent" android:layout_height="48dp" android:visibility="gone"
             android:text="@string/assistant_retry_request" android:textColor="@color/assistant_accent" />
         <com.google.android.material.card.MaterialCardView
@@ -165,6 +165,17 @@
             app:strokeWidth="0dp">
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:orientation="vertical" android:padding="8dp">
+                <LinearLayout android:id="@+id/imagePreview" android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal" android:gravity="center_vertical" android:paddingHorizontal="8dp" android:visibility="gone">
+                    <ImageView android:id="@+id/ivSelectedImage" android:layout_width="56dp" android:layout_height="56dp"
+                        android:scaleType="centerCrop" android:contentDescription="@string/assistant_image_view" android:clickable="true" android:focusable="true" />
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginStart="12dp" android:orientation="vertical">
+                        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/assistant_image_selected" android:textColor="@color/assistant_text" android:textSize="13sp" />
+                        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="@string/assistant_image_hint" android:textColor="@color/assistant_text_secondary" android:textSize="11sp" />
+                    </LinearLayout>
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btnRemoveImage" style="@style/CourseSchedule.TextButton"
+                        android:layout_width="48dp" android:layout_height="48dp" android:minWidth="0dp" android:padding="0dp" android:text="×" android:textSize="24sp" android:contentDescription="@string/assistant_image_remove" />
+                </LinearLayout>
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/inputMessage" android:layout_width="match_parent" android:layout_height="wrap_content"
                     app:boxBackgroundMode="none" app:hintEnabled="false">
@@ -179,11 +190,15 @@
                 <LinearLayout android:layout_width="match_parent" android:layout_height="48dp"
                     android:orientation="horizontal" android:gravity="center_vertical">
                     <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnQuickPrompts" style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:id="@+id/btnQuickPrompts" style="@style/CourseSchedule.TextButton"
                         android:layout_width="wrap_content" android:layout_height="48dp" android:minWidth="0dp"
                         android:text="@string/assistant_quick_prompts" android:textSize="12sp" android:textColor="@color/assistant_accent"
                         app:backgroundTint="@android:color/transparent" app:cornerRadius="18dp"
                         app:icon="@drawable/ic_add" app:iconTint="@color/assistant_accent" app:iconSize="18dp" />
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btnAttachImage" style="@style/CourseSchedule.TextButton"
+                        android:layout_width="48dp" android:layout_height="48dp" android:minWidth="0dp" android:padding="0dp"
+                        android:contentDescription="@string/assistant_attach_image" app:icon="@drawable/ic_assistant_image"
+                        app:iconTint="@color/assistant_accent" app:iconPadding="0dp" app:iconSize="20dp" app:iconGravity="textStart" />
                     <LinearLayout android:id="@+id/progress" android:layout_width="0dp" android:layout_height="48dp"
                         android:layout_weight="1" android:orientation="horizontal" android:gravity="center_vertical" android:visibility="gone">
                         <com.google.android.material.progressindicator.CircularProgressIndicator
@@ -199,7 +214,7 @@
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnSend" android:layout_width="48dp" android:layout_height="48dp"
                         android:minWidth="0dp" android:padding="0dp" android:insetTop="0dp" android:insetBottom="0dp"
-                        android:stateListAnimator="@null" android:elevation="0dp"
+                        android:stateListAnimator="@animator/press_feedback" android:elevation="0dp"
                         android:contentDescription="@string/assistant_send" app:cornerRadius="24dp" app:iconTint="@color/assistant_on_accent"
                         app:icon="@drawable/ic_assistant_send" app:iconSize="24dp" app:iconPadding="0dp"
                         app:iconGravity="textStart" />

@@ -9,7 +9,8 @@ import java.time.LocalDate
 internal data class AssistantPendingOperation(val semester: Semester, val reply: AssistantCourseReply)
 internal data class AssistantUndoBatch(val semester: Semester, val before: List<Course>, val after: List<Course>,
     val conflictBaseline: List<Course>? = null)
-internal data class AssistantRetryRequest(val text: String, val displayedWeek: Int, val requestDate: String? = null)
+internal data class AssistantRetryRequest(val text: String, val displayedWeek: Int, val requestDate: String? = null,
+    val imageRef: String? = null)
 internal data class AssistantTargetChoice(val semester: Semester, val request: AssistantRetryRequest,
     val candidates: List<Course>)
 internal data class AssistantConversationState(
@@ -39,7 +40,11 @@ internal object AssistantConversationCodec {
         }
         state.pending?.let {
             val reply = it.reply
-            require(reply.reply.isNotBlank() && reply.requiresConfirmation && !reply.undo && reply.queriedCourses.isEmpty() && reply.query == null && !reply.queryRequested)
+            require(reply.reply.isNotBlank() && reply.requiresConfirmation && !reply.undo && reply.queriedCourses.isEmpty() && reply.query == null && !reply.queryRequested && reply.studyQuery == null)
+            reply.studyChanges?.let { changes ->
+                require(reply.courses.isEmpty() && reply.updates.isEmpty() && reply.deletions.isEmpty())
+                AssistantStudyProtocol.validateChanges(changes, semesterId)
+            }
             validate(it.semester, reply.courses + reply.deletions + reply.updates.flatMap { row ->
                 require(row.replacements.isNotEmpty())
                 listOf(row.original) + row.replacements
@@ -53,6 +58,7 @@ internal object AssistantConversationCodec {
         fun validateRequest(request: AssistantRetryRequest) {
             require(request.text.isNotBlank() && request.text.length <= 2000 && request.displayedWeek in 1..52)
             request.requestDate?.let { LocalDate.parse(it) }
+            request.imageRef?.let { require(AssistantImageMessage.valid(it)) }
         }
         state.retryRequest?.let(::validateRequest)
         state.targetChoice?.let {

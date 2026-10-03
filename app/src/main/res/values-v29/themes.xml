@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.CourseSchedule" parent="Theme.CourseSchedule.Base">
+        <item name="android:windowLightNavigationBar">@bool/window_light_system_bars</item>
+        <item name="android:navigationBarDividerColor">@android:color/transparent</item>
+        <item name="android:enforceNavigationBarContrast">false</item>
+    </style>
+</resources>

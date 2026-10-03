@@ -53,8 +53,8 @@ class DatabaseStartupTest {
                 old.openHelper.writableDatabase.version = 2
             }
             Room.databaseBuilder(context, AppDatabase::class.java, name)
-                .addMigrations(AppDatabase.MIGRATION_2_3).build().use { upgraded ->
-                    assertEquals(3, upgraded.openHelper.readableDatabase.version)
+                .addMigrations(AppDatabase.MIGRATION_2_3, AppDatabase.MIGRATION_3_4).build().use { upgraded ->
+                    assertEquals(4, upgraded.openHelper.readableDatabase.version)
                     assertEquals(semester, upgraded.semesterDao().getCurrentSemesterSync())
                     assertEquals(listOf(first, if (withAssistant) second.copy(colorIndex = 8) else second, manual),
                         upgraded.courseDao().getCoursesBySemesterSync(42).sortedBy { it.id })
@@ -81,7 +81,7 @@ class DatabaseStartupTest {
                 old.version = 1
             }
             Room.databaseBuilder(context, AppDatabase::class.java, name)
-                .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3).build().use { upgraded ->
+                .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3, AppDatabase.MIGRATION_3_4).build().use { upgraded ->
                     assertEquals(Semester(id = 42, name = "原学期", startDate = 1000,
                         totalWeeks = 16, isCurrent = true, createTime = 100), upgraded.semesterDao().getCurrentSemesterSync())
                     assertEquals(Course(id = 17, courseName = "原课程", teacher = "原老师", classroom = "A101",

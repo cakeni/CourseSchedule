@@ -20,6 +20,8 @@ import android.view.inputmethod.EditorInfo
 import android.widget.Toast
 import android.widget.BaseAdapter
 import android.widget.TextView
+import android.widget.ImageView
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
@@ -61,6 +63,9 @@ class CourseAssistantActivity : AppCompatActivity() {
     private var historySearchGeneration = 0
     private var historySearching = false
     private var imeVisible = false
+    private val imagePicker = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        if (uri != null) viewModel.selectImage(uri)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -99,6 +104,9 @@ class CourseAssistantActivity : AppCompatActivity() {
         binding.btnConnectService.setOnClickListener { showConfig() }
         binding.btnSend.setOnClickListener { if (viewModel.canStop.value == true) viewModel.stopRequest() else send() }
         binding.btnQuickPrompts.setOnClickListener { showQuickPrompts() }
+        binding.btnAttachImage.setOnClickListener { imagePicker.launch("image/*") }
+        binding.btnRemoveImage.setOnClickListener { viewModel.removeImage() }
+        binding.historyPanel.btnDrawerStudyTasks.setOnClickListener { closeHistory(); startActivity(Intent(this, StudyTasksActivity::class.java)) }
         binding.btnUndoLastAction.setOnClickListener { viewModel.undo() }
         binding.btnExampleSimple.setOnClickListener { fillExample(R.string.assistant_example_simple) }
         binding.btnExampleDetails.setOnClickListener { fillExample(R.string.assistant_example_details) }
@@ -134,6 +142,12 @@ class CourseAssistantActivity : AppCompatActivity() {
                 binding.etMessage.setSelection(text.length)
                 restoringDraft = false
             }
+        }
+        viewModel.imageDraft.observe(this) { ref ->
+            binding.imagePreview.visibility = if (ref != null) View.VISIBLE else View.GONE
+            binding.ivSelectedImage.setImageBitmap(ref?.let { AssistantImages(this).thumbnail(it, 240) })
+            binding.ivSelectedImage.setOnClickListener { if (ref != null) showImage(ref) }
+            updateControls()
         }
         viewModel.conversationTitle.observe(this) {
             binding.toolbar.subtitle = if (it == getString(R.string.assistant_new_conversation)) null else it
@@ -185,6 +199,9 @@ class CourseAssistantActivity : AppCompatActivity() {
                 row.tvMessageBody.text = if (message.kind == "confirmation" && message == messages.lastOrNull() &&
                     viewModel.pendingChanges.value != null && viewModel.hasNewerMessages.value != true)
                     message.content.substringBefore("\n\n") else message.content
+                row.ivMessageImage.visibility = if (message.imageRef != null) View.VISIBLE else View.GONE
+                row.ivMessageImage.setImageBitmap(message.imageRef?.let { AssistantImages(this).thumbnail(it) })
+                row.ivMessageImage.setOnClickListener { message.imageRef?.let(::showImage) }
                 viewModel.historyLocation.value?.takeIf { it.messageId == message.id }?.let {
                     row.tvMessageBody.text = highlighted(row.tvMessageBody.text.toString(), it.keyword)
                     row.messageBubble.strokeWidth = (2 * resources.displayMetrics.density).toInt()
@@ -215,13 +232,16 @@ class CourseAssistantActivity : AppCompatActivity() {
         viewModel.pendingChanges.observe(this) { pending ->
             binding.pendingCard.visibility = if (pending == null) View.GONE else View.VISIBLE
             if (pending != null) {
+                val study = !pending.studyChanges.isNullOrEmpty()
+                binding.tvPendingTitle.setText(if (study) R.string.study_confirm_title else R.string.assistant_pending_title)
+                binding.tvPendingHint.setText(if (study) R.string.study_confirm_hint else R.string.assistant_pending_hint)
                 val summary = viewModel.pendingSummary(pending)
                 binding.tvPendingSummary.text = SpannableString(summary).apply {
                     Regex("(?m)^变化：.*$").findAll(summary).forEach {
                         setSpan(StyleSpan(Typeface.BOLD), it.range.first, it.range.last + 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
                     }
                 }
-                binding.btnConfirmPending.setText(if (pending.courses.isEmpty() && pending.updates.isEmpty())
+                binding.btnConfirmPending.setText(if (pending.courses.isEmpty() && pending.updates.isEmpty() && pending.studyChanges.isNullOrEmpty())
                     R.string.assistant_confirm_delete else R.string.assistant_confirm_changes)
                 binding.etMessage.clearFocus()
                 WindowInsetsControllerCompat(window, binding.root).hide(WindowInsetsCompat.Type.ime())
@@ -293,28 +313,33 @@ class CourseAssistantActivity : AppCompatActivity() {
         val canChat = !busy
         binding.progress.visibility = if (busy) View.VISIBLE else View.GONE
         val canStop = viewModel.canStop.value == true
-        binding.btnSend.isEnabled = canStop || (canChat && !binding.etMessage.text.isNullOrBlank())
+        binding.btnSend.isEnabled = canStop || (canChat && (!binding.etMessage.text.isNullOrBlank() || viewModel.imageDraft.value != null))
         binding.etMessage.isEnabled = canChat
         binding.btnSend.contentDescription = getString(if (canStop) R.string.assistant_stop_request else
             if (pending) R.string.assistant_revise_send else R.string.assistant_send)
         binding.btnSend.setIconResource(if (canStop) R.drawable.ic_assistant_stop else R.drawable.ic_assistant_send)
         binding.btnQuickPrompts.visibility = if (busy) View.GONE else View.VISIBLE
         binding.btnQuickPrompts.isEnabled = canChat && !pending && viewModel.targetChoice.value == null
+        binding.btnAttachImage.visibility = if (busy) View.GONE else View.VISIBLE
+        binding.btnAttachImage.isEnabled = canChat && !pending && viewModel.targetChoice.value == null
+        binding.btnRemoveImage.isEnabled = canChat
         binding.tvComposerMode.visibility = if (busy) View.GONE else View.VISIBLE
-        binding.tvComposerMode.text = if (pending) getString(R.string.assistant_revise_send) else ""
+        binding.tvComposerMode.text = if (pending && !binding.etMessage.text.isNullOrBlank()) "补充尚未发送" else if (pending) getString(R.string.assistant_revise_send) else ""
         binding.btnUndoLastAction.visibility = if (viewModel.canUndo.value == true && !pending &&
             viewModel.targetChoice.value == null && viewModel.historyLocation.value == null) View.VISIBLE else View.GONE
         binding.btnUndoLastAction.isEnabled = canChat
         binding.btnConnectService.isEnabled = canChat
-        binding.etMessage.setHint(if (pending) R.string.assistant_revision_hint else R.string.assistant_message_hint)
+        binding.etMessage.setHint(if (!viewModel.pendingChanges.value?.studyChanges.isNullOrEmpty()) R.string.study_revision_hint
+            else if (pending) R.string.assistant_revision_hint else R.string.assistant_message_hint)
         binding.btnExampleSimple.isEnabled = canChat && !pending
         binding.btnExampleDetails.isEnabled = canChat && !pending
         binding.btnExampleQuery.isEnabled = canChat && !pending
         binding.btnExampleDelete.isEnabled = canChat && !pending
         binding.historyPanel.btnConfigureApi.isEnabled = !busy
         binding.historyPanel.btnDrawerNewConversation.isEnabled = !busy
+        binding.historyPanel.btnDrawerStudyTasks.isEnabled = !busy
         binding.historyPanel.historyResults.isEnabled = !busy && !historySearching
-        binding.btnConfirmPending.isEnabled = !busy
+        binding.btnConfirmPending.isEnabled = !busy && binding.etMessage.text.isNullOrBlank() && viewModel.imageDraft.value == null
         binding.btnCancelPending.isEnabled = !busy
         binding.btnChooseTarget.isEnabled = !busy
         binding.btnCancelTargetChoice.isEnabled = !busy
@@ -356,7 +381,7 @@ class CourseAssistantActivity : AppCompatActivity() {
 
     private fun send() {
         val text = binding.etMessage.text?.toString().orEmpty().trim()
-        if (text.isBlank() || viewModel.busy.value == true) return
+        if ((text.isBlank() && viewModel.imageDraft.value == null) || viewModel.busy.value == true) return
         if (viewModel.configured.value != true) { showConfig(); return }
         try {
             binding.inputMessage.error = null
@@ -364,6 +389,16 @@ class CourseAssistantActivity : AppCompatActivity() {
         } catch (error: IllegalArgumentException) {
             binding.inputMessage.error = error.message
         }
+    }
+
+    private fun showImage(ref: String) {
+        val bitmap = AssistantImages(this).thumbnail(ref, 1600)
+        if (bitmap == null) { Toast.makeText(this, "图片已丢失，请重新选择。", Toast.LENGTH_LONG).show(); return }
+        val image = ImageView(this).apply {
+            setImageBitmap(bitmap); adjustViewBounds = true; scaleType = ImageView.ScaleType.FIT_CENTER
+            layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (resources.displayMetrics.heightPixels * 0.65f).toInt())
+        }
+        MaterialAlertDialogBuilder(this).setView(image).setPositiveButton(R.string.ok, null).show()
     }
 
     private fun showConfig() {

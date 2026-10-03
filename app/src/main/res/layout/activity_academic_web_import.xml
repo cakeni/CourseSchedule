@@ -135,7 +135,7 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnOpenWebAddress"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
+            style="@style/CourseSchedule.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="48dp"
             android:layout_marginStart="8dp"
@@ -205,7 +205,7 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnOpenSchool"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
+            style="@style/CourseSchedule.TextButton"
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:text="@string/academic_open_school"

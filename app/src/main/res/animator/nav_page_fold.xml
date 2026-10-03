@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<set xmlns:android="http://schemas.android.com/apk/res/android" android:ordering="sequentially">
+    <objectAnimator android:propertyName="scaleY" android:valueFrom="1" android:valueTo="0.14" android:valueType="floatType" android:duration="220" android:startOffset="0" android:interpolator="@interpolator/motion_fold_in" />
+    <objectAnimator android:propertyName="scaleY" android:valueFrom="0.14" android:valueTo="1" android:valueType="floatType" android:duration="460" android:startOffset="0" android:interpolator="@interpolator/motion_settle" />
+</set>

@@ -78,7 +78,10 @@ class AssistantProcessRestartTest {
                 assertFalse(model!!.canRetry.value == true)
                 assertEquals(fixture.original, database.courseDao().getCourseById(fixture.original.id))
                 screenshot("assistant-restored-pending")
-                withContext(Dispatchers.Main) { model!!.confirmPending(); model!!.confirmPending() }
+                withContext(Dispatchers.Main) {
+                    model!!.updateDraft("")
+                    model!!.confirmPending(); model!!.confirmPending()
+                }
                 awaitIdle(model!!)
                 assertEquals(fixture.original.copy(classroom = "B201"), database.courseDao().getCourseById(fixture.original.id))
                 assertNull(model!!.pendingChanges.value)

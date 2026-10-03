@@ -39,20 +39,20 @@ class AiCourseColorMigrationTest {
             database.openHelper.writableDatabase.version = 1
             database.close()
             database = Room.databaseBuilder(context, AppDatabase::class.java, name)
-                .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3).build()
+                .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3, AppDatabase.MIGRATION_3_4).build()
             val expected = before.map {
                 if (AiCourseColors.isAiCourse(it)) it.copy(colorIndex = if (it.semesterId == 1L) 0 else 12) else it
             }
             assertEquals(expected, database.courseDao().getAllCoursesSync().sortedBy { it.id })
             val migratedSemesterDao = database.semesterDao()
             semesters.forEach { assertEquals(it, migratedSemesterDao.getSemesterById(it.id)) }
-            assertEquals(3, database.openHelper.writableDatabase.version)
+            assertEquals(4, database.openHelper.writableDatabase.version)
 
             val edited = expected[1].copy(colorIndex = 10)
             database.courseDao().updateCourse(edited)
             database.close()
             database = Room.databaseBuilder(context, AppDatabase::class.java, name)
-                .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3).build()
+                .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3, AppDatabase.MIGRATION_3_4).build()
             assertEquals(edited, database.courseDao().getCourseById(edited.id))
         } finally {
             database?.close()

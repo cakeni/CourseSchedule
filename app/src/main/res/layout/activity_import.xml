@@ -65,7 +65,7 @@
                 app:cardBackgroundColor="@color/primary_container"
                 app:cardCornerRadius="22dp"
                 app:cardElevation="0dp"
-                app:rippleColor="@color/today_highlight">
+                app:rippleColor="@color/control_focus_overlay" android:stateListAnimator="@animator/press_feedback">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -142,9 +142,9 @@
                 app:cardBackgroundColor="@color/surface"
                 app:cardCornerRadius="18dp"
                 app:cardElevation="0dp"
-                app:rippleColor="@color/primary_container"
+                app:rippleColor="@color/control_focus_overlay"
                 app:strokeColor="@color/divider"
-                app:strokeWidth="1dp">
+                app:strokeWidth="1dp" android:stateListAnimator="@animator/press_feedback">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -156,7 +156,7 @@
                     <FrameLayout
                         android:layout_width="52dp"
                         android:layout_height="52dp"
-                        android:background="@drawable/bg_icon_tile">
+                        android:background="@android:color/transparent">
 
                         <ImageView
                             android:layout_width="28dp"
@@ -210,9 +210,9 @@
                 app:cardBackgroundColor="@color/surface"
                 app:cardCornerRadius="18dp"
                 app:cardElevation="0dp"
-                app:rippleColor="@color/primary_container"
+                app:rippleColor="@color/control_focus_overlay"
                 app:strokeColor="@color/divider"
-                app:strokeWidth="1dp">
+                app:strokeWidth="1dp" android:stateListAnimator="@animator/press_feedback">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -224,7 +224,7 @@
                     <FrameLayout
                         android:layout_width="52dp"
                         android:layout_height="52dp"
-                        android:background="@drawable/bg_icon_tile">
+                        android:background="@android:color/transparent">
 
                         <ImageView
                             android:layout_width="28dp"
@@ -278,9 +278,9 @@
                 app:cardBackgroundColor="@color/surface"
                 app:cardCornerRadius="18dp"
                 app:cardElevation="0dp"
-                app:rippleColor="@color/primary_container"
+                app:rippleColor="@color/control_focus_overlay"
                 app:strokeColor="@color/divider"
-                app:strokeWidth="1dp">
+                app:strokeWidth="1dp" android:stateListAnimator="@animator/press_feedback">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -292,7 +292,7 @@
                     <FrameLayout
                         android:layout_width="52dp"
                         android:layout_height="52dp"
-                        android:background="@drawable/bg_icon_tile">
+                        android:background="@android:color/transparent">
 
                         <ImageView
                             android:layout_width="28dp"
@@ -380,13 +380,16 @@
         app:itemActiveIndicatorStyle="@style/CourseScheduleBottomNavigationActiveIndicator"
         app:itemIconSize="22dp"
         app:itemIconTint="@color/nav_item_color"
-        app:itemRippleColor="@color/primary_container"
+        app:itemRippleColor="@color/control_focus_overlay"
         app:itemTextColor="@color/nav_item_color"
         app:labelVisibilityMode="labeled"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:menu="@menu/menu_bottom_navigation" />
+        app:menu="@menu/menu_bottom_navigation"
+        app:itemTextAppearanceActive="@style/CourseSchedule.NavigationLabel" app:itemTextAppearanceInactive="@style/CourseSchedule.NavigationLabel"
+        app:itemPaddingTop="12dp" app:itemPaddingBottom="12dp"
+        app:itemHorizontalTranslationEnabled="false" />
 
     <com.google.android.material.progressindicator.CircularProgressIndicator
         android:id="@+id/progressImport"

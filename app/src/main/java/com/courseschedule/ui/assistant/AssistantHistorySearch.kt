@@ -12,6 +12,10 @@ internal object AssistantHistorySearch {
         require(row.role == "assistant")
         AssistantQueryMessage.decode(row.content, row.createdAt)
     }.getOrElse { AssistantMessage("assistant", "这条查询记录无法读取，请重新查询。", "error", row.createdAt) }
+        else if (row.kind == "image") runCatching {
+            require(row.role == "user")
+            AssistantImageMessage.decode(row.content, row.createdAt)
+        }.getOrElse { AssistantMessage("user", "图片消息无法读取，请重新选择图片。", "error", row.createdAt) }
         else AssistantMessage(row.role, row.content, row.kind, row.createdAt)).copy(id = row.id)
 
     fun snippet(text: String, keyword: String): String {

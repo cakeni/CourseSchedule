@@ -35,7 +35,8 @@
         <activity
             android:name=".ui.addcourse.AddCourseActivity"
             android:label="@string/add_course"
-            android:theme="@style/Theme.CourseSchedule" />
+            android:windowSoftInputMode="stateHidden|adjustResize"
+            android:theme="@style/Theme.CourseSchedule.CourseEditor" />
 
         <!-- 导入课程 -->
         <activity
@@ -68,6 +69,12 @@
             android:name=".ui.settings.SettingsActivity"
             android:label="@string/settings"
             android:theme="@style/Theme.CourseSchedule" />
+
+        <activity android:name=".ui.assistant.StudyTaskEditorActivity" android:exported="false"
+            android:windowSoftInputMode="adjustResize" android:theme="@style/Theme.CourseSchedule.Study" />
+        <activity android:name=".ui.assistant.StudyTasksActivity" android:exported="false"
+            android:label="@string/study_title" android:windowSoftInputMode="adjustResize"
+            android:theme="@style/Theme.CourseSchedule.Study" />
 
         <!-- 提醒广播接收器 -->
         <receiver

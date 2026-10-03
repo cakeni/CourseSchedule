@@ -13,6 +13,8 @@ import com.courseschedule.data.entity.AssistantConversation
 import com.courseschedule.data.entity.AssistantChatMessage
 import com.courseschedule.data.entity.Course
 import com.courseschedule.data.entity.Semester
+import com.courseschedule.data.entity.StudyTask
+import com.courseschedule.data.dao.StudyTaskDao
 import com.courseschedule.domain.AiCourseColors
 import java.util.Calendar
 
@@ -20,8 +22,8 @@ import java.util.Calendar
  * 应用数据库
  */
 @Database(
-    entities = [Course::class, Semester::class, AssistantConversation::class, AssistantChatMessage::class],
-    version = 3,
+    entities = [Course::class, Semester::class, AssistantConversation::class, AssistantChatMessage::class, StudyTask::class],
+    version = 4,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -29,8 +31,24 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun courseDao(): CourseDao
     abstract fun semesterDao(): SemesterDao
     abstract fun assistantConversationDao(): AssistantConversationDao
+    abstract fun studyTaskDao(): StudyTaskDao
 
     companion object {
+        internal val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("CREATE TABLE IF NOT EXISTS study_tasks (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, semesterId INTEGER NOT NULL, courseId INTEGER, courseName TEXT NOT NULL, title TEXT NOT NULL, kind TEXT NOT NULL, dueAt INTEGER NOT NULL, reminderMinutes INTEGER NOT NULL, note TEXT NOT NULL, completedAt INTEGER, createdAt INTEGER NOT NULL, updatedAt INTEGER NOT NULL, FOREIGN KEY(semesterId) REFERENCES semesters(id) ON UPDATE NO ACTION ON DELETE CASCADE)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_study_tasks_semesterId ON study_tasks(semesterId)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_study_tasks_dueAt ON study_tasks(dueAt)")
+                createStudyCourseTriggers(db)
+            }
+        }
+
+        private fun createStudyCourseTriggers(db: SupportSQLiteDatabase) {
+            // Course inserts also cover the existing DAO's INSERT OR REPLACE edit path.
+            for ((name, event) in listOf("insert" to "INSERT", "update" to "UPDATE OF courseName")) {
+                db.execSQL("CREATE TRIGGER IF NOT EXISTS study_course_name_$name AFTER $event ON courses BEGIN UPDATE study_tasks SET courseName = NEW.courseName WHERE courseId = NEW.id AND semesterId = NEW.semesterId; END")
+            }
+        }
         internal val MIGRATION_1_2 = object : Migration(1, 2) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 // Keep the earliest AI block's color for each course in its own semester.
@@ -73,7 +91,7 @@ abstract class AppDatabase : RoomDatabase() {
                     "course_schedule_database"
                 )
                     .addCallback(DatabaseCallback())
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
                     .build()
                 INSTANCE = instance
                 instance
@@ -87,6 +105,7 @@ abstract class AppDatabase : RoomDatabase() {
     internal class DatabaseCallback : Callback() {
         override fun onOpen(db: SupportSQLiteDatabase) {
             super.onOpen(db)
+            createStudyCourseTriggers(db)
             db.beginTransaction()
             try {
                 val hasCurrent = db.query("SELECT 1 FROM semesters WHERE isCurrent = 1 LIMIT 1")

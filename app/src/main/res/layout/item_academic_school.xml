@@ -11,9 +11,9 @@
     app:cardBackgroundColor="@color/surface"
     app:cardCornerRadius="17dp"
     app:cardElevation="0dp"
-    app:rippleColor="@color/primary_container"
+    app:rippleColor="@color/control_focus_overlay"
     app:strokeColor="@color/divider"
-    app:strokeWidth="1dp">
+    app:strokeWidth="1dp" android:stateListAnimator="@animator/press_feedback">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"

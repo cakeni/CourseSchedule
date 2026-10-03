@@ -99,6 +99,7 @@ class CourseAssistantManagementTest {
                 onView(withId(R.id.etCourseName)).check(matches(withText(physics.courseName)))
                 androidx.test.espresso.Espresso.pressBack()
                 awaitIdle(model)
+                onView(withId(R.id.etMessage)).check(matches(isDisplayed()))
                 scenario.recreate()
                 awaitIdle(model)
                 assertEquals(3, model.messages.value!!.last().courseIds.size)

@@ -29,6 +29,7 @@ import androidx.core.view.doOnPreDraw
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
+import com.courseschedule.ui.assistant.StudyTasksActivity
 import com.courseschedule.R
 import com.courseschedule.data.entity.Course
 import com.courseschedule.data.entity.Semester
@@ -52,7 +53,6 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
-import kotlin.math.abs
 import kotlin.math.roundToInt
 
 internal fun weekAtProgressPosition(x: Float, width: Int, totalWeeks: Int): Int {
@@ -173,13 +173,7 @@ class MainActivity : AppCompatActivity() {
         binding.weekPager.offscreenPageLimit = 1
         binding.weekPager.registerOnPageChangeCallback(pageChangeCallback)
         binding.weekPager.setPageTransformer { page, position ->
-            val distance = abs(position).coerceIn(0f, 1f)
-            val scale = 1f - (distance * 0.02f)
-            page.alpha = 1f - (distance * 0.16f)
-            page.scaleX = scale
-            page.scaleY = scale
-            page.translationX = -position * dp(14f) * (1f - distance)
-            page.rotationY = 0f
+            // Keep the date row's frame steady while course cards add depth.
             page.findViewById<CourseTableView>(R.id.courseTableView)?.setPagerOffset(position)
         }
 
@@ -205,6 +199,10 @@ class MainActivity : AppCompatActivity() {
             when (item.itemId) {
                 R.id.nav_home -> {
                     itemView.playNavigationMotion()
+                    true
+                }
+                R.id.nav_study -> {
+                    openTab(Intent(this, StudyTasksActivity::class.java).putExtra(StudyTasksActivity.EXTRA_PRIMARY_PAGE, true))
                     true
                 }
                 R.id.nav_import -> {
@@ -377,7 +375,7 @@ class MainActivity : AppCompatActivity() {
         overridePendingTransition(0, 0)
     }
 
-    private fun playSelectedPageMotion(position: Int, forward: Boolean = true) {
+    private fun playSelectedPageMotion(position: Int, forward: Boolean) {
         if (lastAnimatedPagerPosition == position) return
         binding.weekPager.post {
             if (binding.weekPager.currentItem != position) return@post
@@ -722,6 +720,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
+        menu.findItem(R.id.action_add_course)?.actionView?.setOnClickListener { openNewCourse() }
         menu.findItem(R.id.action_today)?.actionView?.setOnClickListener {
             goToCurrentWeek()
         }
@@ -733,11 +732,12 @@ class MainActivity : AppCompatActivity() {
         if (courseToolsPopup?.isShowing == true) return
         val content = layoutInflater.inflate(R.layout.popup_course_tools, binding.toolbar, false)
         content.clipToOutline = true
+        content.installPressScale(0.985f)
         val popup = PopupWindow(content,
             minOf(dp(280f).roundToInt(), binding.root.width - dp(32f).roundToInt()),
             ViewGroup.LayoutParams.WRAP_CONTENT, true).apply {
             setBackgroundDrawable(ContextCompat.getDrawable(this@MainActivity, R.drawable.bg_course_tools_popup))
-            elevation = dp(8f)
+            elevation = dp(3f)
             isOutsideTouchable = true
             setOnDismissListener { courseToolsPopup = null }
         }

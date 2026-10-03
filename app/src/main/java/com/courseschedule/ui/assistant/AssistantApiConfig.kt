@@ -14,8 +14,8 @@ import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 
 internal data class AssistantApiConfig(
-    val baseUrl: String = "https://api.openai.com/v1",
-    val model: String = "gpt-4o-mini",
+    val baseUrl: String = "https://api.deepseek.com",
+    val model: String = "deepseek-flash",
     val apiKey: String = ""
 ) {
     fun endpoint(): String {
