@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.view.animation.PathInterpolator
 import android.widget.TextView
 import androidx.core.content.ContextCompat
+import androidx.core.view.children
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.courseschedule.R
@@ -44,6 +45,7 @@ class WeekPagerAdapter(
     private var settings = WeekPageSettings()
     private val scrollPositions = mutableMapOf<Int, Int>()
     private val settleInterpolator = PathInterpolator(0.2f, 0.85f, 0.25f, 1f)
+    private val dayHeaderInterpolator = PathInterpolator(0.22f, 0f, 0.2f, 1f)
 
     init {
         setHasStableIds(true)
@@ -185,16 +187,16 @@ class WeekPagerAdapter(
         fun playSelectionMotion(forward: Boolean) {
             resetSelectionMotion()
             val density = binding.root.resources.displayMetrics.density
-
-            binding.weekDayHeader.apply {
-                alpha = 0.55f
-                translationX = (if (forward) 12f else -12f) * density
-                animate()
+            val dayLabels = binding.weekDayHeader.children.filter { it.visibility != View.GONE }.toList()
+            (if (forward) dayLabels else dayLabels.reversed()).forEachIndexed { index, label ->
+                label.alpha = 0.72f
+                label.translationY = 6f * density
+                label.animate()
                     .alpha(1f)
-                    .translationX(0f)
-                    .setDuration(360L)
-                    .setInterpolator(settleInterpolator)
-                    .withLayer()
+                    .translationY(0f)
+                    .setStartDelay(index * 14L)
+                    .setDuration(240L)
+                    .setInterpolator(dayHeaderInterpolator)
                     .start()
             }
             if (binding.emptyState.visibility != View.VISIBLE) return
@@ -253,14 +255,14 @@ class WeekPagerAdapter(
         }
 
         fun resetSelectionMotion() {
-            listOf(
+            (listOf(
                 binding.weekDayHeader,
                 binding.scheduleScroll,
                 binding.emptyState,
                 binding.emptyIconContainer,
                 binding.tvEmptyTitle,
                 binding.btnEmptyAdd
-            ).forEach { view ->
+            ) + binding.weekDayHeader.children.toList()).forEach { view ->
                 view.animate().cancel()
                 view.alpha = 1f
                 view.scaleX = 1f

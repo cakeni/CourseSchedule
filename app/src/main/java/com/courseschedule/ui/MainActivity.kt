@@ -52,7 +52,6 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
-import kotlin.math.abs
 import kotlin.math.roundToInt
 
 internal fun weekAtProgressPosition(x: Float, width: Int, totalWeeks: Int): Int {
@@ -173,13 +172,7 @@ class MainActivity : AppCompatActivity() {
         binding.weekPager.offscreenPageLimit = 1
         binding.weekPager.registerOnPageChangeCallback(pageChangeCallback)
         binding.weekPager.setPageTransformer { page, position ->
-            val distance = abs(position).coerceIn(0f, 1f)
-            val scale = 1f - (distance * 0.02f)
-            page.alpha = 1f - (distance * 0.16f)
-            page.scaleX = scale
-            page.scaleY = scale
-            page.translationX = -position * dp(14f) * (1f - distance)
-            page.rotationY = 0f
+            // Keep the date row's frame steady while course cards add depth.
             page.findViewById<CourseTableView>(R.id.courseTableView)?.setPagerOffset(position)
         }
 
@@ -377,7 +370,7 @@ class MainActivity : AppCompatActivity() {
         overridePendingTransition(0, 0)
     }
 
-    private fun playSelectedPageMotion(position: Int, forward: Boolean = true) {
+    private fun playSelectedPageMotion(position: Int, forward: Boolean) {
         if (lastAnimatedPagerPosition == position) return
         binding.weekPager.post {
             if (binding.weekPager.currentItem != position) return@post
