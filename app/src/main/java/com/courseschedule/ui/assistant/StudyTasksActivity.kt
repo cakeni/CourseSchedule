@@ -1,8 +1,10 @@
 package com.courseschedule.ui.assistant
 
+import android.animation.AnimatorSet
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.view.ViewTreeObserver
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.text.SpannableString
@@ -48,6 +50,8 @@ class StudyTasksActivity : AppCompatActivity() {
     private var source: LiveData<List<StudyTask>>? = null
     private var tasks = emptyList<StudyTask>()
     private var writing = false
+    private var contentReady = false
+    private var pageEntrance: AnimatorSet? = null
     private var selectedFilter = R.id.btnTasksPending
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,7 +64,8 @@ class StudyTasksActivity : AppCompatActivity() {
             isAppearanceLightStatusBars = resources.getBoolean(R.bool.window_light_system_bars)
             isAppearanceLightNavigationBars = resources.getBoolean(R.bool.window_light_system_bars)
         }
-        binding.btnStudyBack.visibility = if (intent.getBooleanExtra(EXTRA_PRIMARY_PAGE, false)) View.GONE else View.VISIBLE
+        val primaryPage = intent.getBooleanExtra(EXTRA_PRIMARY_PAGE, false)
+        binding.btnStudyBack.visibility = if (primaryPage) View.GONE else View.VISIBLE
         binding.btnStudyBack.setOnClickListener { finish() }
         binding.btnStudyReminders.setOnClickListener { openReminderSettings() }
         binding.btnAddTask.installPressScale(0.98f)
@@ -78,27 +83,43 @@ class StudyTasksActivity : AppCompatActivity() {
         }
         binding.etTaskSearch.doAfterTextChanged { render() }
         binding.tvTaskReminderStatus.setOnClickListener { openReminderSettings() }
-        if (savedInstanceState == null) binding.taskContent.post { StudyMotion.appear(binding.taskContent, 8f) }
+        // Keep the previous tab visible until counts and rows are ready for the first frame.
+        binding.root.viewTreeObserver.addOnPreDrawListener(object : ViewTreeObserver.OnPreDrawListener {
+            override fun onPreDraw(): Boolean {
+                if (!contentReady) return false
+                binding.root.viewTreeObserver.removeOnPreDrawListener(this)
+                if (savedInstanceState == null) {
+                    pageEntrance = StudyMotion.enterPage(binding)
+                    binding.bottomNavigation.findViewById<View>(R.id.nav_study)?.playNavigationMotion()
+                }
+                return true
+            }
+        })
     }
 
     override fun onResume() {
         super.onResume()
         lifecycleScope.launch {
-            val current = database.semesterDao().getCurrentSemesterSync() ?: return@launch
+            val current = database.semesterDao().getCurrentSemesterSync()
+            if (current == null) {
+                render()
+                contentReady = true
+                return@launch
+            }
             if (semester != current || source == null) {
                 source?.removeObservers(this@StudyTasksActivity)
                 semester = current
                 binding.tvTaskSemester.text = current.name
                 source = database.studyTaskDao().observe(current.id).also { live -> live.observe(this@StudyTasksActivity) {
                     tasks = it; if (!writing) render()
+                    contentReady = true
                     if (intent.hasExtra("study_task_id")) {
                         val id = intent.getLongExtra("study_task_id", 0)
                         intent.removeExtra("study_task_id")
                         tasks.find { row -> row.id == id }?.let { row -> edit(row) }
                     }
                 } }
-            }
-            render()
+            } else render()
         }
     }
 
@@ -107,8 +128,19 @@ class StudyTasksActivity : AppCompatActivity() {
         super.onSaveInstanceState(outState)
     }
 
+    override fun onPause() {
+        finishEntrance()
+        super.onPause()
+    }
+
+    private fun finishEntrance() {
+        pageEntrance?.cancel()
+        pageEntrance = null
+    }
+
     private fun render() {
         if (!::binding.isInitialized) return
+        finishEntrance()
         val now = System.currentTimeMillis()
         val pending = tasks.filter { it.completedAt == null }
         val today = LocalDate.now()
@@ -308,7 +340,6 @@ class StudyTasksActivity : AppCompatActivity() {
             binding.bottomNavigation.findViewById<View>(item.itemId)?.playNavigationMotion()
             binding.taskScroll.smoothScrollTo(0, 0)
         }
-        binding.bottomNavigation.post { binding.bottomNavigation.findViewById<View>(R.id.nav_study)?.playNavigationMotion() }
     }
 
     companion object { const val EXTRA_PRIMARY_PAGE = "study_primary_page" }

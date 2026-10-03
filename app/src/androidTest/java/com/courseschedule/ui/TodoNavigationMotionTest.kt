@@ -21,6 +21,9 @@ import androidx.test.espresso.action.ViewActions.*
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.runner.lifecycle.ActivityLifecycleCallback
+import androidx.test.runner.lifecycle.ActivityLifecycleMonitorRegistry
+import androidx.test.runner.lifecycle.Stage
 import com.courseschedule.R
 import com.courseschedule.data.AppDatabase
 import com.courseschedule.data.StudyTaskStore
@@ -28,6 +31,7 @@ import com.courseschedule.data.entity.Semester
 import com.courseschedule.data.entity.StudyTask
 import com.courseschedule.domain.StudyTaskRules
 import com.courseschedule.ui.assistant.StudyTaskEditorActivity
+import com.courseschedule.ui.assistant.StudyTasksActivity
 import com.courseschedule.utils.ReminderManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.gson.Gson
@@ -97,6 +101,177 @@ class TodoNavigationMotionTest {
         val suffix = InstrumentationRegistry.getArguments().getString("proofSuffix", "animated")
         File(context.getExternalFilesDir(null), "icon-feedback-proof").apply { mkdirs() }
             .resolve("$name-$suffix.json").writeText(Gson().toJson(data))
+    }
+
+    @Test fun todoEntryLayersAnimateAfterDataLoadsAndKeepNavigationStable(): Unit = runBlocking {
+        fixture { semester ->
+            val pending = StudyTaskStore(context).save(StudyTask(semesterId = semester.id, title = "切换时直接显示待办", dueAt = System.currentTimeMillis() + 86400000L))
+            StudyTaskStore(context).save(StudyTask(semesterId = semester.id, title = "已完成事项", dueAt = pending.dueAt, completedAt = System.currentTimeMillis()))
+            var expectEmpty = false
+            val frames = mutableListOf<Int>()
+            val motionFrames = mutableListOf<MutableList<List<Float>>>()
+            val failures = mutableListOf<String>()
+            val listeners = mutableListOf<Pair<View, ViewTreeObserver.OnDrawListener>>()
+            val monitor = ActivityLifecycleMonitorRegistry.getInstance()
+            val callback = ActivityLifecycleCallback { activity, stage ->
+                if (stage == Stage.CREATED && activity is StudyTasksActivity) {
+                    val content = activity.findViewById<View>(R.id.taskContent)
+                    val rows = activity.findViewById<ViewGroup>(R.id.taskRows)
+                    val empty = activity.findViewById<View>(R.id.taskEmpty)
+                    val count = activity.findViewById<TextView>(R.id.btnTasksPending)
+                    val completed = activity.findViewById<TextView>(R.id.btnTasksCompleted)
+                    val layers = listOf(R.id.taskHeader, R.id.btnTasksToday, R.id.btnTasksUpcoming,
+                        R.id.btnTasksPending, R.id.taskSearch, R.id.taskListHeader).map { activity.findViewById<View>(it) } +
+                        if (expectEmpty) empty else rows
+                    val nav = activity.findViewById<BottomNavigationView>(R.id.bottomNavigation)
+                    var navigationGeometry = emptyList<Int>()
+                    val page = frames.size
+                    frames += 0
+                    motionFrames += mutableListOf<List<Float>>()
+                    val listener = ViewTreeObserver.OnDrawListener {
+                        frames[page]++
+                        if (content.alpha != 1f || content.translationY != 0f) failures += "Page $page: whole tab faded or moved"
+                        val sample = layers.flatMap { listOf(it.alpha, it.translationY / it.resources.displayMetrics.density) }
+                        motionFrames[page].lastOrNull()?.let { previous ->
+                            for (index in layers.indices) {
+                                if (sample[index * 2] + 0.001f < previous[index * 2] || sample[index * 2 + 1] > previous[index * 2 + 1] + 0.001f)
+                                    failures += "Page $page: layer $index flashed or restarted"
+                            }
+                        }
+                        motionFrames[page] += sample
+                        val currentGeometry = geometry(nav)
+                        if (navigationGeometry.isEmpty()) navigationGeometry = currentGeometry
+                        if (currentGeometry != navigationGeometry) failures += "Page $page: navigation moved during entry"
+                        if (expectEmpty) {
+                            if (empty.visibility != View.VISIBLE || count.contentDescription.toString() != "全部，0 项") failures += "Page $page: empty data was not ready"
+                        } else {
+                            if (empty.visibility != View.GONE || rows.findViewWithTag<View>(pending.id) == null) failures += "Page $page: placeholder drawn before saved rows"
+                            if (count.contentDescription.toString() != "全部，1 项" || completed.text.toString() != "已完成 1") failures += "Page $page: placeholder counts drawn"
+                        }
+                    }
+                    content.viewTreeObserver.addOnDrawListener(listener)
+                    listeners += content to listener
+                }
+            }
+            instrumentation.runOnMainSync { monitor.addLifecycleCallback(callback) }
+            fun navigate(destination: Int) {
+                val ready = CountDownLatch(1)
+                val focusListeners = mutableListOf<Pair<View, ViewTreeObserver.OnWindowFocusChangeListener>>()
+                fun watch(activity: android.app.Activity) {
+                    val decor = activity.window.decorView
+                    fun afterPresentation() = decor.postOnAnimation { decor.postOnAnimation { ready.countDown() } }
+                    if (decor.hasWindowFocus()) afterPresentation() else {
+                        val listener = object : ViewTreeObserver.OnWindowFocusChangeListener {
+                            override fun onWindowFocusChanged(hasFocus: Boolean) {
+                                if (hasFocus) {
+                                    decor.viewTreeObserver.removeOnWindowFocusChangeListener(this)
+                                    afterPresentation()
+                                }
+                            }
+                        }
+                        decor.viewTreeObserver.addOnWindowFocusChangeListener(listener)
+                        focusListeners += decor to listener
+                    }
+                }
+                val expected = when (destination) {
+                    R.id.nav_home -> MainActivity::class.java
+                    R.id.nav_import -> com.courseschedule.ui.importdata.ImportActivity::class.java
+                    R.id.nav_settings -> com.courseschedule.ui.settings.SettingsActivity::class.java
+                    else -> StudyTasksActivity::class.java
+                }
+                val resumed = ActivityLifecycleCallback { activity, stage -> if (stage == Stage.RESUMED && expected.isInstance(activity)) watch(activity) }
+                instrumentation.runOnMainSync {
+                    monitor.addLifecycleCallback(resumed)
+                    monitor.getActivitiesInStage(Stage.RESUMED).firstOrNull { expected.isInstance(it) }?.let(::watch)
+                }
+                try {
+                    onView(withId(destination)).perform(click())
+                    assertTrue("Destination $destination must be presented and focused before the next navigation", ready.await(5, TimeUnit.SECONDS))
+                } finally {
+                    instrumentation.runOnMainSync {
+                        monitor.removeLifecycleCallback(resumed)
+                        focusListeners.forEach { (view, listener) -> if (view.viewTreeObserver.isAlive) view.viewTreeObserver.removeOnWindowFocusChangeListener(listener) }
+                    }
+                }
+            }
+            try {
+                ActivityScenario.launch(MainActivity::class.java).use {
+                    for (origin in listOf(R.id.nav_home, R.id.nav_import, R.id.nav_settings, R.id.nav_home)) {
+                        navigate(origin)
+                        navigate(R.id.nav_study)
+                        settle(650L)
+                    }
+                    navigate(R.id.nav_home)
+                    database.studyTaskDao().forSemester(semester.id).forEach { StudyTaskStore(context).delete(it) }
+                    instrumentation.runOnMainSync { expectEmpty = true }
+                    navigate(R.id.nav_study)
+                    settle(650L)
+                    assertEquals(5, frames.size)
+                    assertTrue("Every destination must have actual drawn frames", frames.all { it > 0 })
+                    motionFrames.forEachIndexed { page, samples ->
+                        assertEquals("Every layer must settle on page $page", List(7) { listOf(1f, 0f) }.flatten(), samples.last())
+                        if (ValueAnimator.areAnimatorsEnabled()) {
+                            for (index in 0 until 7) {
+                                assertTrue("Layer $index must visibly move on page $page", samples.maxOf { it[index * 2 + 1] } - samples.minOf { it[index * 2 + 1] } > 1f)
+                                assertTrue("Layer $index must visibly appear on page $page", samples.maxOf { it[index * 2] } - samples.minOf { it[index * 2] } > 0.03f)
+                            }
+                            val cardStarts = (1..3).map { index -> samples.indexOfFirst { it[index * 2 + 1] < samples.first()[index * 2 + 1] - 0.1f } }
+                            assertTrue("Overview cards must enter in reading order", cardStarts.zipWithNext().all { (left, right) -> left <= right })
+                        } else {
+                            assertTrue("Reduced motion must show the settled state immediately", samples.all { it == List(7) { listOf(1f, 0f) }.flatten() })
+                        }
+                    }
+                    proof("todo-first-draw", mapOf("drawnFramesPerPage" to frames, "layers" to listOf("header", "today", "upcoming", "all", "search", "list header", "results"),
+                        "opacityAndOffsetDp" to motionFrames, "failures" to failures))
+                    assertTrue(failures.take(6).joinToString(), failures.isEmpty())
+                }
+            } finally {
+                instrumentation.runOnMainSync {
+                    monitor.removeLifecycleCallback(callback)
+                    listeners.forEach { (view, listener) -> if (view.viewTreeObserver.isAlive) view.viewTreeObserver.removeOnDrawListener(listener) }
+                }
+            }
+        }
+    }
+
+    @Test fun interruptedEntrySettlesBeforeFilteringNavigationAndRecreation(): Unit = runBlocking {
+        fixture { semester ->
+            StudyTaskStore(context).save(StudyTask(semesterId = semester.id, title = "进入时切换分类", dueAt = System.currentTimeMillis() + 86400000L))
+            ActivityScenario.launch<StudyTasksActivity>(Intent(context, StudyTasksActivity::class.java)
+                .putExtra(StudyTasksActivity.EXTRA_PRIMARY_PAGE, true)).use { scenario ->
+                val finished = CountDownLatch(1)
+                val failures = mutableListOf<String>()
+                scenario.onActivity { activity ->
+                    val layers = listOf(R.id.taskHeader, R.id.tvTaskReminderStatus, R.id.btnTasksToday, R.id.btnTasksUpcoming,
+                        R.id.btnTasksPending, R.id.taskSearch, R.id.taskListHeader).map { activity.findViewById<View>(it) }
+                    fun checkSettled(reason: String) {
+                        if (layers.any { it.alpha != 1f || it.translationY != 0f }) failures += reason
+                    }
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        activity.findViewById<View>(R.id.btnTasksUpcoming).performClick()
+                        checkSettled("Entry layers were left offset after changing filters")
+                        activity.findViewById<View>(R.id.nav_import).performClick()
+                        Handler(Looper.getMainLooper()).postDelayed({
+                            checkSettled("A delayed entrance restarted after navigation")
+                            finished.countDown()
+                        }, 600L)
+                    }, 80L)
+                }
+                assertTrue(finished.await(3, TimeUnit.SECONDS))
+                assertTrue(failures.joinToString(), failures.isEmpty())
+                onView(withId(R.id.nav_study)).perform(click())
+                settle(650L)
+            }
+            ActivityScenario.launch<StudyTasksActivity>(Intent(context, StudyTasksActivity::class.java)
+                .putExtra(StudyTasksActivity.EXTRA_PRIMARY_PAGE, true)).use { scenario ->
+                settle(650L)
+                scenario.recreate()
+                scenario.onActivity { activity ->
+                    assertEquals(1f, activity.findViewById<View>(R.id.taskHeader).alpha)
+                    assertEquals(0f, activity.findViewById<View>(R.id.btnTasksToday).translationY)
+                }
+            }
+        }
     }
 
     @Test fun allFourPagesKeepIdenticalNavigationGeometryAfterRepeatedSwitches(): Unit = runBlocking {
