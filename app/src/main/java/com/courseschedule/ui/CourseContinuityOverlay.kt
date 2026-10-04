@@ -91,11 +91,14 @@ class CourseContinuityOverlay @JvmOverloads constructor(
         upper.binding.courseTableView.setContinuityCourses(newCourses.map { it.id }.toSet(), true)
         lower.binding.weekDayHeader.visibility = INVISIBLE
         upper.binding.weekDayHeader.visibility = INVISIBLE
-        if (motionStyle == WeekMotionStyle.SOFT_SLIDE) {
-            hiddenEmptyStates = true
-            listOf(lower, upper).forEach { holder ->
-                if (holder.binding.emptyState.visibility == VISIBLE) holder.binding.emptyState.visibility = INVISIBLE
-            }
+        hiddenEmptyStates = true
+        listOf(lower, upper).forEach { holder ->
+            // Start once the illustration is fully entering the visible scene.
+            // Starting when an incoming sheet is still outside the clip would
+            // consume the main page turn before the user can see it.
+            val distance = if (holder === lower) progress else 1f - progress
+            holder.binding.emptyCalendar.setStageHost(this, ready = distance <= .25f)
+            if (holder.binding.emptyState.visibility == VISIBLE) holder.binding.emptyState.visibility = INVISIBLE
         }
         if (changed || sceneChanged) invalidate()
     }
@@ -103,6 +106,7 @@ class CourseContinuityOverlay @JvmOverloads constructor(
     internal fun clear() {
         if (hiddenEmptyStates) listOfNotNull(lower, upper).forEach { holder ->
             holder.binding.emptyState.visibility = if (holder.binding.courseTableView.continuityCourses().isEmpty()) VISIBLE else GONE
+            holder.binding.emptyCalendar.setStageHost(null)
         }
         hiddenEmptyStates = false
         lower?.binding?.courseTableView?.setContinuityCourses(emptySet(), false)
@@ -303,16 +307,59 @@ class CourseContinuityOverlay @JvmOverloads constructor(
             table.drawContinuityCourse(canvas, course, table.continuityBounds(course), frame.opacity)
         }
         canvas.restoreToCount(tableSave)
-        if (table.continuityCourses().isEmpty()) {
-            holder.binding.emptyState.getLocationInWindow(emptyOrigin)
-            holder.itemView.getLocationInWindow(pageOrigin)
-            canvas.translate((emptyOrigin[0] - pageOrigin[0]).toFloat(), (emptyOrigin[1] - origin[1]).toFloat())
-            val emptySave = canvas.saveLayerAlpha(0f, 0f, holder.binding.emptyState.width.toFloat(),
-                holder.binding.emptyState.height.toFloat(), (255 * frame.opacity).toInt())
-            holder.binding.emptyState.draw(canvas)
-            canvas.restoreToCount(emptySave)
-        }
         canvas.restoreToCount(contentSave)
+    }
+
+    private fun drawEmptyContent(canvas: Canvas, holder: WeekPagerAdapter.WeekViewHolder,
+        frame: EmptyWeekMotion.Frame) {
+        if (frame.opacity <= 0f) return
+        holder.binding.emptyState.getLocationInWindow(emptyOrigin)
+        holder.itemView.getLocationInWindow(pageOrigin)
+        val empty = holder.binding.emptyState
+        val save = canvas.save()
+        canvas.translate(emptyOrigin[0] - pageOrigin[0] + frame.offsetX,
+            emptyOrigin[1] - origin[1] + frame.offsetY)
+        canvas.scale(frame.scale, frame.scale, empty.width / 2f, empty.height * .35f)
+        val emptySave = canvas.saveLayerAlpha(0f, 0f, empty.width.toFloat(),
+            empty.height.toFloat(), (255 * frame.opacity.coerceIn(0f, 1f)).toInt())
+        empty.draw(canvas)
+        canvas.restoreToCount(emptySave)
+        canvas.restoreToCount(save)
+    }
+
+    private fun drawEmptyTransition(canvas: Canvas) {
+        val source = lower!!
+        val destination = upper!!
+        val sourceEmpty = source.binding.courseTableView.continuityCourses().isEmpty()
+        val destinationEmpty = destination.binding.courseTableView.continuityCourses().isEmpty()
+        if (!sourceEmpty && !destinationEmpty) return
+
+        getLocationInWindow(origin)
+        source.binding.scheduleScroll.getLocationInWindow(scrollOrigin)
+        val top = (scrollOrigin[1] - origin[1]).toFloat()
+        val save = canvas.save()
+        canvas.clipRect(source.binding.tvMonthLabel.width.toFloat(), top, width.toFloat(),
+            top + source.binding.scheduleScroll.height)
+        val animationsEnabled = ValueAnimator.areAnimatorsEnabled()
+        if (sourceEmpty && destinationEmpty && !animationsEnabled) {
+            drawEmptyContent(canvas, source, EmptyWeekMotion.Frame(0f, 0f, 1f, 1f))
+        } else {
+            // Empty weeks have their own identities too: render both sides of
+            // the change instead of pinning one identical placeholder at rest.
+            listOf(false, true).forEach { incoming ->
+                if (if (incoming) destinationEmpty else sourceEmpty) {
+                    val holder = if (incoming) destination else source
+                    val contentSave = canvas.save()
+                    val softSlide = motionStyle == WeekMotionStyle.SOFT_SLIDE
+                    val frame = EmptyWeekMotion.frame(if (incoming) 1f - progress else -progress,
+                        resources.displayMetrics.density, softSlide, animationsEnabled)
+                    if (softSlide) transformScene(canvas, sceneFrame(incoming), holder)
+                    drawEmptyContent(canvas, holder, frame)
+                    canvas.restoreToCount(contentSave)
+                }
+            }
+        }
+        canvas.restoreToCount(save)
     }
 
     private fun drawSoftSlide(canvas: Canvas) {
@@ -343,6 +390,7 @@ class CourseContinuityOverlay @JvmOverloads constructor(
         val source = lower ?: return
         if (motionStyle == WeekMotionStyle.SOFT_SLIDE) {
             drawSoftSlide(canvas)
+            drawEmptyTransition(canvas)
             return
         }
         val (x, y) = contentOrigin() ?: return
@@ -369,6 +417,7 @@ class CourseContinuityOverlay @JvmOverloads constructor(
             source.binding.courseTableView.drawTransitionCourse(canvas, pair.from, destination, pair.to, localBounds(pair), progress)
         }
         canvas.restoreToCount(save)
+        drawEmptyTransition(canvas)
     }
 
     override fun onDetachedFromWindow() {

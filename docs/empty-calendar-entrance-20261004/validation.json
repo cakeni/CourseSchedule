@@ -1,0 +1,272 @@
+{
+  "versionName": "1.0.40",
+  "versionCode": 41,
+  "package": "com.courseschedule",
+  "apk": {
+    "file": "CourseSchedule-1.0.40.apk",
+    "sha256": "868e20fc65b254dda4ccfdef7646c759715a126f1e40b10d0976fb780150e4d8",
+    "bytes": 25051650
+  },
+  "unit": {
+    "tests": 211,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1,
+    "passed": 210
+  },
+  "lint": {
+    "errors": 0
+  },
+  "native": {
+    "coreControllerBuild": {
+      "sha256": "E14C82689CCF7805095A3390E0B6DB3A45508EC164A7C7AC42E74F2E5C76C0C8",
+      "passed": 18,
+      "groups": [
+        1,
+        1,
+        6,
+        6,
+        4
+      ],
+      "scope": "Controller, empty-week and weekday transitions; before final asset trajectory refinement"
+    },
+    "finalDeliveredBuild": {
+      "passed": 5,
+      "groups": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "scope": "Both native recordings; single-entrance/reentry checks in light, dark and reduced-motion modes"
+    }
+  },
+  "finalAssets": {
+    "raw": {
+      "sha256": "da4b93c5fcadf6a373739ec0a0b465634af0cc6ae0a54a378b136bb8852f50cc",
+      "layers": 28,
+      "fps": 60,
+      "durationSeconds": 2.8
+    },
+    "raw-night": {
+      "sha256": "380d9065cb8a4097c87bed038e7dfede4e6cfd2937690547aacbfa6c5053a839",
+      "layers": 28,
+      "fps": 60,
+      "durationSeconds": 2.8
+    }
+  },
+  "finalBehaviorProofs": {
+    "soft_slide": {
+      "light": {
+        "singleEntrance": {
+          "phases": [
+            0.2175,
+            0.22321428,
+            0.40857142,
+            0.6757143,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "running": [
+            true,
+            true,
+            true,
+            true,
+            false,
+            false,
+            false
+          ],
+          "phaseAtFirstArrivedFrame": 0.22464286,
+          "textStable": true,
+          "noReplayAfter7900ms": true,
+          "entrances": 1
+        },
+        "reentry": {
+          "phaseAtFirstArrivedFrame": 0.04464286,
+          "entrances": 2,
+          "cancelDidNotReplay": true,
+          "foregroundDidNotReplay": true
+        }
+      },
+      "dark": {
+        "singleEntrance": {
+          "phases": [
+            0.20928572,
+            0.21357143,
+            0.41,
+            0.67964286,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "running": [
+            true,
+            true,
+            true,
+            true,
+            false,
+            false,
+            false
+          ],
+          "phaseAtFirstArrivedFrame": 0.215,
+          "textStable": true,
+          "noReplayAfter7900ms": true,
+          "entrances": 1
+        },
+        "reentry": {
+          "phaseAtFirstArrivedFrame": 0.05142857,
+          "entrances": 2,
+          "cancelDidNotReplay": true,
+          "foregroundDidNotReplay": true
+        }
+      },
+      "reduced": {
+        "singleEntrance": {
+          "phases": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "running": [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+          ],
+          "phaseAtFirstArrivedFrame": 1.0,
+          "textStable": true,
+          "noReplayAfter7900ms": true,
+          "entrances": 1
+        },
+        "reentry": {
+          "phaseAtFirstArrivedFrame": 1.0,
+          "entrances": 2,
+          "cancelDidNotReplay": true,
+          "foregroundDidNotReplay": true
+        }
+      }
+    },
+    "continuity": {
+      "light": {
+        "singleEntrance": {
+          "phases": [
+            0.043214284,
+            0.18357143,
+            0.41607141,
+            0.685,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "running": [
+            true,
+            true,
+            true,
+            true,
+            false,
+            false,
+            false
+          ],
+          "phaseAtFirstArrivedFrame": 0.04392857,
+          "textStable": true,
+          "noReplayAfter7900ms": true,
+          "entrances": 1
+        },
+        "reentry": {
+          "phaseAtFirstArrivedFrame": 0.043571427,
+          "entrances": 2,
+          "cancelDidNotReplay": true,
+          "foregroundDidNotReplay": true
+        }
+      },
+      "dark": {
+        "singleEntrance": {
+          "phases": [
+            0.038928572,
+            0.1875,
+            0.4157143,
+            0.68357146,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "running": [
+            true,
+            true,
+            true,
+            true,
+            false,
+            false,
+            false
+          ],
+          "phaseAtFirstArrivedFrame": 0.050714284,
+          "textStable": true,
+          "noReplayAfter7900ms": true,
+          "entrances": 1
+        },
+        "reentry": {
+          "phaseAtFirstArrivedFrame": 0.04142857,
+          "entrances": 2,
+          "cancelDidNotReplay": true,
+          "foregroundDidNotReplay": true
+        }
+      },
+      "reduced": {
+        "singleEntrance": {
+          "phases": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "running": [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+          ],
+          "phaseAtFirstArrivedFrame": 1.0,
+          "textStable": true,
+          "noReplayAfter7900ms": true,
+          "entrances": 1
+        },
+        "reentry": {
+          "phaseAtFirstArrivedFrame": 1.0,
+          "entrances": 2,
+          "cancelDidNotReplay": true,
+          "foregroundDidNotReplay": true
+        }
+      }
+    }
+  },
+  "previews": {
+    "soft_slide": {
+      "gif": "calendar-soft_slide-once.gif",
+      "loops": false,
+      "frames": 187,
+      "nativeRecording": "native-soft_slide.mp4"
+    },
+    "continuity": {
+      "gif": "calendar-continuity-once.gif",
+      "loops": false,
+      "frames": 187,
+      "nativeRecording": "native-continuity.mp4"
+    }
+  },
+  "buildLog": "analysis/empty-calendar-entrance-redesign-20261004/build-final.log"
+}
