@@ -36,11 +36,11 @@
             android:id="@+id/btnEditCourse"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
+            android:background="@drawable/control_focus"
             android:contentDescription="@string/edit"
             android:padding="11dp"
             android:src="@drawable/ic_edit"
-            app:tint="@color/primary" />
+            app:tint="@color/primary"  android:stateListAnimator="@animator/press_feedback_icon" />
     </LinearLayout>
 
     <LinearLayout

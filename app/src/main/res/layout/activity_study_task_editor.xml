@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:background="@color/study_background"
+    android:focusable="true" android:focusableInTouchMode="true">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="56dp" android:paddingHorizontal="12dp" android:gravity="center_vertical">
+        <com.google.android.material.button.MaterialButton android:id="@+id/btnTaskCancel" style="@style/CourseSchedule.TextButton"
+            android:layout_width="64dp" android:layout_height="48dp" android:minWidth="0dp" android:text="取消" android:textSize="15sp" android:fontFamily="sans-serif" android:textColor="@color/study_text_secondary" />
+        <TextView android:id="@+id/tvEditorTitle" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
+            android:gravity="center" android:text="新建事项" android:textSize="17sp" android:fontFamily="sans-serif-medium" android:textColor="@color/study_text" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/btnTaskSave" android:layout_width="64dp" android:layout_height="38dp"
+            android:minWidth="0dp" android:insetTop="0dp" android:insetBottom="0dp" android:paddingHorizontal="12dp" android:text="保存" android:textSize="14sp"
+            app:cornerRadius="19dp" android:stateListAnimator="@animator/press_feedback" android:elevation="0dp" android:enabled="false" />
+    </LinearLayout>
+    <ScrollView android:id="@+id/taskEditorScroll" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:clipToPadding="false">
+        <LinearLayout android:id="@+id/editorContent" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical"
+            android:paddingHorizontal="24dp" android:paddingTop="16dp" android:paddingBottom="32dp">
+            <com.google.android.material.textfield.TextInputEditText android:id="@+id/etTaskTitle" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:minHeight="42dp" android:background="@null" android:padding="0dp" android:gravity="top|start" android:textSize="25sp" android:fontFamily="sans-serif-medium"
+                android:hint="写下要完成的事" android:inputType="textCapSentences|textMultiLine" android:maxLength="120" android:maxLines="3"
+                android:textColor="@color/study_text" android:textColorHint="@color/study_text_secondary" />
+            <TextView android:id="@+id/tvEditorSemester" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp"
+                android:textColor="@color/study_text_secondary" android:textSize="12sp" />
+            <TextView style="@style/Study.FieldLabel" android:text="事项类型" />
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:background="@drawable/bg_study_segments" android:paddingHorizontal="1dp">
+                <com.google.android.material.button.MaterialButton android:id="@+id/btnKindHomework" style="@style/Study.Segment" android:text="作业" />
+                <com.google.android.material.button.MaterialButton android:id="@+id/btnKindExam" style="@style/Study.Segment" android:text="考试" />
+                <com.google.android.material.button.MaterialButton android:id="@+id/btnKindReport" style="@style/Study.Segment" android:text="报告" />
+                <com.google.android.material.button.MaterialButton android:id="@+id/btnKindReminder" style="@style/Study.Segment" android:text="提醒" />
+            </LinearLayout>
+            <TextView android:id="@+id/tvTaskScheduleLabel" style="@style/Study.FieldLabel" android:text="截止安排" />
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/bg_study_group" android:orientation="vertical">
+                <LinearLayout android:id="@+id/btnTaskDate" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="56dp"
+                    android:orientation="horizontal" android:paddingHorizontal="16dp" android:paddingVertical="14dp" android:gravity="center_vertical"
+                    android:clickable="true" android:focusable="true" android:background="@drawable/control_focus" android:stateListAnimator="@animator/press_feedback_row">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="日期" android:textSize="15sp" android:textColor="@color/study_text" />
+                    <TextView android:id="@+id/tvTaskDateValue" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
+                        android:gravity="end" android:layout_marginStart="12dp" android:text="选择日期" android:textSize="15sp"
+                        android:textColor="@color/study_text_secondary" android:maxLines="2" android:ellipsize="end" />
+                    <ImageView android:id="@+id/iconTaskDate" android:layout_width="18dp" android:layout_height="18dp" android:layout_marginStart="8dp"
+                        android:src="@drawable/ic_chevron_right" app:tint="@color/study_text_secondary" android:contentDescription="@null" />
+                </LinearLayout>
+                <LinearLayout android:id="@+id/datePanel" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical"
+                    android:paddingHorizontal="8dp" android:paddingBottom="12dp" android:visibility="gone">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="48dp" android:gravity="center_vertical">
+                        <com.google.android.material.button.MaterialButton android:id="@+id/btnPreviousMonth" style="@style/CourseSchedule.TextButton"
+                            android:layout_width="48dp" android:layout_height="48dp" android:minWidth="0dp" app:icon="@drawable/ic_chevron_right"
+                            android:rotation="180" android:padding="0dp" app:iconPadding="0dp" app:iconGravity="textStart" app:iconSize="20dp" app:iconTint="@color/study_text" android:contentDescription="上个月" />
+                        <TextView android:id="@+id/tvCalendarMonth" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
+                            android:gravity="center" android:textSize="16sp" android:fontFamily="sans-serif-medium" android:textColor="@color/study_text" />
+                        <com.google.android.material.button.MaterialButton android:id="@+id/btnNextMonth" style="@style/CourseSchedule.TextButton"
+                            android:layout_width="48dp" android:layout_height="48dp" android:minWidth="0dp" app:icon="@drawable/ic_chevron_right"
+                            android:padding="0dp" app:iconPadding="0dp" app:iconGravity="textStart" app:iconSize="20dp" app:iconTint="@color/study_text" android:contentDescription="下个月" />
+                    </LinearLayout>
+                    <GridLayout android:id="@+id/calendarDays" android:layout_width="match_parent" android:layout_height="wrap_content" android:columnCount="7" />
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center">
+                        <com.google.android.material.button.MaterialButton android:id="@+id/btnDateToday" style="@style/CourseSchedule.TextButton"
+                            android:layout_width="0dp" android:layout_weight="1" android:layout_height="48dp" android:text="今天" android:textSize="13sp" />
+                        <com.google.android.material.button.MaterialButton android:id="@+id/btnDateTomorrow" style="@style/CourseSchedule.TextButton"
+                            android:layout_width="0dp" android:layout_weight="1" android:layout_height="48dp" android:text="明天" android:textSize="13sp" />
+                    </LinearLayout>
+                </LinearLayout>
+                <View style="@style/Study.Divider" />
+                <LinearLayout android:id="@+id/btnTaskTime" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="56dp"
+                    android:orientation="horizontal" android:paddingHorizontal="16dp" android:paddingVertical="14dp" android:gravity="center_vertical"
+                    android:clickable="true" android:focusable="true" android:background="@drawable/control_focus" android:stateListAnimator="@animator/press_feedback_row">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="时间" android:textSize="15sp" android:textColor="@color/study_text" />
+                    <TextView android:id="@+id/tvTaskTimeValue" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
+                        android:gravity="end" android:layout_marginStart="12dp" android:text="选择时间" android:textSize="15sp"
+                        android:textColor="@color/study_text_secondary" android:maxLines="2" android:ellipsize="end" />
+                    <ImageView android:id="@+id/iconTaskTime" android:layout_width="18dp" android:layout_height="18dp" android:layout_marginStart="8dp"
+                        android:src="@drawable/ic_chevron_right" app:tint="@color/study_text_secondary" android:contentDescription="@null" />
+                </LinearLayout>
+                <LinearLayout android:id="@+id/timePanel" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical"
+                    android:paddingHorizontal="16dp" android:paddingBottom="16dp" android:visibility="gone">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content">
+                        <com.google.android.material.button.MaterialButton android:id="@+id/btnTimeEvening" style="@style/CourseSchedule.TextButton"
+                            android:layout_width="0dp" android:layout_weight="1" android:layout_height="48dp" android:text="20:00" android:textSize="14sp" />
+                        <com.google.android.material.button.MaterialButton android:id="@+id/btnTimeEndOfDay" style="@style/CourseSchedule.TextButton"
+                            android:layout_width="0dp" android:layout_weight="1" android:layout_height="48dp" android:text="23:59" android:textSize="14sp" />
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="horizontal">
+                        <NumberPicker android:id="@+id/taskHour" android:layout_width="80dp" android:layout_height="144dp" android:contentDescription="小时" />
+                        <TextView android:layout_width="24dp" android:layout_height="wrap_content" android:gravity="center" android:text=":" android:textSize="24sp" android:textColor="@color/study_text" />
+                        <NumberPicker android:id="@+id/taskMinute" android:layout_width="80dp" android:layout_height="144dp" android:contentDescription="分钟" />
+                    </LinearLayout>
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btnTimeDone" style="@style/CourseSchedule.TextButton"
+                        android:layout_width="match_parent" android:layout_height="44dp" android:text="确定时间" android:textSize="14sp" />
+                </LinearLayout>
+                <View style="@style/Study.Divider" />
+                <LinearLayout android:id="@+id/btnTaskReminder" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="56dp"
+                    android:orientation="horizontal" android:paddingHorizontal="16dp" android:paddingVertical="14dp" android:gravity="center_vertical"
+                    android:clickable="true" android:focusable="true" android:background="@drawable/control_focus" android:stateListAnimator="@animator/press_feedback_row">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="提醒" android:textSize="15sp" android:textColor="@color/study_text" />
+                    <TextView android:id="@+id/tvTaskReminderValue" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
+                        android:gravity="end" android:layout_marginStart="12dp" android:text="不提醒" android:textSize="15sp"
+                        android:textColor="@color/study_text_secondary" android:maxLines="2" android:ellipsize="end" />
+                    <ImageView android:id="@+id/iconTaskReminder" android:layout_width="18dp" android:layout_height="18dp" android:layout_marginStart="8dp"
+                        android:src="@drawable/ic_chevron_right" app:tint="@color/study_text_secondary" android:contentDescription="@null" />
+                </LinearLayout>
+                <LinearLayout android:id="@+id/reminderPanel" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingBottom="8dp" android:visibility="gone" />
+            </LinearLayout>
+            <TextView style="@style/Study.FieldLabel" android:text="关联课程" />
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/bg_study_group" android:orientation="vertical">
+                <LinearLayout android:id="@+id/btnTaskCourse" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="56dp"
+                    android:orientation="horizontal" android:paddingHorizontal="16dp" android:paddingVertical="14dp" android:gravity="center_vertical"
+                    android:clickable="true" android:focusable="true" android:background="@drawable/control_focus" android:stateListAnimator="@animator/press_feedback_row">
+
+                    <TextView android:id="@+id/tvTaskCourseValue" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
+                        android:gravity="start" android:layout_marginStart="0dp" android:text="不关联课程" android:textSize="15sp"
+                        android:textColor="@color/study_text_secondary" android:maxLines="2" android:ellipsize="end" />
+                    <ImageView android:id="@+id/iconTaskCourse" android:layout_width="18dp" android:layout_height="18dp" android:layout_marginStart="8dp"
+                        android:src="@drawable/ic_chevron_right" app:tint="@color/study_text_secondary" android:contentDescription="@null" />
+                </LinearLayout>
+                <LinearLayout android:id="@+id/coursePanel" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone" android:paddingBottom="8dp">
+                    <EditText android:id="@+id/etCourseSearch" android:layout_width="match_parent" android:layout_height="48dp" android:layout_marginHorizontal="16dp"
+                        android:background="@null" android:hint="搜索课程" android:inputType="text" android:singleLine="true" android:textSize="14sp" android:maxLength="120"
+                        android:textColor="@color/study_text" android:textColorHint="@color/study_text_secondary" />
+                    <LinearLayout android:id="@+id/courseChoices" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" />
+                </LinearLayout>
+            </LinearLayout>
+            <TextView style="@style/Study.FieldLabel" android:text="备注 · 可选" />
+            <com.google.android.material.textfield.TextInputEditText android:id="@+id/etTaskNote" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:minHeight="80dp" android:gravity="top|start" android:background="@drawable/bg_study_group" android:padding="16dp" android:textSize="14sp"
+                android:hint="补充要求、提交方式或要记住的细节" android:inputType="textMultiLine" android:maxLength="2000" android:maxLines="6"
+                android:textColor="@color/study_text" android:textColorHint="@color/study_text_secondary" />
+            <TextView android:id="@+id/tvTaskError" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp"
+                android:textColor="@color/study_danger" android:textSize="13sp" android:accessibilityLiveRegion="polite" android:visibility="gone" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/btnTaskDelete" style="@style/CourseSchedule.TextButton"
+                android:layout_width="match_parent" android:layout_height="48dp" android:layout_marginTop="20dp" android:text="删除事项" android:textColor="@color/study_danger" android:visibility="gone" />
+            <LinearLayout android:id="@+id/confirmationPanel" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp"
+                android:orientation="vertical" android:background="@drawable/bg_study_group" android:padding="16dp" android:visibility="gone">
+                <TextView android:id="@+id/tvConfirmation" android:layout_width="match_parent" android:layout_height="wrap_content" android:textSize="15sp" android:textColor="@color/study_text" />
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp">
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btnKeepEditing" style="@style/CourseSchedule.TextButton" android:layout_width="0dp" android:layout_weight="1" android:layout_height="48dp" android:text="继续编辑" />
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btnConfirmAction" android:layout_width="0dp" android:layout_weight="1" android:layout_height="48dp" android:text="放弃修改" app:cornerRadius="14dp" android:stateListAnimator="@animator/press_feedback" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

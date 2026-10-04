@@ -1,0 +1,22 @@
+<resources>
+    <string name="study_title">待办</string>
+    <string name="study_tab">待办</string>
+    <string name="study_today">今天</string>
+    <string name="study_upcoming">7天内</string>
+    <string name="study_all">全部</string>
+    <string name="study_new">新建待办</string>
+    <string name="study_search">搜索事项或课程</string>
+    <string name="study_reminder_settings">提醒设置</string>
+    <string name="study_count_filter">%1$d\n%2$s</string>
+    <string name="study_completed_count">已完成 %1$d</string>
+    <string name="study_confirm_title">确认待办事项</string>
+    <string name="study_confirm_hint">请核对标题、截止日期和提醒。可在下方补充修正，发送后再确认；删除目标有误时请先取消。</string>
+    <string name="study_revision_hint">补充修改，例如：改为周五20点截止</string>
+    <string name="study_empty">记下作业、考试和要完成的事。\n设置截止时间，让提醒帮你安排。</string>
+    <string name="study_empty_title">还没有待办</string>
+    <string name="assistant_attach_image">选择图片</string>
+    <string name="assistant_image_selected">已选图片</string>
+    <string name="assistant_image_remove">移除图片</string>
+    <string name="assistant_image_hint">课表或通知截图 · 发送给当前 API 识别</string>
+    <string name="assistant_image_view">查看图片</string>
+</resources>

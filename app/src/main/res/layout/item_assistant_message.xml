@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:layout_marginBottom="14dp" android:gravity="start" android:orientation="horizontal">
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/messageBubble" android:layout_width="wrap_content" android:layout_height="wrap_content"
+        app:cardBackgroundColor="@color/assistant_soft_surface" app:cardCornerRadius="22dp" app:cardElevation="0dp" app:strokeWidth="1dp" app:strokeColor="@color/assistant_divider">
+        <LinearLayout
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:orientation="vertical" android:paddingHorizontal="14dp" android:paddingVertical="12dp">
+            <ImageView android:id="@+id/ivMessageImage" android:layout_width="180dp" android:layout_height="140dp" android:layout_marginBottom="8dp"
+                android:visibility="gone" android:scaleType="centerCrop" android:contentDescription="@string/assistant_image_view" android:clickable="true" android:focusable="true" />
+            <LinearLayout android:id="@+id/messageHeader" android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
+                <ImageView android:layout_width="18dp" android:layout_height="18dp" android:src="@drawable/ic_assistant_welcome" android:contentDescription="@null" />
+                <TextView android:id="@+id/tvMessageSender" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="6dp" android:textColor="@color/assistant_accent" android:textSize="11sp" android:fontFamily="sans-serif-medium" />
+            </LinearLayout>
+            <TextView
+                android:id="@+id/tvMessageBody" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="5dp" android:lineSpacingExtra="4dp" android:textColor="@color/assistant_text"
+                android:textSize="15sp" android:textIsSelectable="true" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnViewQueriedCourses" style="@style/CourseSchedule.TextButton"
+                android:layout_width="wrap_content" android:layout_height="48dp" android:layout_marginTop="4dp"
+                android:visibility="gone" android:text="@string/assistant_view_queried_courses"
+                android:textColor="@color/assistant_accent" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnMessageDetails" style="@style/CourseSchedule.TextButton"
+                android:layout_width="wrap_content" android:layout_height="48dp" android:visibility="gone"
+                android:text="查看原方案" android:textColor="@color/assistant_accent" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnReminderSettings" style="@style/CourseSchedule.TextButton"
+                android:layout_width="wrap_content" android:layout_height="48dp" android:visibility="gone"
+                android:text="提醒设置" app:icon="@drawable/ic_assistant_reminder" app:iconSize="18dp"
+                app:iconTint="@color/assistant_accent" android:textColor="@color/assistant_accent" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+</LinearLayout>

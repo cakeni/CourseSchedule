@@ -14,6 +14,8 @@ class AcademicSchoolTest {
         assertFalse(AcademicSchools.NUAA_GRADUATE.verified)
         assertFalse(AcademicSchools.NUAA.isGraduate)
         assertTrue(AcademicSchools.NUAA_GRADUATE.isGraduate)
+        assertEquals("https://deanservices.swpu.edu.cn/jwapp/sys/jwauthapp/login/index.html", AcademicSchools.SWPU.loginUrl)
+        assertEquals("http://jw.sdufe.edu.cn", AcademicSchools.SDUFE.loginUrl)
         assertNull(AcademicSchools.find("made-up-school"))
         assertNull(AcademicSchools.find(null))
         AcademicSchools.all.forEach {
@@ -24,7 +26,7 @@ class AcademicSchoolTest {
 
     @Test fun onlyConfiguredSchemesExactHostsAndExpectedPortsAreTrusted() {
         val representatives = mapOf(
-            AcademicSchools.SWPU to "deanservices.swpu.edu.cn",
+            AcademicSchools.SWPU to "deancs.swpu.edu.cn",
             AcademicSchools.SDUFE to "jw.sdufe.edu.cn",
             AcademicSchools.NUAA to "authserver.nuaa.edu.cn",
             AcademicSchools.NUAA_GRADUATE to "graduate.nuaa.edu.cn"
@@ -106,7 +108,7 @@ class AcademicSchoolTest {
             assertTrue(school.allowsNavigation(prefix + "authserver/login?service=https%3A%2F%2Fwebvpn.sdufe.edu.cn"))
             assertFalse(school.allowsTimetable(prefix + "authserver/login"))
         }
-        assertFalse(school.allowsTimetable(school.loginUrl))
+        assertTrue(school.allowsTimetable(school.loginUrl))
         assertTrue(school.allowsTimetable(school.timetableUrl + "tkglAction.do?method=goListKb"))
         for (path in listOf("/http/unregistered/", "/https/unknown/", "/https-443/unknown/",
             "/http%2funregistered/", "//http/unknown/", "/x/../http/unknown/")) {
@@ -138,7 +140,7 @@ class AcademicSchoolTest {
         assertNull(parsed.semester)
         assertNull(parsed.settings)
         assertEquals(1, ImportAnalyzer.analyze(parsed.courses, emptyList(), 7, 20).accepted.size)
-        for (bad in listOf(payload.replace(school.timetableUrl, school.loginUrl), "{}", "null", "[]", "not-json",
+        for (bad in listOf(payload.replace(school.timetableUrl, "https://ids.sdufe.edu.cn/login"), "{}", "null", "[]", "not-json",
             " ".repeat(AcademicSchools.MAX_PAYLOAD_CHARS + 1))) {
             assertThrows(ImportFormatException::class.java) { AcademicSchools.parse(school, bad, 20) }
         }

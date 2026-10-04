@@ -1,335 +1,137 @@
-<?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/background">
-
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/toolbar"
-        android:layout_width="0dp"
-        android:layout_height="56dp"
-        android:background="@color/surface"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:navigationIcon="@drawable/ic_back"
-        app:navigationIconTint="@color/primary"
-        app:titleTextColor="@color/text_primary" />
-
-    <View
-        android:id="@+id/toolbarDivider"
-        android:layout_width="0dp"
-        android:layout_height="1dp"
-        android:background="@color/divider"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toolbar" />
-
-    <androidx.core.widget.NestedScrollView
-        android:id="@+id/formScroll"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:clipToPadding="false"
-        android:fillViewport="true"
-        android:overScrollMode="never"
-        app:layout_constraintBottom_toTopOf="@id/bottomActions"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toolbarDivider">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingHorizontal="16dp"
-            android:paddingTop="12dp"
-            android:paddingBottom="24dp">
-
-            <TextView
-                style="@style/CourseScheduleSectionTitle"
-                android:text="@string/basic_information" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/tilCourseName"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/course_name"
-                app:boxBackgroundColor="@color/surface">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etCourseName"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:imeOptions="actionNext"
-                    android:inputType="textCapSentences"
-                    android:maxLines="1" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:hint="@string/teacher_name"
-                app:boxBackgroundColor="@color/surface">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etTeacher"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:imeOptions="actionNext"
-                    android:inputType="textPersonName"
-                    android:maxLines="1" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:hint="@string/classroom"
-                app:boxBackgroundColor="@color/surface">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etClassroom"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:imeOptions="actionDone"
-                    android:inputType="textCapSentences"
-                    android:maxLines="1" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <TextView
-                style="@style/CourseScheduleSectionTitle"
-                android:layout_marginTop="24dp"
-                android:text="@string/class_time" />
-
-            <TextView
-                style="@style/CourseScheduleFieldLabel"
-                android:text="@string/day_of_week" />
-
-            <HorizontalScrollView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:clipToPadding="false"
-                android:scrollbars="none">
-
-                <com.google.android.material.chip.ChipGroup
-                    android:id="@+id/chipGroupDay"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:chipSpacingHorizontal="4dp"
-                    app:selectionRequired="true"
-                    app:singleLine="true"
-                    app:singleSelection="true">
-
-                    <com.google.android.material.chip.Chip android:id="@+id/chipMon" style="@style/CourseScheduleChoiceChip" android:text="周一" />
-                    <com.google.android.material.chip.Chip android:id="@+id/chipTue" style="@style/CourseScheduleChoiceChip" android:text="周二" />
-                    <com.google.android.material.chip.Chip android:id="@+id/chipWed" style="@style/CourseScheduleChoiceChip" android:text="周三" />
-                    <com.google.android.material.chip.Chip android:id="@+id/chipThu" style="@style/CourseScheduleChoiceChip" android:text="周四" />
-                    <com.google.android.material.chip.Chip android:id="@+id/chipFri" style="@style/CourseScheduleChoiceChip" android:text="周五" />
-                    <com.google.android.material.chip.Chip android:id="@+id/chipSat" style="@style/CourseScheduleChoiceChip" android:text="周六" />
-                    <com.google.android.material.chip.Chip android:id="@+id/chipSun" style="@style/CourseScheduleChoiceChip" android:text="周日" />
-                </com.google.android.material.chip.ChipGroup>
-            </HorizontalScrollView>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
-                android:orientation="horizontal">
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/tilStartSection"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:hint="@string/start_section"
-                    app:boxBackgroundColor="@color/surface">
-
-                    <AutoCompleteTextView
-                        android:id="@+id/spinnerStartSection"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="none" />
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <Space android:layout_width="12dp" android:layout_height="1dp" />
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/tilEndSection"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:hint="@string/end_section"
-                    app:boxBackgroundColor="@color/surface">
-
-                    <AutoCompleteTextView
-                        android:id="@+id/spinnerEndSection"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="none" />
-                </com.google.android.material.textfield.TextInputLayout>
+<?xml version='1.0' encoding='utf-8'?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent" android:layout_height="match_parent" android:background="@color/editor_background" android:focusable="true" android:focusableInTouchMode="true">
+    <FrameLayout android:id="@+id/editorHeader" android:layout_width="0dp" android:layout_height="56dp" app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent">
+        <ImageButton android:id="@+id/btnBack" android:layout_width="48dp" android:layout_height="48dp" android:layout_gravity="start|center_vertical" android:layout_marginStart="8dp" android:src="@drawable/ic_back" app:tint="@color/editor_text" android:contentDescription="@string/back" />
+        <TextView android:id="@+id/tvEditorTitle" android:layout_width="wrap_content" android:layout_height="match_parent" android:layout_gravity="center" android:gravity="center" android:text="@string/add_course" android:textSize="17sp" android:fontFamily="sans-serif-medium" android:textColor="@color/editor_text" />
+    </FrameLayout>
+    <androidx.core.widget.NestedScrollView android:id="@+id/formScroll" android:layout_width="0dp" android:layout_height="0dp" android:fillViewport="true" android:clipToPadding="false" android:scrollbars="none" app:layout_constraintTop_toBottomOf="@id/editorHeader" app:layout_constraintBottom_toTopOf="@id/bottomActions" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent">
+        <LinearLayout android:id="@+id/formContent" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingHorizontal="20dp" android:paddingTop="18dp" android:paddingBottom="24dp" android:animateLayoutChanges="false">
+            <LinearLayout android:id="@+id/courseIdentity" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingHorizontal="4dp">
+                <TextView android:id="@+id/tvSemester" style="@style/CourseEditor.Label" android:maxLines="2" />
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginTop="20dp">
+                    <View android:id="@+id/courseAccent" android:layout_width="16dp" android:layout_height="3dp" android:layout_marginEnd="8dp" android:background="@color/course_red" />
+                    <TextView style="@style/CourseEditor.Label" android:text="@string/editor_required_name" android:labelFor="@id/etCourseName" />
+                </LinearLayout>
+                <androidx.appcompat.widget.AppCompatEditText android:id="@+id/etCourseName" style="@style/CourseEditor.Field" android:hint="@string/editor_name_hint" android:textSize="25sp" android:fontFamily="sans-serif-medium" android:singleLine="true" android:inputType="textCapSentences" android:imeOptions="actionNext" android:layout_marginTop="6dp" android:minHeight="56dp" />
+                <TextView android:id="@+id/nameError" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/editor_error" android:textSize="12sp" android:visibility="gone" android:accessibilityLiveRegion="polite" android:layout_marginBottom="8dp" />
             </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:orientation="horizontal">
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/tilStartWeek"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:hint="@string/start_week"
-                    app:boxBackgroundColor="@color/surface">
-
-                    <AutoCompleteTextView
-                        android:id="@+id/spinnerStartWeek"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="none" />
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <Space android:layout_width="12dp" android:layout_height="1dp" />
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/tilEndWeek"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:hint="@string/end_week"
-                    app:boxBackgroundColor="@color/surface">
-
-                    <AutoCompleteTextView
-                        android:id="@+id/spinnerEndWeek"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="none" />
-                </com.google.android.material.textfield.TextInputLayout>
+            <LinearLayout android:id="@+id/detailsGroup" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:background="@drawable/bg_course_editor_group" android:layout_marginTop="14dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="56dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingHorizontal="18dp">
+                    <TextView android:layout_width="40dp" android:layout_height="wrap_content" android:text="@string/editor_teacher" android:textSize="13sp" android:textColor="@color/editor_secondary" android:includeFontPadding="false" android:labelFor="@id/etTeacher" />
+                    <androidx.appcompat.widget.AppCompatEditText android:id="@+id/etTeacher" style="@style/CourseEditor.Field" android:minHeight="56dp" android:hint="@string/editor_teacher_hint" android:inputType="textPersonName" android:singleLine="true" android:imeOptions="actionNext" android:layout_width="0dp" android:layout_weight="1" android:layout_marginStart="12dp" />
+                </LinearLayout>
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:layout_marginHorizontal="18dp" android:background="@color/editor_line" />
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="56dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingHorizontal="18dp">
+                    <TextView android:layout_width="40dp" android:layout_height="wrap_content" android:text="@string/editor_location" android:textSize="13sp" android:textColor="@color/editor_secondary" android:includeFontPadding="false" android:labelFor="@id/etClassroom" />
+                    <androidx.appcompat.widget.AppCompatEditText android:id="@+id/etClassroom" style="@style/CourseEditor.Field" android:minHeight="56dp" android:hint="@string/editor_location_hint" android:inputType="text" android:singleLine="true" android:imeOptions="actionDone" android:layout_width="0dp" android:layout_weight="1" android:layout_marginStart="12dp" />
+                </LinearLayout>
             </LinearLayout>
-
-            <TextView
-                style="@style/CourseScheduleFieldLabel"
-                android:layout_marginTop="14dp"
-                android:text="@string/week_type" />
-
-            <com.google.android.material.chip.ChipGroup
-                android:id="@+id/chipGroupWeekType"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                app:chipSpacingHorizontal="6dp"
-                app:selectionRequired="true"
-                app:singleLine="true"
-                app:singleSelection="true">
-
-                <com.google.android.material.chip.Chip android:id="@+id/chipEveryWeek" style="@style/CourseScheduleChoiceChip" android:checked="true" android:text="@string/every_week" />
-                <com.google.android.material.chip.Chip android:id="@+id/chipOddWeek" style="@style/CourseScheduleChoiceChip" android:text="@string/odd_week" />
-                <com.google.android.material.chip.Chip android:id="@+id/chipEvenWeek" style="@style/CourseScheduleChoiceChip" android:text="@string/even_week" />
-            </com.google.android.material.chip.ChipGroup>
-
-            <TextView
-                style="@style/CourseScheduleSectionTitle"
-                android:layout_marginTop="24dp"
-                android:text="@string/display_and_reminder" />
-
-            <TextView
-                style="@style/CourseScheduleFieldLabel"
-                android:text="@string/course_color" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerColors"
-                android:layout_width="match_parent"
-                android:layout_height="52dp"
-                android:layout_marginTop="6dp"
-                android:clipToPadding="false"
-                android:overScrollMode="never"
-                android:paddingHorizontal="2dp"
-                android:scrollbars="none"
-                tools:itemCount="8"
-                tools:listitem="@layout/item_color" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
-                android:hint="@string/reminder"
-                app:boxBackgroundColor="@color/surface">
-
-                <AutoCompleteTextView
-                    android:id="@+id/spinnerReminder"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="none" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:hint="@string/note"
-                app:boxBackgroundColor="@color/surface">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etNote"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="top"
-                    android:inputType="textMultiLine|textCapSentences"
-                    android:maxLines="4"
-                    android:minLines="2" />
-            </com.google.android.material.textfield.TextInputLayout>
+            <TextView style="@style/CourseEditor.Section" android:text="@string/editor_schedule" />
+            <LinearLayout android:id="@+id/scheduleGroup" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:background="@drawable/bg_course_editor_group">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingHorizontal="8dp" android:paddingTop="16dp" android:paddingBottom="10dp">
+                    <TextView style="@style/CourseEditor.Label" android:text="@string/editor_weekday" android:layout_marginStart="10dp" />
+                    <FrameLayout android:id="@+id/dayBar" android:layout_width="match_parent" android:layout_height="54dp" android:layout_marginTop="2dp">
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="48dp" android:orientation="horizontal">
+                            <com.google.android.material.button.MaterialButton android:id="@+id/day1" style="@style/CourseEditor.Segment" android:layout_weight="1" android:text="@string/editor_day_1" />
+                            <com.google.android.material.button.MaterialButton android:id="@+id/day2" style="@style/CourseEditor.Segment" android:layout_weight="1" android:text="@string/editor_day_2" />
+                            <com.google.android.material.button.MaterialButton android:id="@+id/day3" style="@style/CourseEditor.Segment" android:layout_weight="1" android:text="@string/editor_day_3" />
+                            <com.google.android.material.button.MaterialButton android:id="@+id/day4" style="@style/CourseEditor.Segment" android:layout_weight="1" android:text="@string/editor_day_4" />
+                            <com.google.android.material.button.MaterialButton android:id="@+id/day5" style="@style/CourseEditor.Segment" android:layout_weight="1" android:text="@string/editor_day_5" />
+                            <com.google.android.material.button.MaterialButton android:id="@+id/day6" style="@style/CourseEditor.Segment" android:layout_weight="1" android:text="@string/editor_day_6" />
+                            <com.google.android.material.button.MaterialButton android:id="@+id/day7" style="@style/CourseEditor.Segment" android:layout_weight="1" android:text="@string/editor_day_7" />
+                        </LinearLayout>
+                        <View android:id="@+id/dayIndicator" android:layout_width="18dp" android:layout_height="2dp" android:layout_gravity="bottom" android:background="@color/editor_accent" />
+                    </FrameLayout>
+                </LinearLayout>
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:layout_marginHorizontal="18dp" android:background="@color/editor_line" />
+                <LinearLayout android:id="@+id/rowSections" style="@style/CourseEditor.Row">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/editor_sections" android:textSize="14sp" android:textColor="@color/editor_text" android:includeFontPadding="false" />
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginStart="18dp" android:gravity="end">
+                        <TextView android:id="@+id/tvSections" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="end" android:textSize="15sp" android:textColor="@color/editor_text" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" />
+                        <TextView android:id="@+id/tvSectionTimes" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:textSize="12sp" android:textColor="@color/editor_secondary" android:includeFontPadding="false" android:gravity="end" />
+                    </LinearLayout>
+                    <ImageView android:id="@+id/rowSectionsChevron" style="@style/CourseEditor.Chevron" android:contentDescription="@null" />
+                </LinearLayout>
+                <LinearLayout android:id="@+id/sectionPanel" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingHorizontal="18dp" android:paddingBottom="12dp" android:visibility="gone">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                        <TextView style="@style/CourseEditor.Label" android:text="@string/editor_start" android:layout_width="0dp" android:layout_weight="1" android:gravity="center" />
+                        <View android:layout_width="32dp" android:layout_height="1dp" android:importantForAccessibility="no" />
+                        <TextView style="@style/CourseEditor.Label" android:text="@string/editor_end" android:layout_width="0dp" android:layout_weight="1" android:gravity="center" />
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="132dp" android:orientation="horizontal" android:gravity="center_vertical" android:baselineAligned="false">
+                        <NumberPicker android:id="@+id/sectionStart" android:layout_width="0dp" android:layout_height="132dp" android:importantForAccessibility="yes" android:layout_weight="1" />
+                        <TextView android:layout_width="32dp" android:layout_height="132dp" android:gravity="center" android:text="@string/editor_range_dash" android:textSize="16sp" android:textColor="@color/editor_secondary" />
+                        <NumberPicker android:id="@+id/sectionEnd" android:layout_width="0dp" android:layout_height="132dp" android:importantForAccessibility="yes" android:layout_weight="1" />
+                    </LinearLayout>
+                    <com.google.android.material.button.MaterialButton android:id="@+id/sectionPanelDone" style="@style/CourseEditor.Segment" android:layout_width="match_parent" android:layout_weight="0" android:text="@string/editor_done" android:textColor="@color/editor_accent" />
+                </LinearLayout>
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:layout_marginHorizontal="18dp" android:background="@color/editor_line" />
+                <LinearLayout android:id="@+id/rowWeeks" style="@style/CourseEditor.Row">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/editor_weeks" android:textSize="14sp" android:textColor="@color/editor_text" android:includeFontPadding="false" />
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginStart="18dp" android:gravity="end">
+                        <TextView android:id="@+id/tvWeeks" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="end" android:textSize="15sp" android:textColor="@color/editor_text" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" />
+                    </LinearLayout>
+                    <ImageView android:id="@+id/rowWeeksChevron" style="@style/CourseEditor.Chevron" android:contentDescription="@null" />
+                </LinearLayout>
+                <LinearLayout android:id="@+id/weekPanel" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingHorizontal="18dp" android:paddingBottom="12dp" android:visibility="gone">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                        <TextView style="@style/CourseEditor.Label" android:text="@string/editor_start" android:layout_width="0dp" android:layout_weight="1" android:gravity="center" />
+                        <View android:layout_width="32dp" android:layout_height="1dp" android:importantForAccessibility="no" />
+                        <TextView style="@style/CourseEditor.Label" android:text="@string/editor_end" android:layout_width="0dp" android:layout_weight="1" android:gravity="center" />
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="132dp" android:orientation="horizontal" android:gravity="center_vertical" android:baselineAligned="false">
+                        <NumberPicker android:id="@+id/weekStart" android:layout_width="0dp" android:layout_height="132dp" android:importantForAccessibility="yes" android:layout_weight="1" />
+                        <TextView android:layout_width="32dp" android:layout_height="132dp" android:gravity="center" android:text="@string/editor_range_dash" android:textSize="16sp" android:textColor="@color/editor_secondary" />
+                        <NumberPicker android:id="@+id/weekEnd" android:layout_width="0dp" android:layout_height="132dp" android:importantForAccessibility="yes" android:layout_weight="1" />
+                    </LinearLayout>
+                    <FrameLayout android:id="@+id/weekTypeBar" android:layout_width="match_parent" android:layout_height="50dp" android:layout_marginTop="4dp">
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="48dp" android:orientation="horizontal">
+                            <com.google.android.material.button.MaterialButton android:id="@+id/weekEvery" style="@style/CourseEditor.Segment" android:layout_weight="1" android:text="@string/every_week" />
+                            <com.google.android.material.button.MaterialButton android:id="@+id/weekOdd" style="@style/CourseEditor.Segment" android:layout_weight="1" android:text="@string/odd_week" />
+                            <com.google.android.material.button.MaterialButton android:id="@+id/weekEven" style="@style/CourseEditor.Segment" android:layout_weight="1" android:text="@string/even_week" />
+                        </LinearLayout>
+                        <View android:id="@+id/weekTypeIndicator" android:layout_width="18dp" android:layout_height="2dp" android:layout_gravity="bottom" android:background="@color/editor_accent" />
+                    </FrameLayout>
+                    <com.google.android.material.button.MaterialButton android:id="@+id/weekPanelDone" style="@style/CourseEditor.Segment" android:layout_width="match_parent" android:layout_weight="0" android:text="@string/editor_done" android:textColor="@color/editor_accent" />
+                </LinearLayout>
+            </LinearLayout>
+            <TextView android:id="@+id/formError" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:paddingHorizontal="4dp" android:textSize="13sp" android:textColor="@color/editor_error" android:accessibilityLiveRegion="polite" android:visibility="gone" />
+            <TextView style="@style/CourseEditor.Section" android:text="@string/editor_appearance" />
+            <LinearLayout android:id="@+id/appearanceGroup" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:background="@drawable/bg_course_editor_group">
+                <LinearLayout android:id="@+id/rowColor" style="@style/CourseEditor.Row">
+                    <View android:id="@+id/colorPreview" android:layout_width="14dp" android:layout_height="14dp" android:layout_marginEnd="10dp" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/editor_color" android:textSize="14sp" android:textColor="@color/editor_text" android:includeFontPadding="false" />
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginStart="18dp" android:gravity="end">
+                        <TextView android:id="@+id/tvColor" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="end" android:textSize="15sp" android:textColor="@color/editor_text" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" />
+                    </LinearLayout>
+                    <ImageView android:id="@+id/rowColorChevron" style="@style/CourseEditor.Chevron" android:contentDescription="@null" />
+                </LinearLayout>
+                <androidx.recyclerview.widget.RecyclerView android:id="@+id/recyclerColors" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingHorizontal="16dp" android:paddingBottom="12dp" android:nestedScrollingEnabled="false" android:visibility="gone" />
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:layout_marginHorizontal="18dp" android:background="@color/editor_line" />
+                <LinearLayout android:id="@+id/rowReminder" style="@style/CourseEditor.Row">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/editor_reminder" android:textSize="14sp" android:textColor="@color/editor_text" android:includeFontPadding="false" />
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginStart="18dp" android:gravity="end">
+                        <TextView android:id="@+id/tvReminder" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="end" android:textSize="15sp" android:textColor="@color/editor_text" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" />
+                    </LinearLayout>
+                    <ImageView android:id="@+id/rowReminderChevron" style="@style/CourseEditor.Chevron" android:contentDescription="@null" />
+                </LinearLayout>
+                <LinearLayout android:id="@+id/reminderPanel" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingHorizontal="18dp" android:paddingBottom="8dp" android:orientation="vertical" android:visibility="gone" />
+                <TextView android:id="@+id/tvReminderDisabled" style="@style/CourseEditor.Label" android:layout_marginHorizontal="18dp" android:layout_marginBottom="12dp" android:text="@string/editor_reminder_disabled" android:visibility="gone" />
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:layout_marginHorizontal="18dp" android:background="@color/editor_line" />
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingHorizontal="18dp" android:paddingTop="16dp" android:paddingBottom="10dp" android:orientation="vertical">
+                    <TextView style="@style/CourseEditor.Label" android:text="@string/editor_note" android:labelFor="@id/etNote" />
+                    <androidx.appcompat.widget.AppCompatEditText android:id="@+id/etNote" style="@style/CourseEditor.Field" android:layout_marginTop="8dp" android:hint="@string/editor_note_hint" android:minLines="2" android:maxLines="5" android:gravity="top" android:inputType="textMultiLine|textCapSentences" />
+                </LinearLayout>
+            </LinearLayout>
+            <com.google.android.material.button.MaterialButton android:id="@+id/btnDelete" style="@style/CourseSchedule.TextButton" android:layout_width="match_parent" android:layout_height="48dp" android:layout_marginTop="14dp" android:text="@string/delete_course" android:textColor="@color/editor_error" android:visibility="gone" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
-
-    <LinearLayout
-        android:id="@+id/bottomActions"
-        android:layout_width="0dp"
-        android:layout_height="76dp"
-        android:background="@color/surface"
-        android:elevation="8dp"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingHorizontal="16dp"
-        android:paddingVertical="10dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnDelete"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_marginEnd="12dp"
-            android:text="@string/delete"
-            android:textColor="@color/error"
-            android:visibility="gone"
-            app:strokeColor="@color/error"
-            tools:visibility="visible" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnSave"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="@string/save_course"
-            app:cornerRadius="8dp"
-            app:icon="@drawable/ic_check"
-            app:iconGravity="textStart" />
+    <LinearLayout android:id="@+id/bottomActions" android:layout_width="0dp" android:layout_height="wrap_content" android:minHeight="78dp" android:paddingHorizontal="24dp" android:paddingVertical="12dp" android:orientation="horizontal" android:gravity="center_vertical" android:background="@color/editor_background" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent">
+        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="16dp" android:orientation="vertical">
+            <TextView android:id="@+id/tvSaveSummary" android:layout_width="match_parent" android:layout_height="wrap_content" android:textSize="13sp" android:textColor="@color/editor_text" android:fontFamily="sans-serif-medium" />
+            <TextView android:id="@+id/tvSaveWeeks" style="@style/CourseEditor.Label" android:layout_marginTop="4dp" />
+        </LinearLayout>
+        <ProgressBar android:id="@+id/saveProgress" style="?android:attr/progressBarStyleSmall" android:layout_width="20dp" android:layout_height="20dp" android:layout_marginEnd="12dp" android:indeterminateTint="@color/editor_accent" android:visibility="gone" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/btnSave" style="@style/CourseSchedule.Button" android:layout_width="104dp" android:layout_height="48dp" android:insetTop="0dp" android:insetBottom="0dp" android:minWidth="0dp" android:paddingHorizontal="16dp" android:text="@string/editor_save" android:textSize="15sp" android:fontFamily="sans-serif-medium" android:enabled="false" app:backgroundTint="@color/editor_accent" app:cornerRadius="14dp" app:strokeWidth="0dp" app:elevation="0dp" />
     </LinearLayout>
-
 </androidx.constraintlayout.widget.ConstraintLayout>

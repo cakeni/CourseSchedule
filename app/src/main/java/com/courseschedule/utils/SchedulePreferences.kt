@@ -2,6 +2,7 @@ package com.courseschedule.utils
 
 import android.content.Context
 import com.courseschedule.data.backup.SettingsSnapshot
+import com.courseschedule.domain.WeekMotionStyle
 import java.util.Locale
 
 class SchedulePreferences(context: Context) {
@@ -34,6 +35,10 @@ class SchedulePreferences(context: Context) {
         get() = prefs.getInt(KEY_SECTION_HEIGHT, 64)
         set(value) = prefs.edit().putInt(KEY_SECTION_HEIGHT, value).apply()
 
+    var weekMotionStyle: WeekMotionStyle
+        get() = WeekMotionStyle.fromStoredValue(prefs.getString(KEY_WEEK_MOTION, null))
+        set(value) = prefs.edit().putString(KEY_WEEK_MOTION, value.storedValue).apply()
+
     var reminderEnabled: Boolean
         get() = prefs.getBoolean(KEY_REMINDER_ENABLED, true)
         set(value) = prefs.edit().putBoolean(KEY_REMINDER_ENABLED, value).apply()
@@ -41,6 +46,14 @@ class SchedulePreferences(context: Context) {
     var defaultReminderMinutes: Int
         get() = prefs.getInt(KEY_DEFAULT_REMINDER, 15)
         set(value) = prefs.edit().putInt(KEY_DEFAULT_REMINDER, value).apply()
+
+    var darkModeOverride: Boolean?
+        get() = if (prefs.contains(KEY_DARK_MODE)) prefs.getBoolean(KEY_DARK_MODE, false) else null
+        set(value) {
+            prefs.edit().apply {
+                if (value == null) remove(KEY_DARK_MODE) else putBoolean(KEY_DARK_MODE, value)
+            }.apply()
+        }
 
     val sectionTimes: List<String>
         get() {
@@ -76,7 +89,8 @@ class SchedulePreferences(context: Context) {
         reminderEnabled = reminderEnabled,
         defaultReminderMinutes = defaultReminderMinutes,
         sectionTimes = sectionTimes,
-        sectionEndTimes = sectionEndTimes
+        sectionEndTimes = sectionEndTimes,
+        weekMotionStyle = weekMotionStyle.storedValue
     )
 
     fun applySnapshot(snapshot: SettingsSnapshot) {
@@ -92,6 +106,7 @@ class SchedulePreferences(context: Context) {
             .putInt(KEY_DEFAULT_REMINDER, snapshot.defaultReminderMinutes)
             .putString(KEY_SECTION_TIMES, times.joinToString(","))
             .putString(KEY_SECTION_END_TIMES, endTimes.joinToString(","))
+            .putString(KEY_WEEK_MOTION, WeekMotionStyle.fromStoredValue(snapshot.weekMotionStyle).storedValue)
             .apply()
     }
 
@@ -102,9 +117,11 @@ class SchedulePreferences(context: Context) {
         private const val KEY_SHOW_TIME = "show_time"
         private const val KEY_SHOW_INACTIVE_COURSES = "show_inactive_courses"
         private const val KEY_SECTION_HEIGHT = "section_height_dp"
+        private const val KEY_WEEK_MOTION = "week_motion_style"
         private const val KEY_COMPACT_DENSITY_MIGRATED = "compact_density_migrated_v2"
         private const val KEY_REMINDER_ENABLED = "reminder_enabled"
         private const val KEY_DEFAULT_REMINDER = "default_reminder_minutes"
+        private const val KEY_DARK_MODE = "dark_mode"
         private const val KEY_SECTION_TIMES = "section_times"
         private const val KEY_SECTION_END_TIMES = "section_end_times"
         private const val DEFAULT_SECTION_DURATION_MINUTES = 45

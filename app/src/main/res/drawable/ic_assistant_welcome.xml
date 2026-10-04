@@ -1,0 +1,5 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="64dp" android:height="64dp" android:viewportWidth="64" android:viewportHeight="64">
+    <path android:fillColor="@color/assistant_accent" android:pathData="M18,4H46Q60,4 60,18V46Q60,60 46,60H18Q4,60 4,46V18Q4,4 18,4" />
+    <path android:fillColor="@color/assistant_on_accent" android:pathData="M30,18L34,28L44,32L34,36L30,46L26,36L16,32L26,28z" />
+    <path android:fillColor="@color/assistant_prompt_change" android:pathData="M45,15L46.5,19.5L51,21L46.5,22.5L45,27L43.5,22.5L39,21L43.5,19.5z" />
+</vector>

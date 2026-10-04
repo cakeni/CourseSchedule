@@ -65,7 +65,7 @@
                 app:cardBackgroundColor="@color/primary_container"
                 app:cardCornerRadius="22dp"
                 app:cardElevation="0dp"
-                app:rippleColor="@color/today_highlight">
+                app:rippleColor="@color/control_focus_overlay" android:stateListAnimator="@animator/press_feedback">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -134,7 +134,7 @@
                 android:textStyle="bold" />
 
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardImportJson"
+                android:id="@+id/cardImportAssistant"
                 android:layout_width="match_parent"
                 android:layout_height="96dp"
                 android:clickable="true"
@@ -142,9 +142,9 @@
                 app:cardBackgroundColor="@color/surface"
                 app:cardCornerRadius="18dp"
                 app:cardElevation="0dp"
-                app:rippleColor="@color/primary_container"
+                app:rippleColor="@color/control_focus_overlay"
                 app:strokeColor="@color/divider"
-                app:strokeWidth="1dp">
+                app:strokeWidth="1dp" android:stateListAnimator="@animator/press_feedback">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -156,7 +156,75 @@
                     <FrameLayout
                         android:layout_width="52dp"
                         android:layout_height="52dp"
-                        android:background="@drawable/bg_icon_tile">
+                        android:background="@android:color/transparent">
+
+                        <ImageView
+                            android:layout_width="28dp"
+                            android:layout_height="28dp"
+                            android:layout_gravity="center"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_assistant"
+                            app:tint="@color/primary" />
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="14dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/import_from_assistant"
+                            android:textColor="@color/text_primary"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="3dp"
+                            android:text="@string/assistant_import_description"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_chevron_right_gray"
+                        app:tint="@color/text_tertiary" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardImportJson"
+                android:layout_width="match_parent"
+                android:layout_height="96dp"
+                android:layout_marginTop="12dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardBackgroundColor="@color/surface"
+                app:cardCornerRadius="18dp"
+                app:cardElevation="0dp"
+                app:rippleColor="@color/control_focus_overlay"
+                app:strokeColor="@color/divider"
+                app:strokeWidth="1dp" android:stateListAnimator="@animator/press_feedback">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="16dp">
+
+                    <FrameLayout
+                        android:layout_width="52dp"
+                        android:layout_height="52dp"
+                        android:background="@android:color/transparent">
 
                         <ImageView
                             android:layout_width="28dp"
@@ -210,9 +278,9 @@
                 app:cardBackgroundColor="@color/surface"
                 app:cardCornerRadius="18dp"
                 app:cardElevation="0dp"
-                app:rippleColor="@color/primary_container"
+                app:rippleColor="@color/control_focus_overlay"
                 app:strokeColor="@color/divider"
-                app:strokeWidth="1dp">
+                app:strokeWidth="1dp" android:stateListAnimator="@animator/press_feedback">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -224,7 +292,7 @@
                     <FrameLayout
                         android:layout_width="52dp"
                         android:layout_height="52dp"
-                        android:background="@drawable/bg_icon_tile">
+                        android:background="@android:color/transparent">
 
                         <ImageView
                             android:layout_width="28dp"
@@ -312,13 +380,16 @@
         app:itemActiveIndicatorStyle="@style/CourseScheduleBottomNavigationActiveIndicator"
         app:itemIconSize="22dp"
         app:itemIconTint="@color/nav_item_color"
-        app:itemRippleColor="@color/primary_container"
+        app:itemRippleColor="@color/control_focus_overlay"
         app:itemTextColor="@color/nav_item_color"
         app:labelVisibilityMode="labeled"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:menu="@menu/menu_bottom_navigation" />
+        app:menu="@menu/menu_bottom_navigation"
+        app:itemTextAppearanceActive="@style/CourseSchedule.NavigationLabel" app:itemTextAppearanceInactive="@style/CourseSchedule.NavigationLabel"
+        app:itemPaddingTop="12dp" app:itemPaddingBottom="12dp"
+        app:itemHorizontalTranslationEnabled="false" />
 
     <com.google.android.material.progressindicator.CircularProgressIndicator
         android:id="@+id/progressImport"

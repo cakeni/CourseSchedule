@@ -31,7 +31,7 @@
         android:layout_width="0dp"
         android:layout_height="40dp"
         android:layout_marginEnd="92dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
+        android:background="@drawable/control_focus"
         android:clickable="true"
         android:contentDescription="@string/open_source_header_link"
         android:ellipsize="end"
@@ -50,13 +50,13 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintWidth_percent="0.36" />
+        app:layout_constraintWidth_percent="0.36"  android:stateListAnimator="@animator/press_feedback_row" />
 
     <View
         android:id="@+id/toolbarDivider"
         android:layout_width="0dp"
         android:layout_height="1dp"
-        android:background="#5CFFFFFF"
+        android:background="@color/toolbar_divider"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/toolbar" />
@@ -78,11 +78,11 @@
             android:id="@+id/btnPreviousWeek"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
+            android:background="@drawable/control_focus"
             android:contentDescription="@string/previous_week"
             android:padding="8dp"
             android:src="@drawable/ic_chevron_left"
-            app:tint="@color/text_secondary" />
+            app:tint="@color/text_secondary"  android:stateListAnimator="@animator/press_feedback_icon" />
 
         <LinearLayout
             android:id="@+id/weekInfo"
@@ -90,11 +90,11 @@
             android:layout_height="match_parent"
             android:layout_marginHorizontal="4dp"
             android:layout_weight="1"
-            android:background="?attr/selectableItemBackground"
+            android:background="@drawable/control_focus"
             android:clickable="true"
             android:focusable="true"
             android:gravity="center"
-            android:orientation="vertical">
+            android:orientation="vertical" android:stateListAnimator="@animator/press_feedback_row">
 
             <TextView
                 android:id="@+id/tvCurrentWeek"
@@ -121,11 +121,11 @@
             android:id="@+id/btnNextWeek"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
+            android:background="@drawable/control_focus"
             android:contentDescription="@string/next_week"
             android:padding="8dp"
             android:src="@drawable/ic_chevron_right"
-            app:tint="@color/text_secondary" />
+            app:tint="@color/text_secondary"  android:stateListAnimator="@animator/press_feedback_icon" />
     </LinearLayout>
 
     <com.google.android.material.progressindicator.LinearProgressIndicator
@@ -139,7 +139,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/weekSelector"
-        app:trackColor="#42FFFFFF"
+        app:trackColor="@color/progress_track"
+        app:trackCornerRadius="1dp"
         app:trackThickness="2dp" />
 
     <androidx.viewpager2.widget.ViewPager2
@@ -156,6 +157,41 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/weekProgress" />
 
+    <com.courseschedule.ui.CourseContinuityOverlay
+        android:id="@+id/courseContinuityOverlay"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:importantForAccessibility="no"
+        app:layout_constraintTop_toTopOf="@id/weekPager"
+        app:layout_constraintBottom_toBottomOf="@id/weekPager"
+        app:layout_constraintStart_toStartOf="@id/weekPager"
+        app:layout_constraintEnd_toEndOf="@id/weekPager" />
+
+    <View
+        android:id="@+id/weekProgressThumb"
+        android:layout_width="12dp"
+        android:layout_height="12dp"
+        android:alpha="0"
+        android:background="@drawable/bg_week_progress_thumb"
+        android:elevation="2dp"
+        android:scaleX="0.65"
+        android:scaleY="0.65"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@id/weekProgress"
+        app:layout_constraintStart_toStartOf="@id/weekProgress"
+        app:layout_constraintTop_toTopOf="@id/weekProgress" />
+
+    <View
+        android:id="@+id/weekProgressTouchTarget"
+        android:layout_width="0dp"
+        android:layout_height="32dp"
+        android:background="@android:color/transparent"
+        android:importantForAccessibility="no"
+        app:layout_constraintBottom_toBottomOf="@id/weekProgress"
+        app:layout_constraintEnd_toEndOf="@id/weekProgress"
+        app:layout_constraintStart_toStartOf="@id/weekProgress"
+        app:layout_constraintTop_toTopOf="@id/weekProgress" />
+
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigation"
         android:layout_width="0dp"
@@ -165,12 +201,15 @@
         app:itemActiveIndicatorStyle="@style/CourseScheduleBottomNavigationActiveIndicator"
         app:itemIconSize="22dp"
         app:itemIconTint="@color/nav_item_color"
-        app:itemRippleColor="@color/primary_container"
+        app:itemRippleColor="@color/control_focus_overlay"
         app:itemTextColor="@color/nav_item_color"
         app:labelVisibilityMode="labeled"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:menu="@menu/menu_bottom_navigation" />
+        app:menu="@menu/menu_bottom_navigation"
+        app:itemTextAppearanceActive="@style/CourseSchedule.NavigationLabel" app:itemTextAppearanceInactive="@style/CourseSchedule.NavigationLabel"
+        app:itemPaddingTop="12dp" app:itemPaddingBottom="12dp"
+        app:itemHorizontalTranslationEnabled="false" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

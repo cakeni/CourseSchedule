@@ -1,0 +1,6 @@
+{
+  "string": [
+    { "name": "app_name", "value": "晴课表" },
+    { "name": "module_desc", "value": "原生鸿蒙课程表" }
+  ]
+}

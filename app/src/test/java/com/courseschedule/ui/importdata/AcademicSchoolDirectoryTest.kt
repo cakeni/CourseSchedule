@@ -17,14 +17,33 @@ class AcademicSchoolDirectoryTest {
     @Test fun bundledCatalogKeepsEveryReviewedLocalRouteLoadable() {
         val asset = assetFile()
         val entries = AcademicSchoolDirectory.parse(asset.readText())
+        val rawNames = JsonParser.parseString(asset.readText()).asJsonObject.getAsJsonArray("entries")
+            .map { it.asJsonObject.get("name").asString }.toSet()
 
-        assertEquals(3_566, entries.size)
-        assertEquals(2_681, entries.count { it.canImport })
-        assertEquals(765, entries.count { it.needsUserUrl })
+        assertEquals("Dropped: ${rawNames - entries.map { it.name }.toSet()}", 3_566, entries.size)
+        assertEquals(2_861, entries.count { it.canImport })
+        assertEquals(585, entries.count { it.needsUserUrl })
         assertEquals(120, entries.count { !it.canImport && !it.needsUserUrl })
         assertEquals(984, entries.count { it.sourceType == "ziyan" && it.canImport })
         assertEquals(104, entries.count { it.sourceType == "ziyan" && !it.canImport })
-        assertEquals(935, entries.count { it.allowCleartext })
+        assertEquals(1_087, entries.count { it.allowCleartext })
+        assertEquals(87, entries.count { it.verified })
+        assertTrue(entries.filter { it.verified }.all { it.canImport })
+
+        listOf(
+            "杭州电子科技大学信息工程学院",
+            "河北北方学院动物科技学院",
+            "吉林建筑科技学院"
+        ).forEach { name ->
+            val special = entries.single { it.name == name }
+            assertTrue(special.needsUserUrl)
+            assertFalse(special.verified)
+        }
+        listOf("曹妃甸职业技术学院", "南京理工大学").forEach { name ->
+            val activated = entries.single { it.name == name }
+            assertTrue(activated.canImport)
+            assertFalse(activated.verified)
+        }
 
         val sudaPost = entries.first { it.sourceType == "suda_post" && it.needsUserUrl }
         assertEquals("structured", sudaPost.profile!!.id)
@@ -64,7 +83,7 @@ class AcademicSchoolDirectoryTest {
         assertEquals(AcademicAdapterRegistry.GDEI_NESTED_GRID, gdei.adapterId)
     }
 
-    @Test fun bundledV3MapsAdaptersAndLeavesAll578UnverifiedFamilyRowsBlocked() {
+    @Test fun bundledV3KeepsAdapterMetadataForRowsStillAwaitingAnEntry() {
         val root = JsonParser.parseString(assetFile().readText()).asJsonObject
         assertEquals(3, root.get("schemaVersion").asInt)
         val entries = root.getAsJsonArray("entries").map { it.asJsonObject }
@@ -80,11 +99,11 @@ class AcademicSchoolDirectoryTest {
             row.get("support").asString == "adapter_required" &&
                 row.get("sourceType").asString in expectedAdapters
         }
-        assertEquals(578, blocked.size)
+        assertEquals(451, blocked.size)
         blocked.forEach { row ->
             assertEquals(expectedAdapters.getValue(row.get("sourceType").asString), row.get("adapterId").asString)
         }
-        assertFalse(entries.any { it.get("support").asString == "verified" })
+        assertEquals(87, entries.count { it.get("support").asString == "verified" })
     }
 
     @Test fun bundledCatalogContainsNoSessionIdentifiers() {
@@ -249,6 +268,29 @@ class AcademicSchoolDirectoryTest {
         assertFalse(school.allowsTimetable("https://auth.example.edu.cn/login"))
         assertTrue(school.allowsTimetable("https://jw.example.edu.cn/jsxsd/xskb/list.do"))
         assertFalse(school.allowsTimetable("https://portal.example.edu.cn/login"))
+    }
+
+    @Test fun bundledExperimentalUrlExceptionsArePerSchoolAndKeepSpaRoutes() {
+        val entries = AcademicSchoolDirectory.parse(
+            """{"schemaVersion":3,"entries":[
+              {"id":"local","name":"内网大学","profile":"qiangzhi",
+               "url":"http://192.168.8.7:8080/login?language=zh_CN#/student",
+               "support":"experimental","category":"undergraduate","sourceType":"qz",
+               "adapterId":"qiangzhi_standard","cleartext":true,"allowIpAddress":true,"retainQuery":true},
+              {"id":"vpn","name":"门户大学","profile":"qiangzhi",
+               "url":"https://webvpn.example.edu.cn/login","support":"experimental",
+               "category":"undergraduate","sourceType":"qz","adapterId":"qiangzhi_standard",
+               "allowVpnOrigin":true}
+            ]}"""
+        )
+        assertEquals(2, entries.size)
+        val local = entries.single { it.id == "local" }
+        assertTrue(local.canImport)
+        assertEquals("http://192.168.8.7:8080/login?language=zh_CN#/student", local.url)
+        assertTrue(local.toAcademicSchool()!!.allowsNavigation(local.url))
+        val vpn = entries.single { it.id == "vpn" }
+        assertTrue(vpn.canImport)
+        assertTrue(vpn.toAcademicSchool()!!.allowsNavigation(vpn.url))
     }
 
     @Test fun versionThreeRejectsAnAdapterFromAnotherFamily() {

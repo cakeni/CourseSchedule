@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android" android:drawable="@drawable/nav_schedule_parts">
+    <target android:name="page" android:animation="@animator/nav_page_fold" />
+    <target android:name="page" android:animation="@animator/nav_page_turn" />
+</animated-vector>

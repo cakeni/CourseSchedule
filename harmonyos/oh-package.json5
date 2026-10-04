@@ -1,0 +1,8 @@
+{
+  "modelVersion": "5.0.0",
+  "name": "qing-schedule-harmonyos",
+  "version": "0.1.0",
+  "description": "晴课表原生 HarmonyOS NEXT 版本",
+  "dependencies": {},
+  "devDependencies": {}
+}

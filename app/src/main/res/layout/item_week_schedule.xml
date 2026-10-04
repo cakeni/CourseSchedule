@@ -62,7 +62,7 @@
             android:layout_width="280dp"
             android:layout_height="wrap_content"
             android:layout_gravity="top|center_horizontal"
-            android:layout_marginTop="96dp"
+            android:layout_marginTop="64dp"
             android:gravity="center"
             android:orientation="vertical"
             android:visibility="gone"
@@ -70,18 +70,16 @@
 
             <FrameLayout
                 android:id="@+id/emptyIconContainer"
-                android:layout_width="72dp"
-                android:layout_height="72dp"
-                android:background="@drawable/bg_empty_icon"
+                android:layout_width="128dp"
+                android:layout_height="128dp"
                 android:contentDescription="@string/no_courses_this_week">
 
-                <ImageView
-                    android:layout_width="34dp"
-                    android:layout_height="34dp"
+                <com.courseschedule.view.EmptyCalendarView
+                    android:id="@+id/emptyCalendar"
+                    android:layout_width="128dp"
+                    android:layout_height="128dp"
                     android:layout_gravity="center"
-                    android:contentDescription="@null"
-                    android:src="@drawable/ic_today"
-                    app:tint="@color/primary" />
+                    android:contentDescription="@null" />
             </FrameLayout>
 
             <TextView
@@ -91,23 +89,30 @@
                 android:layout_marginTop="12dp"
                 android:text="@string/no_courses_this_week"
                 android:textColor="@color/text_primary"
-                android:textSize="17sp"
-                android:textStyle="bold" />
+                android:textSize="16sp"
+                android:fontFamily="sans-serif-medium" />
+
+            <TextView
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="8dp" android:text="@string/empty_schedule_hint"
+                android:textColor="@color/text_secondary" android:textSize="12sp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnEmptyAdd"
+                style="@style/CourseSchedule.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="44dp"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="8dp"
                 android:minWidth="128dp"
                 android:text="@string/add_course"
                 android:textAllCaps="false"
                 android:textSize="14sp"
-                app:backgroundTint="@color/primary"
+                android:textColor="@color/primary"
                 app:cornerRadius="8dp"
                 app:icon="@drawable/ic_add"
                 app:iconGravity="textStart"
-                app:iconTint="@color/on_primary" />
+                app:iconSize="18dp"
+                app:iconTint="@color/primary" />
         </LinearLayout>
     </FrameLayout>
 </LinearLayout>

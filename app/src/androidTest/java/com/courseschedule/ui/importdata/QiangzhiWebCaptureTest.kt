@@ -43,7 +43,7 @@ class QiangzhiWebCaptureTest {
     }
 
     @Test fun readsTrustedNestedFrameButSkipsAnotherSiteBehindSameWebVpnOrigin() {
-        val trusted = school.timetableUrl + "fixture"
+        val trusted = school.timetablePrefixes.first { it.startsWith("https://webvpn.sdufe.edu.cn/http/") } + "fixture"
         val untrusted = "https://webvpn.sdufe.edu.cn/http/unregistered/fixture"
         val wrapper = "<iframe style='width:100%;height:320px' src='$untrusted'></iframe>" +
             "<iframe style='width:100%;height:320px' src='$trusted'></iframe>"

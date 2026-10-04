@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.CourseSchedule.Base" parent="Theme.MaterialComponents.Light.NoActionBar">
+    <style name="Theme.CourseSchedule.Base" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Primary color -->
         <item name="colorPrimary">@color/primary</item>
         <item name="colorPrimaryVariant">@color/primary_variant</item>
@@ -13,11 +13,34 @@
 
         <!-- Background -->
         <item name="android:colorBackground">@color/background</item>
+        <item name="android:colorBackgroundFloating">@color/surface</item>
         <item name="colorOnBackground">@color/on_background</item>
 
         <!-- Surface -->
         <item name="colorSurface">@color/surface</item>
         <item name="colorOnSurface">@color/on_surface</item>
+        <item name="elevationOverlayEnabled">false</item>
+
+        <!-- Native dialogs and controls should use the same semantic palette. -->
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
+        <item name="android:textColorHint">@color/text_tertiary</item>
+        <item name="android:colorAccent">@color/primary</item>
+        <item name="colorAccent">@color/primary</item>
+        <item name="colorControlActivated">@color/primary</item>
+        <item name="colorControlNormal">@color/text_secondary</item>
+        <item name="colorControlHighlight">@android:color/transparent</item>
+        <item name="android:colorControlHighlight">@android:color/transparent</item>
+        <item name="selectableItemBackground">@drawable/control_focus</item>
+        <item name="selectableItemBackgroundBorderless">@drawable/control_focus</item>
+        <item name="materialButtonStyle">@style/CourseSchedule.Button</item>
+        <item name="imageButtonStyle">@style/CourseSchedule.ImageButton</item>
+        <item name="android:imageButtonStyle">@style/CourseSchedule.ImageButton</item>
+        <item name="toolbarNavigationButtonStyle">@style/CourseSchedule.ToolbarButton</item>
+        <item name="actionButtonStyle">@style/CourseSchedule.ActionButton</item>
+        <item name="actionOverflowButtonStyle">@style/CourseSchedule.OverflowButton</item>
+        <item name="alertDialogTheme">@style/ThemeOverlay.CourseSchedule.Dialog.Alert</item>
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.CourseSchedule.MaterialAlertDialog</item>
 
         <!-- Error -->
         <item name="colorError">@color/error</item>
@@ -26,13 +49,93 @@
         <!-- Status bar -->
         <item name="android:statusBarColor">@color/background</item>
         <item name="android:navigationBarColor">@color/navigation_surface</item>
-        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightStatusBar">@bool/window_light_system_bars</item>
         <item name="android:fontFamily">sans</item>
         <item name="android:windowActivityTransitions">false</item>
         <item name="android:windowBackground">@color/background</item>
     </style>
 
     <style name="Theme.CourseSchedule" parent="Theme.CourseSchedule.Base" />
+
+    <style name="Theme.CourseSchedule.Assistant" parent="Theme.CourseSchedule">
+        <item name="android:windowDisablePreview">true</item>
+        <item name="colorPrimary">@color/assistant_accent</item>
+        <item name="colorPrimaryVariant">@color/assistant_accent</item>
+        <item name="colorOnPrimary">@color/assistant_on_accent</item>
+        <item name="colorSecondary">@color/assistant_accent</item>
+        <item name="colorOnSecondary">@color/assistant_on_accent</item>
+        <item name="colorSurface">@color/assistant_background</item>
+        <item name="colorOnSurface">@color/assistant_text</item>
+        <item name="colorOnBackground">@color/assistant_text</item>
+        <item name="colorControlNormal">@color/assistant_text_secondary</item>
+        <item name="colorControlActivated">@color/assistant_accent</item>
+        <item name="android:colorAccent">@color/assistant_accent</item>
+        <item name="android:colorBackground">@color/assistant_background</item>
+        <item name="android:windowBackground">@color/assistant_background</item>
+        <item name="android:textColorPrimary">@color/assistant_text</item>
+        <item name="android:textColorSecondary">@color/assistant_text_secondary</item>
+        <item name="alertDialogTheme">@style/ThemeOverlay.CourseSchedule.AssistantDialog</item>
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.CourseSchedule.AssistantDialog</item>
+        <item name="bottomSheetDialogTheme">@style/ThemeOverlay.CourseSchedule.AssistantSheet</item>
+    </style>
+
+    <style name="ThemeOverlay.CourseSchedule.AssistantSheet" parent="ThemeOverlay.MaterialComponents.BottomSheetDialog">
+        <item name="colorPrimary">@color/assistant_accent</item>
+        <item name="colorOnPrimary">@color/assistant_on_accent</item>
+        <item name="colorSurface">@color/assistant_background</item>
+        <item name="colorOnSurface">@color/assistant_text</item>
+        <item name="bottomSheetStyle">@style/Assistant.BottomSheet</item>
+    </style>
+
+    <style name="Assistant.BottomSheet" parent="Widget.MaterialComponents.BottomSheet.Modal">
+        <item name="backgroundTint">@color/assistant_background</item>
+        <item name="shapeAppearanceOverlay">@style/Assistant.SheetShape</item>
+        <item name="android:elevation">0dp</item>
+    </style>
+
+    <style name="Assistant.SheetShape" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopLeft">28dp</item>
+        <item name="cornerSizeTopRight">28dp</item>
+    </style>
+
+    <style name="ThemeOverlay.CourseSchedule.AssistantDialog" parent="ThemeOverlay.CourseSchedule.MaterialAlertDialog">
+        <item name="colorPrimary">@color/assistant_accent</item>
+        <item name="colorSurface">@color/assistant_background</item>
+        <item name="colorOnSurface">@color/assistant_text</item>
+        <item name="android:colorBackground">@color/assistant_background</item>
+        <item name="android:colorBackgroundFloating">@color/assistant_background</item>
+        <item name="alertDialogStyle">@style/Assistant.Dialog</item>
+    </style>
+
+    <style name="Assistant.Dialog" parent="CourseScheduleAlertDialog">
+        <item name="backgroundTint">@color/assistant_background</item>
+    </style>
+
+    <style name="ShapeAppearance.CourseSchedule.Dialog" parent="ShapeAppearance.MaterialComponents.LargeComponent">
+        <item name="cornerSize">20dp</item>
+    </style>
+
+    <style name="CourseScheduleAlertDialog" parent="MaterialAlertDialog.MaterialComponents">
+        <item name="backgroundTint">@color/surface</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.CourseSchedule.Dialog</item>
+    </style>
+
+    <style name="ThemeOverlay.CourseSchedule.Dialog.Alert" parent="ThemeOverlay.MaterialComponents.Dialog.Alert">
+        <item name="android:colorBackground">@color/surface</item>
+        <item name="android:colorBackgroundFloating">@color/surface</item>
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorOnSurface">@color/on_surface</item>
+        <item name="alertDialogStyle">@style/CourseScheduleAlertDialog</item>
+    </style>
+
+    <style name="ThemeOverlay.CourseSchedule.MaterialAlertDialog" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="android:colorBackground">@color/surface</item>
+        <item name="android:colorBackgroundFloating">@color/surface</item>
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorOnSurface">@color/on_surface</item>
+        <item name="alertDialogStyle">@style/CourseScheduleAlertDialog</item>
+    </style>
 
     <style name="CourseScheduleDayLabel">
         <item name="android:layout_width">0dp</item>
@@ -106,6 +209,7 @@
     </style>
 
     <style name="CourseScheduleSettingsRow">
+        <item name="android:stateListAnimator">@animator/press_feedback_row</item>
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">62dp</item>
         <item name="android:gravity">center_vertical</item>
@@ -136,7 +240,7 @@
     <style name="CourseScheduleBottomNavigationActiveIndicator" parent="">
         <item name="android:width">58dp</item>
         <item name="android:height">34dp</item>
-        <item name="android:color">@color/primary_container</item>
+        <item name="android:color">@android:color/transparent</item>
         <item name="shapeAppearance">@style/ShapeAppearance.CourseSchedule.NavigationIndicator</item>
         <item name="marginHorizontal">4dp</item>
     </style>
@@ -148,11 +252,11 @@
     </style>
 
     <!-- 按钮样式 -->
-    <style name="PrimaryButton" parent="Widget.MaterialComponents.Button">
+    <style name="PrimaryButton" parent="CourseSchedule.Button">
         <item name="backgroundTint">@color/primary</item>
     </style>
 
-    <style name="SecondaryButton" parent="Widget.MaterialComponents.Button.OutlinedButton">
+    <style name="SecondaryButton" parent="CourseSchedule.OutlinedButton">
         <item name="strokeColor">@color/primary</item>
         <item name="android:textColor">@color/primary</item>
     </style>
