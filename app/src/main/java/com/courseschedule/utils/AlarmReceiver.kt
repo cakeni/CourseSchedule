@@ -117,7 +117,7 @@ class AlarmReceiver : BroadcastReceiver() {
         val manager = context.getSystemService(NotificationManager::class.java)
         manager.createNotificationChannel(NotificationChannel(CHANNEL_ID, "课程提醒",
             NotificationManager.IMPORTANCE_HIGH).apply {
-            description = "课程开始前及学习事项截止的提醒通知"
+            description = "课程、课业和生活事项的提醒通知"
             enableVibration(true)
         })
         if (!notificationsAvailable(context)) {
@@ -133,7 +133,7 @@ class AlarmReceiver : BroadcastReceiver() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification)
-            .setContentTitle(if (taskId != null) "学习事项提醒" else context.getString(if (tag == "test") R.string.reminder_test_title else R.string.course_reminders))
+            .setContentTitle(if (taskId != null) "事项提醒" else context.getString(if (tag == "test") R.string.reminder_test_title else R.string.course_reminders))
             .setContentText(content)
             .setStyle(NotificationCompat.BigTextStyle().bigText(content))
             .setPriority(NotificationCompat.PRIORITY_HIGH)

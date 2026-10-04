@@ -25,8 +25,9 @@
                 <com.google.android.material.button.MaterialButton android:id="@+id/btnKindHomework" style="@style/Study.Segment" android:text="作业" />
                 <com.google.android.material.button.MaterialButton android:id="@+id/btnKindExam" style="@style/Study.Segment" android:text="考试" />
                 <com.google.android.material.button.MaterialButton android:id="@+id/btnKindReport" style="@style/Study.Segment" android:text="报告" />
+                <com.google.android.material.button.MaterialButton android:id="@+id/btnKindReminder" style="@style/Study.Segment" android:text="提醒" />
             </LinearLayout>
-            <TextView style="@style/Study.FieldLabel" android:text="截止安排" />
+            <TextView android:id="@+id/tvTaskScheduleLabel" style="@style/Study.FieldLabel" android:text="截止安排" />
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/bg_study_group" android:orientation="vertical">
                 <LinearLayout android:id="@+id/btnTaskDate" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="56dp"
                     android:orientation="horizontal" android:paddingHorizontal="16dp" android:paddingVertical="14dp" android:gravity="center_vertical"

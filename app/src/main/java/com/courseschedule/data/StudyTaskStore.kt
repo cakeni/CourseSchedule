@@ -11,6 +11,7 @@ class StudyTaskStore(private val context: Context) {
     private val db = AppDatabase.getDatabase(context)
     suspend fun save(task: StudyTask, original: StudyTask? = null): StudyTask {
         StudyTaskRules.validate(task)
+        StudyTaskRules.validateReminderTime(task, original)
         val saved = db.withTransaction {
             require(db.semesterDao().getSemesterById(task.semesterId) != null) { "学期已删除，请重新打开。" }
             task.courseId?.let { id ->

@@ -17,4 +17,7 @@
     <com.google.android.material.button.MaterialButton android:id="@+id/btnPromptDelete" style="@style/CourseSchedule.TextButton"
         android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="56dp" android:gravity="start|center_vertical"
         android:text="@string/assistant_example_delete" android:textSize="14sp" android:textColor="@color/assistant_accent" app:cornerRadius="14dp" app:icon="@drawable/ic_assistant_delete" app:iconSize="20dp" app:iconTint="@color/assistant_accent" />
+    <com.google.android.material.button.MaterialButton android:id="@+id/btnPromptReminder" style="@style/CourseSchedule.TextButton"
+        android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="56dp" android:gravity="start|center_vertical"
+        android:text="明天12:00提醒我吃饭" android:textSize="14sp" android:textColor="@color/assistant_accent" app:cornerRadius="14dp" app:icon="@drawable/ic_assistant_reminder" app:iconSize="20dp" app:iconTint="@color/assistant_accent" />
 </LinearLayout>

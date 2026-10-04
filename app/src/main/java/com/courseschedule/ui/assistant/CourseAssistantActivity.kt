@@ -111,6 +111,7 @@ class CourseAssistantActivity : AppCompatActivity() {
         binding.btnExampleSimple.setOnClickListener { fillExample(R.string.assistant_example_simple) }
         binding.btnExampleDetails.setOnClickListener { fillExample(R.string.assistant_example_details) }
         binding.btnExampleQuery.setOnClickListener { fillExample(R.string.assistant_example_query) }
+        binding.btnExampleReminder.setOnClickListener { fillExample(R.string.assistant_example_reminder) }
         binding.btnExampleDelete.setOnClickListener { fillExample(R.string.assistant_example_delete) }
         binding.btnConfirmPending.setOnClickListener { viewModel.confirmPending() }
         binding.btnCancelPending.setOnClickListener { viewModel.cancelPending() }
@@ -175,30 +176,36 @@ class CourseAssistantActivity : AppCompatActivity() {
                 row.root.tag = message.id
                 val user = message.role == "user"
                 row.root.gravity = if (user) Gravity.END else Gravity.START
-                val inset = (32 * resources.displayMetrics.density).toInt()
+                val inset = ((if (user) 48 else 4) * resources.displayMetrics.density).toInt()
                 row.root.setPaddingRelative(if (user) inset else 0, 0, if (user) 0 else inset, 0)
                 row.messageBubble.setCardBackgroundColor(ContextCompat.getColor(this,
-                    if (user) R.color.assistant_soft_surface else R.color.assistant_background))
+                    if (user) R.color.assistant_selected_surface else if (message.kind == "error") R.color.assistant_pending_surface else R.color.assistant_soft_surface))
                 val sender = getString(if (user) R.string.assistant_you else R.string.assistant_name)
                 val kind = when (message.kind) {
-                    "result" -> " · 执行结果"
-                    "confirmation" -> " · 待确认"
+                    "result", "reminder_result" -> " · 已保存"
+                    "confirmation" -> if (message == messages.lastOrNull() && viewModel.pendingChanges.value != null) " · 待确认" else " · 操作方案"
                     "error" -> " · 未完成"
                     "interrupted" -> " · 已中断"
                     "cancel" -> " · 已取消"
                     else -> ""
                 }
-                row.tvMessageSender.visibility = if (user) View.GONE else View.VISIBLE
+                row.messageHeader.visibility = if (user) View.GONE else View.VISIBLE
+                row.messageBubble.strokeWidth = if (user) 0 else resources.displayMetrics.density.toInt().coerceAtLeast(1)
                 row.tvMessageSender.text = "$sender$kind"
-                row.tvMessageSender.setTextColor(ContextCompat.getColor(this,
-                    R.color.assistant_text_secondary))
+                row.tvMessageSender.setTextColor(ContextCompat.getColor(this, R.color.assistant_accent))
                 row.tvMessageBody.setTextColor(ContextCompat.getColor(this,
                     R.color.assistant_text))
                 row.tvMessageBody.maxWidth = resources.displayMetrics.widthPixels -
                     (96 * resources.displayMetrics.density).toInt()
-                row.tvMessageBody.text = if (message.kind == "confirmation" && message == messages.lastOrNull() &&
-                    viewModel.pendingChanges.value != null && viewModel.hasNewerMessages.value != true)
-                    message.content.substringBefore("\n\n") else message.content
+                val activePlan = message.kind == "confirmation" && message == messages.lastOrNull() &&
+                    viewModel.pendingChanges.value != null && viewModel.hasNewerMessages.value != true
+                row.tvMessageBody.text = if (message.kind == "confirmation") message.content.substringBefore("\n\n") else message.content
+                row.btnMessageDetails.visibility = if (message.kind == "confirmation" && !activePlan && message.content.contains("\n\n")) View.VISIBLE else View.GONE
+                row.btnMessageDetails.setOnClickListener {
+                    val expanded = row.tvMessageBody.text.toString() == message.content
+                    row.tvMessageBody.text = if (expanded) message.content.substringBefore("\n\n") else message.content
+                    row.btnMessageDetails.text = if (expanded) "查看原方案" else "收起方案"
+                }
                 row.ivMessageImage.visibility = if (message.imageRef != null) View.VISIBLE else View.GONE
                 row.ivMessageImage.setImageBitmap(message.imageRef?.let { AssistantImages(this).thumbnail(it) })
                 row.ivMessageImage.setOnClickListener { message.imageRef?.let(::showImage) }
@@ -211,6 +218,10 @@ class CourseAssistantActivity : AppCompatActivity() {
                 row.btnViewQueriedCourses.setText(if (message.courseIds.size > 1)
                     R.string.assistant_select_queried_course else R.string.assistant_view_queried_courses)
                 row.btnViewQueriedCourses.setOnClickListener { showQueriedCourses(message.courseIds) }
+                row.btnReminderSettings.visibility = if (message.kind == "reminder_result") View.VISIBLE else View.GONE
+                row.btnReminderSettings.setOnClickListener {
+                    startActivity(Intent(this, SettingsActivity::class.java).putExtra(SettingsActivity.EXTRA_FOCUS_REMINDERS, true))
+                }
                 binding.messagesContainer.addView(row.root)
             }
             if (loadingOlder) {
@@ -235,6 +246,11 @@ class CourseAssistantActivity : AppCompatActivity() {
                 val study = !pending.studyChanges.isNullOrEmpty()
                 binding.tvPendingTitle.setText(if (study) R.string.study_confirm_title else R.string.assistant_pending_title)
                 binding.tvPendingHint.setText(if (study) R.string.study_confirm_hint else R.string.assistant_pending_hint)
+                val reminder = pending.studyChanges?.all { (it.after ?: it.original)?.kind == "reminder" } == true
+                if (reminder) {
+                    binding.tvPendingTitle.text = "核对生活提醒"
+                    binding.tvPendingHint.text = "确认后保存到手机，通过系统通知提醒你。"
+                }
                 val summary = viewModel.pendingSummary(pending)
                 binding.tvPendingSummary.text = SpannableString(summary).apply {
                     Regex("(?m)^变化：.*$").findAll(summary).forEach {
@@ -243,6 +259,7 @@ class CourseAssistantActivity : AppCompatActivity() {
                 }
                 binding.btnConfirmPending.setText(if (pending.courses.isEmpty() && pending.updates.isEmpty() && pending.studyChanges.isNullOrEmpty())
                     R.string.assistant_confirm_delete else R.string.assistant_confirm_changes)
+                if (reminder) binding.btnConfirmPending.text = "保存提醒"
                 binding.etMessage.clearFocus()
                 WindowInsetsControllerCompat(window, binding.root).hide(WindowInsetsCompat.Type.ime())
                 if (initialContentDrawn && viewModel.historyLocation.value == null) {
@@ -333,6 +350,7 @@ class CourseAssistantActivity : AppCompatActivity() {
             else if (pending) R.string.assistant_revision_hint else R.string.assistant_message_hint)
         binding.btnExampleSimple.isEnabled = canChat && !pending
         binding.btnExampleDetails.isEnabled = canChat && !pending
+        binding.btnExampleReminder.isEnabled = canChat && !pending
         binding.btnExampleQuery.isEnabled = canChat && !pending
         binding.btnExampleDelete.isEnabled = canChat && !pending
         binding.historyPanel.btnConfigureApi.isEnabled = !busy
@@ -382,7 +400,7 @@ class CourseAssistantActivity : AppCompatActivity() {
     private fun send() {
         val text = binding.etMessage.text?.toString().orEmpty().trim()
         if ((text.isBlank() && viewModel.imageDraft.value == null) || viewModel.busy.value == true) return
-        if (viewModel.configured.value != true) { showConfig(); return }
+        if (viewModel.configured.value != true && !viewModel.canSendLocally(text)) { showConfig(); return }
         try {
             binding.inputMessage.error = null
             viewModel.send(text, intent.getIntExtra(EXTRA_DISPLAYED_WEEK, 1))
@@ -621,7 +639,7 @@ class CourseAssistantActivity : AppCompatActivity() {
         dialog.setContentView(sheet)
         val examples = listOf(R.id.btnPromptAdd to R.string.assistant_example_simple,
             R.id.btnPromptQuery to R.string.assistant_example_query, R.id.btnPromptChange to R.string.assistant_example_details,
-            R.id.btnPromptDelete to R.string.assistant_example_delete)
+            R.id.btnPromptDelete to R.string.assistant_example_delete, R.id.btnPromptReminder to R.string.assistant_example_reminder)
         examples.forEach { (id, text) -> sheet.findViewById<View>(id).setOnClickListener {
             dialog.dismiss()
             fillExample(text)

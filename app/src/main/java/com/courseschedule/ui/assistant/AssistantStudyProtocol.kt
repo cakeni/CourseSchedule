@@ -26,19 +26,20 @@ internal object AssistantStudyProtocol {
         if (taskAction && has("undo")) { require(!bool(this, "undo")); remove("undo") }
     }
     fun instructions(tasks: List<StudyTask>, pending: AssistantCourseReply?, today: LocalDate): String = """
-        还支持课程关联的学习事项：作业 homework、考试 exam、报告 report，查询和写操作必须使用以下独立动作，不能混入课程操作。
+        还支持课程关联的学习事项：作业 homework、考试 exam、报告 report，以及不需要关联课程的生活提醒 reminder（吃饭、喝水、取快递等），查询和写操作必须使用以下独立动作，不能混入课程操作。
+        用户要求生活提醒时必须使用 kind:reminder，不得声称无法提醒；未指定时间则追问具体日期和钟点。生活提醒默认 reminderMinutes:0，时间必须在未来；当前仅支持单次提醒，重复提醒需说明并询问这一次的日期。
         学习事项不是课程，不能用 courses 或 updates 保存作业和考试；截止时间不可变成上课时间。
         action:"task_change"：taskCreates:[{title,kind,courseName,due:{date:"YYYY-MM-DD",time:"HH:mm"},reminderMinutes,note}]。
         courseName 为真实课名，没有关联课程则省略；同一课名多个上课安排可只按课名关联，不选猜测的id。
         due 必须有明确时间，日期只用 date、dayOffset 或 weekOffset+dayOfWeek 三种之一；明天 dayOffset:1，本周五 weekOffset:0,dayOfWeek:5。
         用户只说某天、晚上或月底而没有明确钟点时先询问，不默认23:59、零点或当前时间；缺少标题也先问。
-        提醒 reminderMinutes：-1不提醒，0截止时，1–10080提前分钟数；未要求提醒则默认-1。不能宣称已开启通知。
+        提醒 reminderMinutes：-1不提醒，0截止时，1–10080提前分钟数；未要求提醒则默认-1；生活提醒除外，默认0。不能宣称已开启通知。
         taskUpdates:[{id,targetTitle, ...用户要求改变的title/kind/courseName/due/reminderMinutes/note,completed:true/false}]。
         taskDeletes:[{id,targetTitle}]；id 和 targetTitle 必须同时匹配真实事项。多个同名事项先询问截止日期，或明确任务编号，不能擅自选一个。
         用户给出任务编号时可填 targetIdExplicit:true；用户给出原截止日期时可填 targetDueDate:"YYYY-MM-DD"，只用于定位，不是新截止日期。
         所有写入、完成和删除先预览，点击确认后执行。撤销课程操作不用于学习事项，事项可在学习事项页编辑/重新打开。
         学习事项动作只填写task开头的字段，不输出courses/updates/deleteIds等课程字段，连空数组也无需输出。
-        action:"task_query",taskQuery:{status:"pending"/"completed"/"all",kind?:"exam"/"homework"/"report",courseName?,title?,window:"all"/"week"/"upcoming"/"overdue"/"range",weekOffset?:0,daysAhead?:7,startDate?,endDate?}。
+        action:"task_query",taskQuery:{status:"pending"/"completed"/"all",kind?:"exam"/"homework"/"report"/"reminder",courseName?,title?,window:"all"/"week"/"upcoming"/"overdue"/"range",weekOffset?:0,daysAhead?:7,startDate?,endDate?}。
         查询由本地执行，不能虚构结果。本周用 week+weekOffset:0；最近考试用 upcoming+daysAhead:30；range日期区间含开始和结束当天。
         今天的日期基准为 $today，学习事项允许截止日在学期外；查询某周按该日期所在自然周计算。
         ${if (!pending?.studyChanges.isNullOrEmpty()) "已有待确认学习事项，补充只能用 action:task_revise,taskRevisions:[{index:0,...需要修正的字段}]，index来自下面待确认顺序；不得更换原目标或新增其他事项，删除项先取消。" else "没有待确认学习事项，不得输出task_revise。"}
@@ -133,12 +134,13 @@ internal object AssistantStudyProtocol {
             courseId = if (name == old?.courseName) old.courseId else matching.singleOrNull()?.id,
             courseName = name, title = optional(row, "title", 120) ?: old?.title ?: error("missing title"),
             kind = optional(row, "kind", 20) ?: old?.kind ?: error("missing kind"), dueAt = dueAt,
-            reminderMinutes = if (row.has("reminderMinutes")) int(row, "reminderMinutes") else old?.reminderMinutes ?: -1,
+            reminderMinutes = if (row.has("reminderMinutes")) int(row, "reminderMinutes") else old?.reminderMinutes ?: if (optional(row, "kind", 20) == "reminder") 0 else -1,
             note = optional(row, "note", 2000) ?: old?.note.orEmpty(),
             completedAt = if (row.has("completed")) { if (bool(row, "completed")) old?.completedAt ?: now else null } else old?.completedAt,
             createdAt = old?.createdAt ?: now, updatedAt = now)
         if (old == null) require(!row.has("completed"))
         StudyTaskRules.validate(task)
+        StudyTaskRules.validateReminderTime(task, old, now)
         return task
     }
 
@@ -181,7 +183,7 @@ internal object AssistantStudyProtocol {
 
     fun summary(changes: List<AssistantStudyChange>) = changes.joinToString("\n\n") { change ->
         when {
-            change.original == null -> "新增学习事项\n${StudyTaskRules.describe(requireNotNull(change.after))}"
+            change.original == null -> "新增${if (change.after?.kind == "reminder") "提醒" else "学习事项"}\n${StudyTaskRules.describe(requireNotNull(change.after))}"
             change.after == null -> "删除学习事项\n${StudyTaskRules.describe(change.original)}"
             else -> "修改学习事项 #${change.original.id}\n原：${StudyTaskRules.describe(change.original)}\n改为：${StudyTaskRules.describe(change.after)}"
         }
