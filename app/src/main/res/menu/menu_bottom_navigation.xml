@@ -6,6 +6,8 @@
         android:icon="@drawable/ic_schedule"
         android:title="@string/schedule" />
 
+    <item android:id="@+id/nav_study" android:icon="@drawable/ic_study_navigation" android:title="@string/study_tab" />
+
     <item
         android:id="@+id/nav_import"
         android:icon="@drawable/ic_import"

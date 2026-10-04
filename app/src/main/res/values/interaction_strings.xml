@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="empty_schedule_hint">添加课程，让接下来的安排一目了然</string>
+</resources>

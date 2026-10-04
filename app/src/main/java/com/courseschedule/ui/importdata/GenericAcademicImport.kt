@@ -74,6 +74,14 @@ internal object GenericAcademicImport {
         return create(system, address, profiles.firstOrNull { it.system == system }?.id)
     }
 
+    fun withAddress(school: AcademicSchool, address: String): AcademicSchool {
+        val definition = profile(school.genericProfileId)
+            ?: profiles.firstOrNull { it.system == school.system }
+            ?: throw ImportFormatException("该学校没有可复用的本地解析器")
+        return createCatalog(definition, address, address.trim().startsWith("http://", ignoreCase = true),
+            adapterId = school.adapterId).copy(name = school.name)
+    }
+
     fun create(profileId: String, address: String): AcademicSchool {
         val profile = profile(profileId) ?: throw ImportFormatException("不支持的教务系统类型")
         return create(profile.system, address, profile.id)
@@ -87,24 +95,31 @@ internal object GenericAcademicImport {
         authenticationUrls: List<String> = emptyList(),
         timetableUrls: List<String> = emptyList(),
         adapterId: String = AcademicAdapterRegistry.defaultAdapterId(profile.id),
-        loginUrls: List<String> = emptyList()
+        loginUrls: List<String> = emptyList(),
+        allowIpAddress: Boolean = false,
+        allowVpnOrigin: Boolean = false,
+        retainQuery: Boolean = false
     ): AcademicSchool {
-        val school = create(profile.system, address, profile.id, allowCleartext, allowNonDefaultPort = true)
+        val school = create(
+            profile.system, address, profile.id, allowCleartext, allowNonDefaultPort = true,
+            allowIpAddress = allowIpAddress, allowVpnOrigin = allowVpnOrigin, retainQuery = retainQuery,
+            retainFragment = true
+        )
         val authenticationUris = authenticationUrls.map {
-            checkedAddress(it, allowCleartext, allowNonDefaultPort = true)
+            checkedAddress(it, allowCleartext, allowNonDefaultPort = true, allowIpAddress = allowIpAddress)
         }
         val timetableUris = timetableUrls.map {
-            checkedAddress(it, allowCleartext, allowNonDefaultPort = true)
+            checkedAddress(it, allowCleartext, allowNonDefaultPort = true, allowIpAddress = allowIpAddress)
         }
         val timetableScopes = timetableUris.map {
-            academicUrlScope(it.toString(), allowCleartext, allowNonDefaultPort = true)
+            academicUrlScope(it.toString(), allowCleartext, allowNonDefaultPort = true, allowIpAddress = allowIpAddress)
                 ?: throw ImportFormatException("课表读取地址范围无效")
         }
         val loginUris = loginUrls.map {
-            checkedAddress(it, allowCleartext, allowNonDefaultPort = true)
+            checkedAddress(it, allowCleartext, allowNonDefaultPort = true, allowIpAddress = allowIpAddress)
         }
         val loginScopes = loginUris.map {
-            academicUrlScope(it.toString(), allowCleartext, allowNonDefaultPort = true)
+            academicUrlScope(it.toString(), allowCleartext, allowNonDefaultPort = true, allowIpAddress = allowIpAddress)
                 ?: throw ImportFormatException("登录地址范围无效")
         }
         if (!AcademicAdapterRegistry.isCompatible(adapterId, profile.system)) {
@@ -116,7 +131,7 @@ internal object GenericAcademicImport {
                 timetableUris.map { it.host.lowercase(Locale.ROOT) } +
                 loginUris.map { it.host.lowercase(Locale.ROOT) },
             authenticationPrefixes = authenticationUris.map {
-                academicUrlScope(it.toString(), allowCleartext, allowNonDefaultPort = true)
+                academicUrlScope(it.toString(), allowCleartext, allowNonDefaultPort = true, allowIpAddress = allowIpAddress)
                     ?: throw ImportFormatException("认证地址范围无效")
             },
             timetablePrefixes = timetableScopes.ifEmpty { school.timetablePrefixes },
@@ -133,22 +148,30 @@ internal object GenericAcademicImport {
         address: String,
         profileId: String?,
         allowCleartext: Boolean = false,
-        allowNonDefaultPort: Boolean = false
+        allowNonDefaultPort: Boolean = false,
+        allowIpAddress: Boolean = false,
+        allowVpnOrigin: Boolean = false,
+        retainQuery: Boolean = false,
+        retainFragment: Boolean = false
     ): AcademicSchool {
-        val uri = checkedAddress(address, allowCleartext, allowNonDefaultPort)
+        val uri = checkedAddress(address, allowCleartext, allowNonDefaultPort, allowIpAddress)
         val host = uri.host.lowercase(Locale.ROOT)
-        val scope = academicUrlScope(uri.toString(), allowCleartext, allowNonDefaultPort)
+        val scope = academicUrlScope(uri.toString(), allowCleartext, allowNonDefaultPort, allowIpAddress)
             ?: throw ImportFormatException("无法确认教务地址的访问范围")
         val origin = "${uri.scheme.lowercase(Locale.ROOT)}://${academicAuthority(uri)}/"
-        if (host.contains("vpn") && scope == origin) {
+        if (!allowVpnOrigin && host.contains("vpn") && scope == origin) {
             throw ImportFormatException("请粘贴 WebVPN 中具体教务资源的地址，而不是 VPN 门户登录地址")
         }
-        // Do not retain pasted tickets, query parameters or fragments in Activity extras/state.
+        // User-pasted URLs lose query/fragment by default; bundled routes may retain them.
         val cleanPath = uri.rawPath.orEmpty()
             .replace(Regex(";jsessionid=[^/]*", RegexOption.IGNORE_CASE), "")
             .ifBlank { "/" }
-        val cleanAddress = "${uri.scheme.lowercase(Locale.ROOT)}://${academicAuthority(uri)}" +
-            cleanPath
+        val cleanAddress = buildString {
+            append("${uri.scheme.lowercase(Locale.ROOT)}://${academicAuthority(uri)}")
+            append(cleanPath)
+            if (retainQuery) uri.rawQuery?.let { append('?').append(it) }
+            if (retainFragment) uri.rawFragment?.let { append('#').append(it) }
+        }
         val timetableScopes = buildList {
             add(scope)
             if (uri.scheme.equals("http", ignoreCase = true)) {
@@ -164,20 +187,24 @@ internal object GenericAcademicImport {
             adapterId = AcademicAdapterRegistry.defaultAdapterId(profileId),
             allowCleartext = allowCleartext,
             cleartextHosts = if (allowCleartext) setOf(host) else emptySet(),
-            allowNonDefaultPort = allowNonDefaultPort
+            allowNonDefaultPort = allowNonDefaultPort,
+            allowIpAddress = allowIpAddress,
+            allowVpnOrigin = allowVpnOrigin,
+            retainQuery = retainQuery
         )
     }
 
     private fun checkedAddress(
         address: String,
         allowCleartext: Boolean = false,
-        allowNonDefaultPort: Boolean = false
+        allowNonDefaultPort: Boolean = false,
+        allowIpAddress: Boolean = false
     ): URI {
         val entered = address.trim().let { if ("://" in it) it else "https://$it" }
-        val uri = academicWebUri(entered, allowCleartext, allowNonDefaultPort)
+        val uri = academicWebUri(entered, allowCleartext, allowNonDefaultPort, allowIpAddress)
             ?: throw ImportFormatException("请输入学校的 HTTPS 网址，不支持明文 HTTP、特殊端口、IP 地址或含账号的地址；也可使用 HTML 文件导入")
         val host = uri.host.lowercase(Locale.ROOT)
-        if ('.' !in host || host.endsWith('.') || host.matches(Regex("[0-9.]+")) ||
+        if ('.' !in host || host.endsWith('.') || !allowIpAddress && host.matches(Regex("[0-9.]+")) ||
             ':' in host || host.endsWith(".local") || host.endsWith(".localhost")) {
             throw ImportFormatException("请填写学校官方域名，不能使用本机或 IP 地址")
         }

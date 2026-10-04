@@ -1,29 +1,41 @@
 package com.courseschedule.ui
 
 import android.Manifest
+import android.animation.ValueAnimator
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.RectF
+import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
+import android.view.HapticFeedbackConstants
+import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.PathInterpolator
 import android.widget.TextView
+import android.widget.PopupWindow
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.view.doOnLayout
 import androidx.core.view.doOnPreDraw
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
+import com.courseschedule.ui.assistant.StudyTasksActivity
 import com.courseschedule.R
 import com.courseschedule.data.entity.Course
 import com.courseschedule.data.entity.Semester
 import com.courseschedule.databinding.ActivityMainBinding
+import com.courseschedule.ui.assistant.CourseAssistantActivity
 import com.courseschedule.domain.ScheduleRules
 import com.courseschedule.ui.addcourse.AddCourseActivity
 import com.courseschedule.ui.importdata.ImportActivity
@@ -31,15 +43,23 @@ import com.courseschedule.ui.settings.SettingsActivity
 import com.courseschedule.domain.SemesterPhase
 import com.courseschedule.domain.SemesterWeekStatus
 import com.courseschedule.utils.SchedulePreferences
+import com.courseschedule.utils.ReminderManager
+import kotlinx.coroutines.launch
 import com.courseschedule.view.CourseTableView
 import com.courseschedule.viewmodel.CourseViewModel
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
-import kotlin.math.abs
+import kotlin.math.roundToInt
+
+internal fun weekAtProgressPosition(x: Float, width: Int, totalWeeks: Int): Int {
+    if (width <= 0 || totalWeeks <= 1) return 1
+    return (x / width * totalWeeks).roundToInt().coerceIn(1, totalWeeks)
+}
 
 /**
  * 主界面 - 课程表显示
@@ -49,7 +69,16 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var viewModel: CourseViewModel
     private lateinit var weekPagerAdapter: WeekPagerAdapter
+    private var courseToolsPopup: PopupWindow? = null
 
+    private var returnPreDraw: android.view.ViewTreeObserver.OnPreDrawListener? = null
+    private var returnTable: CourseTableView? = null
+    private var continuityPosition = 0
+    private var continuityProgress = 0f
+    private val continuityPreDraw = android.view.ViewTreeObserver.OnPreDrawListener {
+        if (continuityProgress > 0f) updateCourseContinuity()
+        true
+    }
     private var currentWeek = 1
     private var currentSemester: Semester? = null
     private var currentCourses: List<Course> = emptyList()
@@ -64,12 +93,24 @@ class MainActivity : AppCompatActivity() {
     private var coursesDataLoaded = false
     private var suppressBottomNavigationMotion = false
     private var hasResumedOnce = false
+    private var weekProgressScrubbing = false
+    private var weekProgressScrubbedWeek = 1
     private var dateHeaderWeek: Int? = null
     private var dateHeaderSemesterId: Long? = null
     private val headerInterpolator = PathInterpolator(0.2f, 0.8f, 0.2f, 1f)
 
     private val pageChangeCallback = object : ViewPager2.OnPageChangeCallback() {
+        override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
+            continuityPosition = position
+            continuityProgress = positionOffset
+            updateCourseContinuity()
+        }
+
         override fun onPageSelected(position: Int) {
+            // Start the selected empty illustration during the page transition,
+            // rather than waiting for idle or carrying an old looping playhead.
+            weekPagerAdapter.selectPage(binding.weekPager, position)
+            if (position != lastPagerPosition) cancelScheduleReturnEntrance()
             val previousPosition = lastPagerPosition
             lastPagerPosition = position
             val week = position + 1
@@ -78,7 +119,9 @@ class MainActivity : AppCompatActivity() {
                 viewModel.setCurrentWeek(week)
             }
             updateWeekDisplay()
-            if (pagerMotionReady && previousPosition >= 0 && previousPosition != position) {
+            if (pagerMotionReady && !weekProgressScrubbing &&
+                previousPosition >= 0 && previousPosition != position
+            ) {
                 pendingPagerMotionPosition = position
                 pendingPagerMotionForward = position > previousPosition
                 animateWeekHeader(forward = pendingPagerMotionForward)
@@ -90,6 +133,14 @@ class MainActivity : AppCompatActivity() {
         }
 
         override fun onPageScrollStateChanged(state: Int) {
+            if (state == ViewPager2.SCROLL_STATE_DRAGGING) {
+                cancelScheduleReturnEntrance()
+                weekPagerAdapter.prepareNeighborIllustrations(binding.weekPager)
+            }
+            if (state == ViewPager2.SCROLL_STATE_IDLE) {
+                continuityProgress = 0f
+                binding.courseContinuityOverlay.clear()
+            }
             if (state != ViewPager2.SCROLL_STATE_IDLE || pendingPagerMotionPosition < 0) return
             playSelectedPageMotion(pendingPagerMotionPosition, pendingPagerMotionForward)
             pendingPagerMotionPosition = -1
@@ -99,7 +150,11 @@ class MainActivity : AppCompatActivity() {
     // 通知权限请求 launcher
     private val notificationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
-    ) { /* 结果忽略：用户拒绝则提醒通知不显示，不影响其他功能 */ }
+    ) { granted ->
+        if (granted) {
+            restoreCourseReminders()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -139,14 +194,9 @@ class MainActivity : AppCompatActivity() {
         binding.weekPager.visibility = View.INVISIBLE
         binding.weekPager.offscreenPageLimit = 1
         binding.weekPager.registerOnPageChangeCallback(pageChangeCallback)
+        binding.root.viewTreeObserver.addOnPreDrawListener(continuityPreDraw)
         binding.weekPager.setPageTransformer { page, position ->
-            val distance = abs(position).coerceIn(0f, 1f)
-            val scale = 1f - (distance * 0.02f)
-            page.alpha = 1f - (distance * 0.16f)
-            page.scaleX = scale
-            page.scaleY = scale
-            page.translationX = -position * dp(14f) * (1f - distance)
-            page.rotationY = 0f
+            // Course changes are drawn on the stationary stage above these pages.
             page.findViewById<CourseTableView>(R.id.courseTableView)?.setPagerOffset(position)
         }
 
@@ -158,17 +208,24 @@ class MainActivity : AppCompatActivity() {
             selectWeek(currentWeek + 1, smoothScroll = true)
         }
 
+        installWeekProgressScrubbing()
+
         binding.weekInfo.setOnClickListener { showWeekPicker() }
         binding.weekInfo.installPressScale(0.97f)
         binding.btnPreviousWeek.installPressScale(0.97f)
         binding.btnNextWeek.installPressScale(0.97f)
 
+        binding.bottomNavigation.stabilizeActiveIndicatorSize()
         binding.bottomNavigation.setOnItemSelectedListener { item ->
             if (suppressBottomNavigationMotion) return@setOnItemSelectedListener true
             val itemView = binding.bottomNavigation.findViewById<View>(item.itemId)
             when (item.itemId) {
                 R.id.nav_home -> {
                     itemView.playNavigationMotion()
+                    true
+                }
+                R.id.nav_study -> {
+                    openTab(Intent(this, StudyTasksActivity::class.java).putExtra(StudyTasksActivity.EXTRA_PRIMARY_PAGE, true))
                     true
                 }
                 R.id.nav_import -> {
@@ -184,6 +241,95 @@ class MainActivity : AppCompatActivity() {
         }
         binding.bottomNavigation.setOnItemReselectedListener { item ->
             binding.bottomNavigation.findViewById<View>(item.itemId)?.playNavigationMotion()
+        }
+    }
+
+    private fun updateCourseContinuity() {
+        binding.courseContinuityOverlay.updatePages(
+            weekPagerAdapter.holderAt(binding.weekPager, continuityPosition),
+            weekPagerAdapter.holderAt(binding.weekPager, continuityPosition + 1),
+            continuityProgress
+        )
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private fun installWeekProgressScrubbing() {
+        binding.weekProgressTouchTarget.setOnTouchListener { view, event ->
+            when (event.actionMasked) {
+                MotionEvent.ACTION_DOWN -> {
+                    if (currentSemester == null) return@setOnTouchListener false
+                    view.parent.requestDisallowInterceptTouchEvent(true)
+                    weekProgressScrubbedWeek = currentWeek
+                    setWeekProgressScrubbing(true)
+                    true
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    val totalWeeks = currentSemester?.totalWeeks ?: return@setOnTouchListener false
+                    val targetWeek = weekAtProgressPosition(event.x, view.width, totalWeeks)
+                    if (targetWeek != weekProgressScrubbedWeek) {
+                        weekProgressScrubbedWeek = targetWeek
+                        view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+                        selectWeek(targetWeek, smoothScroll = false)
+                    }
+                    true
+                }
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    view.parent.requestDisallowInterceptTouchEvent(false)
+                    setWeekProgressScrubbing(false)
+                    true
+                }
+                else -> false
+            }
+        }
+    }
+
+    private fun setWeekProgressScrubbing(scrubbing: Boolean) {
+        if (weekProgressScrubbing == scrubbing) return
+        weekProgressScrubbing = scrubbing
+        if (scrubbing) {
+            pendingPagerMotionPosition = -1
+            positionWeekProgressThumb()
+        }
+
+        binding.weekProgress.animate().cancel()
+        binding.weekProgress.animate()
+            .scaleY(if (scrubbing) 2.5f else 1f)
+            .setDuration(if (scrubbing) 120L else 180L)
+            .setInterpolator(headerInterpolator)
+            .start()
+
+        binding.weekProgressThumb.animate().cancel()
+        if (scrubbing) {
+            binding.weekProgressThumb.visibility = View.VISIBLE
+            binding.weekProgressThumb.animate()
+                .alpha(1f)
+                .scaleX(1f)
+                .scaleY(1f)
+                .setDuration(120L)
+                .setInterpolator(headerInterpolator)
+                .start()
+        } else {
+            binding.weekProgressThumb.animate()
+                .alpha(0f)
+                .scaleX(0.65f)
+                .scaleY(0.65f)
+                .setDuration(160L)
+                .setInterpolator(headerInterpolator)
+                .withEndAction {
+                    if (!weekProgressScrubbing) {
+                        binding.weekProgressThumb.visibility = View.INVISIBLE
+                    }
+                }
+                .start()
+        }
+    }
+
+    private fun positionWeekProgressThumb() {
+        val totalWeeks = currentSemester?.totalWeeks ?: return
+        binding.weekProgress.doOnLayout { progress ->
+            binding.weekProgressThumb.translationX =
+                progress.width * currentWeek / totalWeeks.toFloat() -
+                binding.weekProgressThumb.width / 2f
         }
     }
 
@@ -203,12 +349,59 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        val source = intent.getStringExtra(EXTRA_SCHEDULE_RETURN_SOURCE)
+        intent.removeExtra(EXTRA_SCHEDULE_RETURN_SOURCE)
+        if (!ScheduleReturnMotion.accepts(source)) return
+        cancelScheduleReturnEntrance()
+        // Bind resumed data and measure before the first visible frame.
+        val listener = android.view.ViewTreeObserver.OnPreDrawListener {
+            if (!semesterDataLoaded || !coursesDataLoaded) {
+                false
+            } else {
+                val holder = weekPagerAdapter.currentHolder(binding.weekPager)
+                if (holder == null && weekPagerAdapter.itemCount > 0) {
+                    false
+                } else {
+                    returnPreDraw?.let { binding.root.viewTreeObserver.removeOnPreDrawListener(it) }
+                    returnPreDraw = null
+                    holder?.let {
+                        returnTable = it.binding.courseTableView
+                        returnTable?.playReturnEntrance()
+                    }
+                    true
+                }
+            }
+        }
+        returnPreDraw = listener
+        binding.root.viewTreeObserver.addOnPreDrawListener(listener)
+        binding.root.invalidate()
+    }
+
+    private fun cancelScheduleReturnEntrance() {
+        returnPreDraw?.let { binding.root.viewTreeObserver.removeOnPreDrawListener(it) }
+        returnPreDraw = null
+        returnTable?.cancelReturnEntrance()
+        returnTable = null
+        binding.dateHeader.alpha = 1f
+        binding.weekInfo.alpha = 1f
+    }
+
+    override fun onPause() {
+        courseToolsPopup?.dismiss()
+        cancelScheduleReturnEntrance()
+        continuityProgress = 0f
+        binding.courseContinuityOverlay.clear()
+        super.onPause()
+    }
+
     private fun openTab(intent: Intent) {
         startActivity(intent)
         overridePendingTransition(0, 0)
     }
 
-    private fun playSelectedPageMotion(position: Int, forward: Boolean = true) {
+    private fun playSelectedPageMotion(position: Int, forward: Boolean) {
         if (lastAnimatedPagerPosition == position) return
         binding.weekPager.post {
             if (binding.weekPager.currentItem != position) return@post
@@ -267,6 +460,7 @@ class MainActivity : AppCompatActivity() {
     private fun showWeekPagerWhenReady() {
         if (semesterDataLoaded && coursesDataLoaded) {
             binding.weekPager.visibility = View.VISIBLE
+            weekPagerAdapter.selectPage(binding.weekPager, binding.weekPager.currentItem)
         }
     }
 
@@ -297,7 +491,7 @@ class MainActivity : AppCompatActivity() {
             return
         }
         if (binding.weekPager.adapter?.itemCount == semester.totalWeeks) {
-            binding.weekPager.setCurrentItem(targetWeek - 1, smoothScroll)
+            binding.weekPager.setCurrentItem(targetWeek - 1, smoothScroll && ValueAnimator.areAnimatorsEnabled())
         } else {
             currentWeek = targetWeek
             viewModel.setCurrentWeek(targetWeek)
@@ -472,7 +666,8 @@ class MainActivity : AppCompatActivity() {
         binding.dateHeader.setDate(
             date = dateTitle,
             summary = getString(R.string.toolbar_week_summary, currentWeek, weekday),
-            animate = pagerMotionReady && dateHeaderSemesterId == semester.id &&
+            animate = pagerMotionReady && !weekProgressScrubbing &&
+                dateHeaderSemesterId == semester.id &&
                 previousHeaderWeek != null && previousHeaderWeek != currentWeek,
             forward = currentWeek >= (previousHeaderWeek ?: currentWeek)
         )
@@ -497,12 +692,14 @@ class MainActivity : AppCompatActivity() {
         binding.tvWeekContext.text = buildWeekContext(status, visibleCourses.size)
         binding.weekProgress.max = semester.totalWeeks
         binding.weekProgress.progress = currentWeek
-        binding.weekProgress.setIndicatorColor(
-            ContextCompat.getColor(
-                this,
-                if (isOutsideSemester) R.color.secondary else R.color.primary
-            )
+        val indicatorColor = ContextCompat.getColor(
+            this,
+            if (isOutsideSemester) R.color.secondary else R.color.primary
         )
+        binding.weekProgress.setIndicatorColor(indicatorColor)
+        (binding.weekProgressThumb.background.mutate() as? GradientDrawable)
+            ?.setColor(indicatorColor)
+        positionWeekProgressThumb()
         binding.btnPreviousWeek.isEnabled = currentWeek > 1
         binding.btnNextWeek.isEnabled = currentWeek < semester.totalWeeks
         binding.btnPreviousWeek.alpha = if (binding.btnPreviousWeek.isEnabled) 1f else 0.35f
@@ -539,7 +736,7 @@ class MainActivity : AppCompatActivity() {
         val semester = currentSemester ?: return
         val weeks = Array(semester.totalWeeks) { getString(R.string.week_format, it + 1) }
 
-        androidx.appcompat.app.AlertDialog.Builder(this)
+        MaterialAlertDialogBuilder(this)
             .setTitle(R.string.select_week)
             .setSingleChoiceItems(weeks, currentWeek - 1) { dialog, which ->
                 dialog.dismiss()
@@ -550,14 +747,42 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
+        menu.findItem(R.id.action_add_course)?.actionView?.setOnClickListener { openNewCourse() }
         menu.findItem(R.id.action_today)?.actionView?.setOnClickListener {
             goToCurrentWeek()
         }
+        menu.findItem(R.id.action_course_assistant)?.actionView?.setOnClickListener(::showCourseTools)
         return true
+    }
+
+    private fun showCourseTools(anchor: View) {
+        if (courseToolsPopup?.isShowing == true) return
+        val content = layoutInflater.inflate(R.layout.popup_course_tools, binding.toolbar, false)
+        content.clipToOutline = true
+        content.installPressScale(0.985f)
+        val popup = PopupWindow(content,
+            minOf(dp(280f).roundToInt(), binding.root.width - dp(32f).roundToInt()),
+            ViewGroup.LayoutParams.WRAP_CONTENT, true).apply {
+            setBackgroundDrawable(ContextCompat.getDrawable(this@MainActivity, R.drawable.bg_course_tools_popup))
+            elevation = dp(3f)
+            isOutsideTouchable = true
+            setOnDismissListener { courseToolsPopup = null }
+        }
+        content.setOnClickListener {
+            popup.dismiss()
+            openTab(Intent(this, CourseAssistantActivity::class.java)
+                .putExtra(CourseAssistantActivity.EXTRA_DISPLAYED_WEEK, currentWeek))
+        }
+        courseToolsPopup = popup
+        popup.showAsDropDown(anchor, -dp(8f).roundToInt(), dp(4f).roundToInt(), Gravity.END)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
+            R.id.action_course_assistant -> {
+                binding.toolbar.menu.findItem(item.itemId)?.actionView?.let(::showCourseTools)
+                true
+            }
             R.id.action_add_course -> {
                 openNewCourse()
                 true
@@ -577,12 +802,13 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        restoreCourseReminders()
         applyDisplaySettings()
         val returningToHome = hasResumedOnce &&
             binding.bottomNavigation.selectedItemId != R.id.nav_home
         if (binding.bottomNavigation.selectedItemId != R.id.nav_home) {
             suppressBottomNavigationMotion = true
-            binding.bottomNavigation.selectedItemId = R.id.nav_home
+            binding.bottomNavigation.selectItemWithoutAnimation(R.id.nav_home)
             suppressBottomNavigationMotion = false
         }
         if (returningToHome) {
@@ -603,11 +829,15 @@ class MainActivity : AppCompatActivity() {
             showInactiveCourses = prefs.showInactiveCourses,
             sectionHeightDp = prefs.sectionHeightDp,
             sectionTimes = prefs.sectionTimes,
-            sectionEndTimes = prefs.sectionEndTimes
+            sectionEndTimes = prefs.sectionEndTimes,
+            weekMotionStyle = prefs.weekMotionStyle
         )
+        binding.courseContinuityOverlay.motionStyle = prefs.weekMotionStyle
     }
 
     override fun onDestroy() {
+        binding.root.viewTreeObserver.removeOnPreDrawListener(continuityPreDraw)
+        binding.courseContinuityOverlay.clear()
         binding.weekPager.unregisterOnPageChangeCallback(pageChangeCallback)
         super.onDestroy()
     }
@@ -616,6 +846,18 @@ class MainActivity : AppCompatActivity() {
      * 请求通知权限（Android 13+ / API 33+）
      * 提醒功能依赖通知权限，未授予则提醒通知不会显示
      */
+    private fun restoreCourseReminders() {
+        lifecycleScope.launch {
+            try {
+                ReminderManager(applicationContext).restoreReminders()
+            } catch (error: kotlinx.coroutines.CancellationException) {
+                throw error
+            } catch (error: Exception) {
+                Log.e("MainActivity", "Unable to restore reminders", error)
+            }
+        }
+    }
+
     private fun requestNotificationPermissionIfNeeded() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             val granted = ContextCompat.checkSelfPermission(

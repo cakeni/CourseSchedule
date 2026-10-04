@@ -3,6 +3,9 @@ package com.courseschedule.ui.importdata
 import android.app.Activity
 import android.content.ClipboardManager
 import android.content.Context
+import androidx.activity.addCallback
+import com.courseschedule.ui.returnToSchedule
+import com.courseschedule.ui.ScheduleReturnSource
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -16,14 +19,18 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.doOnPreDraw
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import com.courseschedule.ui.assistant.StudyTasksActivity
 import com.courseschedule.R
 import com.courseschedule.data.entity.Course
 import com.courseschedule.data.entity.Semester
 import com.courseschedule.databinding.ActivityImportBinding
 import com.courseschedule.domain.ScheduleRules
 import com.courseschedule.ui.MainActivity
+import com.courseschedule.ui.assistant.CourseAssistantActivity
 import com.courseschedule.ui.installPressScale
 import com.courseschedule.ui.playNavigationMotion
+import com.courseschedule.ui.selectItemWithoutAnimation
+import com.courseschedule.ui.stabilizeActiveIndicatorSize
 import com.courseschedule.ui.settings.SettingsActivity
 import com.courseschedule.utils.ReminderManager
 import com.courseschedule.utils.SchedulePreferences
@@ -36,6 +43,9 @@ import com.google.android.material.textfield.TextInputEditText
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import androidx.room.withTransaction
+import com.courseschedule.data.AppDatabase
+import com.courseschedule.data.entity.StudyTask
 
 class ImportActivity : AppCompatActivity() {
 
@@ -93,6 +103,7 @@ class ImportActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        onBackPressedDispatcher.addCallback(this) { returnToSchedule(ScheduleReturnSource.IMPORT) }
         binding = ActivityImportBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -110,9 +121,14 @@ class ImportActivity : AppCompatActivity() {
         }
         binding.cardImportJson.setOnClickListener { openFilePicker() }
         binding.cardImportText.setOnClickListener { showTextImportDialog() }
+        binding.cardImportAssistant.setOnClickListener {
+            startActivity(Intent(this, CourseAssistantActivity::class.java)
+                .putExtra(CourseAssistantActivity.EXTRA_DISPLAYED_WEEK, courseViewModel.currentWeek.value ?: 1))
+        }
         binding.cardImportSchool.installPressScale()
         binding.cardImportJson.installPressScale()
         binding.cardImportText.installPressScale()
+        binding.cardImportAssistant.installPressScale()
         initBottomNavigation()
         animateImportEntrance()
         courseViewModel.currentSemester.observe(this) { semester ->
@@ -124,16 +140,17 @@ class ImportActivity : AppCompatActivity() {
     }
 
     private fun initBottomNavigation() {
-        binding.bottomNavigation.selectedItemId = R.id.nav_import
+        binding.bottomNavigation.stabilizeActiveIndicatorSize()
+        binding.bottomNavigation.selectItemWithoutAnimation(R.id.nav_import)
         binding.bottomNavigation.setOnItemSelectedListener { item ->
             val itemView = binding.bottomNavigation.findViewById<View>(item.itemId)
             when (item.itemId) {
                 R.id.nav_home -> {
-                    startActivity(
-                        Intent(this, MainActivity::class.java).addFlags(
-                            Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-                        )
-                    )
+                    returnToSchedule(ScheduleReturnSource.IMPORT)
+                    true
+                }
+                R.id.nav_study -> {
+                    startActivity(Intent(this, StudyTasksActivity::class.java).putExtra(StudyTasksActivity.EXTRA_PRIMARY_PAGE, true))
                     overridePendingTransition(0, 0)
                     finish()
                     overridePendingTransition(0, 0)
@@ -257,7 +274,10 @@ class ImportActivity : AppCompatActivity() {
         setLoading(true)
         lifecycleScope.launch {
             try {
-                val parsed = withContext(Dispatchers.IO) { parser(currentSemester.totalWeeks) }
+                val parsed = withContext(Dispatchers.IO) { parser(currentSemester.totalWeeks) }.let { source ->
+                    val minutes = SchedulePreferences(this@ImportActivity).defaultReminderMinutes
+                    source.copy(courses = source.courses.map { source.withDefaultReminder(it, minutes) })
+                }
                 val existing = courseViewModel.getCurrentSemesterCourses()
                 val analysisWeeks = parsed.semester?.totalWeeks ?: currentSemester.totalWeeks
                 val analysis = ImportAnalyzer.analyze(
@@ -270,7 +290,7 @@ class ImportActivity : AppCompatActivity() {
                 if (
                     analysis.accepted.isEmpty() &&
                     analysis.conflicts.isEmpty() &&
-                    analysis.duplicates.isEmpty()
+                    analysis.duplicates.isEmpty() && parsed.studyTasks.isNullOrEmpty()
                 ) {
                     showNothingToImport(analysis)
                 } else {
@@ -312,6 +332,9 @@ class ImportActivity : AppCompatActivity() {
         val includeConflicts = view.findViewById<MaterialCheckBox>(R.id.checkIncludeConflicts)
         val restoreMetadata = view.findViewById<MaterialCheckBox>(R.id.checkRestoreMetadata)
         val replaceExisting = view.findViewById<MaterialCheckBox>(R.id.checkReplaceExisting)
+        val restoreTasks = view.findViewById<MaterialCheckBox>(R.id.checkRestoreStudyTasks)
+        restoreTasks.visibility = if (parsed.studyTasks.isNullOrEmpty()) View.GONE else View.VISIBLE
+        restoreTasks.isChecked = !parsed.studyTasks.isNullOrEmpty()
 
         val importSummary = getString(
             R.string.import_preview_summary,
@@ -326,7 +349,7 @@ class ImportActivity : AppCompatActivity() {
             parsed.courses.size,
             parsed.courses.count { it.teacher.isNotBlank() }
         )
-        summary.text = "$importSummary\n$metadataSummary"
+        summary.text = "$importSummary\n$metadataSummary" + if (!parsed.studyTasks.isNullOrEmpty()) "\n备份含${parsed.studyTasks.size}项学习事项，已完成状态和提醒提前量一并保留。" else ""
         val allPreviewCourses = analysis.accepted + analysis.conflicts + analysis.duplicates
         val previewCourses = allPreviewCourses.take(30)
         courseList.text = previewCourses.joinToString("\n") { course ->
@@ -339,6 +362,9 @@ class ImportActivity : AppCompatActivity() {
         } + if (allPreviewCourses.size > 30) {
             getString(R.string.import_more_courses)
         } else ""
+        if (!parsed.studyTasks.isNullOrEmpty()) courseList.append("\n\n学习事项预览：\n" + parsed.studyTasks.take(15).joinToString("\n\n") {
+            com.courseschedule.domain.StudyTaskRules.describe(it)
+        } + if (parsed.studyTasks.size > 15) "\n还有${parsed.studyTasks.size - 15}项。" else "")
         includeConflicts.visibility = if (analysis.conflicts.isEmpty()) View.GONE else View.VISIBLE
         restoreMetadata.visibility = if (parsed.semester != null || parsed.settings != null) {
             View.VISIBLE
@@ -367,7 +393,7 @@ class ImportActivity : AppCompatActivity() {
                 val selected = effectiveAnalysis.accepted + if (includeConflicts.isChecked) {
                     effectiveAnalysis.conflicts
                 } else emptyList()
-                if (selected.isEmpty()) {
+                if (selected.isEmpty() && (!restoreTasks.isChecked || parsed.studyTasks.isNullOrEmpty())) {
                     Toast.makeText(this, R.string.no_courses_selected, Toast.LENGTH_SHORT).show()
                     return@setOnClickListener
                 }
@@ -378,7 +404,8 @@ class ImportActivity : AppCompatActivity() {
                     currentSemester,
                     existing,
                     restoreMetadata.isChecked,
-                    replaceExisting.isChecked
+                    replaceExisting.isChecked,
+                    restoreTasks.isChecked
                 )
             }
         }
@@ -391,34 +418,54 @@ class ImportActivity : AppCompatActivity() {
         oldSemester: Semester,
         existing: List<Course>,
         restoreMetadata: Boolean,
-        replaceExisting: Boolean
+        replaceExisting: Boolean,
+        restoreTasks: Boolean
     ) {
         setLoading(true)
         val preferences = SchedulePreferences(this)
         val oldSettings = preferences.snapshot()
         lifecycleScope.launch {
             try {
-                val targetSemester = if (restoreMetadata && parsed.semester != null) {
-                    oldSemester.copy(
-                        name = parsed.semester.name,
-                        startDate = parsed.semester.startDate,
-                        totalWeeks = parsed.semester.totalWeeks.coerceIn(1, 52)
-                    ).also { semesterViewModel.updateSemesterNow(it) }
-                } else oldSemester
-                if (restoreMetadata) parsed.settings?.let(preferences::applySnapshot)
-
-                val ready = selected
-                    .filter { ScheduleRules.isValidCourse(it, targetSemester.totalWeeks) }
-                    .map { it.copy(semesterId = targetSemester.id) }
+                val database = AppDatabase.getDatabase(this@ImportActivity)
                 val manager = ReminderManager(this@ImportActivity)
-                if (replaceExisting) manager.cancelAllReminders(existing)
-                val ids = if (replaceExisting) {
-                    courseViewModel.replaceCurrentSemesterCourses(ready)
-                } else {
-                    courseViewModel.insertCoursesNow(ready)
+                val importedTasks = mutableListOf<StudyTask>()
+                val saved = database.withTransaction {
+                    require(database.semesterDao().getCurrentSemesterSync() == oldSemester) { "学期已变化，请重新导入。" }
+                    val targetSemester = if (restoreMetadata && parsed.semester != null) {
+                        oldSemester.copy(
+                            name = parsed.semester.name,
+                            startDate = parsed.semester.startDate,
+                            totalWeeks = parsed.semester.totalWeeks.coerceIn(1, 52)
+                        ).also { semesterViewModel.updateSemesterNow(it) }
+                    } else oldSemester
+                    val ready = selected
+                        .filter { ScheduleRules.isValidCourse(it, targetSemester.totalWeeks) }
+                        .map { it.copy(semesterId = targetSemester.id) }
+                    if (replaceExisting) manager.cancelAllReminders(existing)
+                    val ids = if (replaceExisting) {
+                        courseViewModel.replaceCurrentSemesterCourses(ready)
+                    } else {
+                        courseViewModel.insertCoursesNow(ready)
+                    }
+                    val saved = ready.zip(ids).map { (course, id) -> course.copy(id = id) }
+                    if (restoreTasks) {
+                        val existingTasks = database.studyTaskDao().forSemester(targetSemester.id).toMutableList()
+                        val currentCourses = database.courseDao().getCoursesBySemesterSync(targetSemester.id)
+                        parsed.studyTasks.orEmpty().forEach { task ->
+                            if (existingTasks.none { it.title == task.title && it.courseName == task.courseName && it.kind == task.kind && it.dueAt == task.dueAt }) {
+                                val readyTask = task.copy(id = 0, semesterId = targetSemester.id,
+                                    courseId = currentCourses.filter { it.courseName == task.courseName }.singleOrNull()?.id,
+                                    updatedAt = System.currentTimeMillis())
+                                val row = readyTask.copy(id = database.studyTaskDao().insert(readyTask))
+                                importedTasks += row; existingTasks += row
+                            }
+                        }
+                    }
+                    saved
                 }
-                val saved = ready.zip(ids).map { (course, id) -> course.copy(id = id) }
-                manager.rescheduleReminders(saved, targetSemester)
+                if (restoreMetadata) parsed.settings?.let(preferences::applySnapshot)
+                // 追加导入也可能恢复学期日期/节次配置，旧课程需一并重新排程。
+                manager.restoreReminders()
                 setLoading(false)
                 showImportComplete(
                     saved,
@@ -426,7 +473,8 @@ class ImportActivity : AppCompatActivity() {
                     oldSettings,
                     existing,
                     restoreMetadata,
-                    replaceExisting
+                    replaceExisting,
+                    importedTasks
                 )
             } catch (error: Exception) {
                 setLoading(false)
@@ -441,15 +489,22 @@ class ImportActivity : AppCompatActivity() {
         oldSettings: com.courseschedule.data.backup.SettingsSnapshot,
         existing: List<Course>,
         restoredMetadata: Boolean,
-        replacedExisting: Boolean
+        replacedExisting: Boolean,
+        importedTasks: List<StudyTask>
     ) {
         Snackbar.make(
             binding.root,
-            getString(R.string.import_count_success, saved.size),
+            getString(R.string.import_count_success, saved.size) + if (importedTasks.isNotEmpty()) "，${importedTasks.size}项学习事项" else "",
             Snackbar.LENGTH_LONG
         ).setAction(R.string.undo) {
             lifecycleScope.launch {
+                val database = AppDatabase.getDatabase(this@ImportActivity)
+                if (importedTasks.any { database.studyTaskDao().find(it.id) != it }) {
+                    Toast.makeText(this@ImportActivity, "导入后的学习事项已变化，未撤销，以免覆盖修改。", Toast.LENGTH_LONG).show()
+                    return@launch
+                }
                 val manager = ReminderManager(this@ImportActivity)
+                importedTasks.forEach { database.studyTaskDao().delete(it.id); manager.cancelStudyReminder(it.id) }
                 manager.cancelAllReminders(saved)
                 if (replacedExisting) {
                     courseViewModel.replaceCurrentSemesterCourses(existing)
@@ -460,7 +515,7 @@ class ImportActivity : AppCompatActivity() {
                     semesterViewModel.updateSemesterNow(oldSemester)
                     SchedulePreferences(this@ImportActivity).applySnapshot(oldSettings)
                 }
-                manager.rescheduleReminders(existing, oldSemester)
+                manager.restoreReminders()
                 Toast.makeText(this@ImportActivity, R.string.import_undone, Toast.LENGTH_SHORT).show()
             }
         }.show()

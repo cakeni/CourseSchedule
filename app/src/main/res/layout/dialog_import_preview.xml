@@ -52,4 +52,7 @@
         android:layout_height="wrap_content"
         android:text="@string/replace_current_semester_courses" />
 
+    <com.google.android.material.checkbox.MaterialCheckBox android:id="@+id/checkRestoreStudyTasks"
+        android:layout_width="match_parent" android:layout_height="wrap_content" android:text="导入备份中的学习事项（保留已有事项）" android:visibility="gone" />
+
 </LinearLayout>

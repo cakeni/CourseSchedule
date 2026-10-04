@@ -6,28 +6,43 @@ import java.util.Calendar
 
 object ReminderTimeCalculator {
 
+    data class Occurrence(val reminderTime: Long, val classStart: Long)
+
     fun nextReminderTime(
         course: Course,
         semester: Semester,
         sectionTimes: List<String>,
         now: Long = System.currentTimeMillis()
     ): Long? {
+        return nextOccurrence(course, semester, sectionTimes, now)?.reminderTime
+    }
+
+    fun nextOccurrence(
+        course: Course,
+        semester: Semester,
+        sectionTimes: List<String>,
+        now: Long = System.currentTimeMillis(),
+        lastDeliveredClassStart: Long = 0L
+    ): Occurrence? {
         if (course.reminderMinutes <= 0 || course.startSection !in sectionTimes.indices.map { it + 1 }) {
             return null
         }
         val (hour, minute) = parseTime(sectionTimes[course.startSection - 1]) ?: return null
         for (week in course.startWeek..minOf(course.endWeek, semester.totalWeeks)) {
             if (!ScheduleRules.isCourseInWeek(course, week)) continue
-            val reminder = Calendar.getInstance().apply {
+            val classStart = Calendar.getInstance().apply {
                 timeInMillis = semester.startDate
                 set(Calendar.HOUR_OF_DAY, hour)
                 set(Calendar.MINUTE, minute)
                 set(Calendar.SECOND, 0)
                 set(Calendar.MILLISECOND, 0)
                 add(Calendar.DAY_OF_MONTH, (week - 1) * 7 + course.dayOfWeek - 1)
-                add(Calendar.MINUTE, -course.reminderMinutes)
             }.timeInMillis
-            if (reminder > now) return reminder
+            if (classStart > now && classStart > lastDeliveredClassStart) {
+                val reminder = classStart - course.reminderMinutes * 60_000L
+                // 已到提醒时间但尚未上课时补发；已发送的课次不会重复提醒。
+                return Occurrence(maxOf(reminder, now), classStart)
+            }
         }
         return null
     }

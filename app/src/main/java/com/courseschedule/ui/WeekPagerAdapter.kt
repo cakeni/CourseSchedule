@@ -1,5 +1,6 @@
 package com.courseschedule.ui
 
+import android.animation.ValueAnimator
 import android.graphics.Typeface
 import android.graphics.RectF
 import android.view.LayoutInflater
@@ -8,6 +9,7 @@ import android.view.ViewGroup
 import android.view.animation.PathInterpolator
 import android.widget.TextView
 import androidx.core.content.ContextCompat
+import androidx.core.view.children
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.courseschedule.R
@@ -17,6 +19,7 @@ import com.courseschedule.databinding.ItemWeekScheduleBinding
 import com.courseschedule.domain.ScheduleRules
 import com.courseschedule.domain.SemesterPhase
 import com.courseschedule.domain.SemesterWeekStatus
+import com.courseschedule.domain.WeekMotionStyle
 import com.courseschedule.utils.SchedulePreferences
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -28,7 +31,8 @@ data class WeekPageSettings(
     val showInactiveCourses: Boolean = true,
     val sectionHeightDp: Int = 64,
     val sectionTimes: List<String> = SchedulePreferences.DEFAULT_SECTION_TIMES,
-    val sectionEndTimes: List<String> = SchedulePreferences.DEFAULT_SECTION_END_TIMES
+    val sectionEndTimes: List<String> = SchedulePreferences.DEFAULT_SECTION_END_TIMES,
+    val weekMotionStyle: WeekMotionStyle = WeekMotionStyle.SOFT_SLIDE
 )
 
 class WeekPagerAdapter(
@@ -43,7 +47,8 @@ class WeekPagerAdapter(
     private var status: SemesterWeekStatus? = null
     private var settings = WeekPageSettings()
     private val scrollPositions = mutableMapOf<Int, Int>()
-    private val settleInterpolator = PathInterpolator(0.2f, 0.85f, 0.25f, 1f)
+    private var selectedPosition = RecyclerView.NO_POSITION
+    private val dayHeaderInterpolator = PathInterpolator(0.22f, 0f, 0.2f, 1f)
 
     init {
         setHasStableIds(true)
@@ -55,6 +60,8 @@ class WeekPagerAdapter(
         status: SemesterWeekStatus?,
         settings: WeekPageSettings
     ) {
+        if (this.semester == semester && this.courses == courses &&
+            this.status == status && this.settings == settings) return
         val oldCount = itemCount
         val oldSemesterId = this.semester?.id
         this.semester = semester
@@ -65,7 +72,8 @@ class WeekPagerAdapter(
             scrollPositions.clear()
             notifyDataSetChanged()
         } else if (itemCount > 0) {
-            notifyItemRangeChanged(0, itemCount)
+            // Reuse the holder during state sync so its running entrance clock survives.
+            notifyItemRangeChanged(0, itemCount, Unit)
         }
     }
 
@@ -98,10 +106,40 @@ class WeekPagerAdapter(
         holder.boundWeek?.let { week ->
             scrollPositions[week] = holder.binding.scheduleScroll.scrollY
         }
+        holder.binding.courseTableView.cancelReturnEntrance()
+        holder.binding.emptyCalendar.resetForReuse()
         holder.resetSelectionMotion()
         holder.binding.courseTableView.resetPagerMotion()
+        holder.binding.weekDayHeader.visibility = View.VISIBLE
         super.onViewRecycled(holder)
     }
+
+    override fun onViewAttachedToWindow(holder: WeekViewHolder) {
+        super.onViewAttachedToWindow(holder)
+        holder.syncIllustrationSelection()
+    }
+
+    fun selectPage(pager: ViewPager2, position: Int) {
+        selectedPosition = position
+        val recycler = pager.getChildAt(0) as? RecyclerView ?: return
+        recycler.children.forEach { page ->
+            (recycler.getChildViewHolder(page) as? WeekViewHolder)?.syncIllustrationSelection()
+        }
+    }
+
+    fun prepareNeighborIllustrations(pager: ViewPager2) {
+        val recycler = pager.getChildAt(0) as? RecyclerView ?: return
+        recycler.children.forEach { page ->
+            (recycler.getChildViewHolder(page) as? WeekViewHolder)?.binding?.emptyCalendar?.prepareForEntry()
+        }
+    }
+
+    fun currentHolder(pager: ViewPager2): WeekViewHolder? =
+        holderAt(pager, pager.currentItem)
+
+    fun holderAt(pager: ViewPager2, position: Int): WeekViewHolder? =
+        (pager.getChildAt(0) as? RecyclerView)
+            ?.findViewHolderForAdapterPosition(position) as? WeekViewHolder
 
     fun playSelectionMotion(pager: ViewPager2, position: Int, forward: Boolean): Boolean {
         val recyclerView = pager.getChildAt(0) as? RecyclerView ?: return false
@@ -116,6 +154,8 @@ class WeekPagerAdapter(
     ) : RecyclerView.ViewHolder(binding.root) {
 
         var boundWeek: Int? = null
+        private var boundSemesterId: Long? = null
+        private var emptySchedule = false
 
         fun bind(
             week: Int,
@@ -125,9 +165,14 @@ class WeekPagerAdapter(
             settings: WeekPageSettings
         ) {
             val previousWeek = boundWeek
+            if (previousWeek != week || boundSemesterId != semester.id) {
+                binding.emptyCalendar.resetForReuse()
+            }
+            boundSemesterId = semester.id
             if (previousWeek != week) {
                 resetSelectionMotion()
                 binding.courseTableView.resetPagerMotion()
+                binding.weekDayHeader.visibility = View.VISIBLE
             }
             boundWeek = week
             val displayCourses = ScheduleRules.selectCoursesForWeek(
@@ -163,6 +208,8 @@ class WeekPagerAdapter(
                 }
             }
             binding.emptyState.visibility = if (visibleCourses.isEmpty()) View.VISIBLE else View.GONE
+            emptySchedule = visibleCourses.isEmpty()
+            syncIllustrationSelection()
             binding.btnEmptyAdd.setOnClickListener { onAddCourse(null, null) }
             binding.btnEmptyAdd.installPressScale(0.97f)
             binding.root.contentDescription = binding.root.context.getString(R.string.week_format, week)
@@ -174,85 +221,38 @@ class WeekPagerAdapter(
             }
         }
 
+        fun syncIllustrationSelection() {
+            binding.emptyCalendar.setPageSelected(emptySchedule && boundWeek == selectedPosition + 1)
+        }
+
         fun playSelectionMotion(forward: Boolean) {
             resetSelectionMotion()
             val density = binding.root.resources.displayMetrics.density
-
-            binding.weekDayHeader.apply {
-                alpha = 0.55f
-                translationX = (if (forward) 12f else -12f) * density
-                animate()
-                    .alpha(1f)
-                    .translationX(0f)
-                    .setDuration(360L)
-                    .setInterpolator(settleInterpolator)
-                    .withLayer()
-                    .start()
-            }
-            if (binding.emptyState.visibility != View.VISIBLE) return
-
-            binding.emptyState.apply {
-                alpha = 0f
-                translationY = 10f * density
-                animate()
+            val dayLabels = binding.weekDayHeader.children.filter { it.visibility != View.GONE }.toList()
+            if (ValueAnimator.areAnimatorsEnabled()) (if (forward) dayLabels else dayLabels.reversed()).forEachIndexed { index, label ->
+                label.alpha = 0.72f
+                label.translationY = 6f * density
+                label.animate()
                     .alpha(1f)
                     .translationY(0f)
-                    .setDuration(540L)
-                    .setInterpolator(settleInterpolator)
-                    .withLayer()
+                    .setStartDelay(index * 14L)
+                    .setDuration(240L)
+                    .setInterpolator(dayHeaderInterpolator)
                     .start()
             }
-            binding.emptyIconContainer.apply {
-                alpha = 0f
-                scaleX = 0.96f
-                scaleY = 0.96f
-                rotation = 0f
-                translationY = 4f * density
-                animate()
-                    .alpha(1f)
-                    .scaleX(1f)
-                    .scaleY(1f)
-                    .translationY(0f)
-                    .setStartDelay(45L)
-                    .setDuration(620L)
-                    .setInterpolator(settleInterpolator)
-                    .withLayer()
-                    .start()
-            }
-            binding.tvEmptyTitle.apply {
-                alpha = 0f
-                translationY = 16f * density
-                animate()
-                    .alpha(1f)
-                    .translationY(0f)
-                    .setStartDelay(145L)
-                    .setDuration(430L)
-                    .setInterpolator(settleInterpolator)
-                    .start()
-            }
-            binding.btnEmptyAdd.apply {
-                alpha = 0f
-                translationY = 18f * density
-                animate()
-                    .alpha(1f)
-                    .translationY(0f)
-                    .setStartDelay(230L)
-                    .setDuration(460L)
-                    .setInterpolator(settleInterpolator)
-                    .withLayer()
-                    .start()
-            }
+            // Empty content already arrives through the swipe scene. At rest it
+            // must stay visible rather than disappear and start a second entrance.
         }
 
         fun resetSelectionMotion() {
-            listOf(
+            (listOf(
                 binding.weekDayHeader,
                 binding.scheduleScroll,
                 binding.emptyState,
                 binding.emptyIconContainer,
                 binding.tvEmptyTitle,
                 binding.btnEmptyAdd
-            ).forEach { view ->
+            ) + binding.weekDayHeader.children.toList()).forEach { view ->
                 view.animate().cancel()
                 view.alpha = 1f
                 view.scaleX = 1f
@@ -306,7 +306,6 @@ class WeekPagerAdapter(
                 styleDay(textView, showToday && index == todayIndex, normalColor, highlightColor)
                 calendar.add(Calendar.DAY_OF_MONTH, 1)
             }
-            binding.courseTableView.setHighlightedDay(if (showToday) todayIndex + 1 else null)
         }
 
         private fun styleDay(

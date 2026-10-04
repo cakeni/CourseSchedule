@@ -6,7 +6,10 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
 import android.view.ViewGroup
-import android.widget.AutoCompleteTextView
+import android.widget.NumberPicker
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import android.view.ViewTreeObserver
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -17,7 +20,6 @@ import com.courseschedule.domain.ScheduleRules
 import com.courseschedule.ui.addcourse.AddCourseActivity
 import com.courseschedule.ui.importdata.ImportActivity
 import com.courseschedule.utils.SchedulePreferences
-import com.google.android.material.chip.Chip
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
@@ -133,24 +135,27 @@ class CourseTableViewInteractionTest {
             putExtra(AddCourseActivity.EXTRA_WEEK, 7)
         }
         ActivityScenario.launch<AddCourseActivity>(intent).use { scenario ->
+            val ready = CountDownLatch(1)
             scenario.onActivity { activity ->
-                assertEquals(true, activity.findViewById<Chip>(R.id.chipThu).isChecked)
-                assertEquals(
-                    activity.getString(R.string.section_format, 3),
-                    activity.findViewById<AutoCompleteTextView>(R.id.spinnerStartSection).text.toString()
-                )
-                assertEquals(
-                    activity.getString(R.string.section_format, 5),
-                    activity.findViewById<AutoCompleteTextView>(R.id.spinnerEndSection).text.toString()
-                )
-                assertEquals(
-                    activity.getString(R.string.week_format, 7),
-                    activity.findViewById<AutoCompleteTextView>(R.id.spinnerStartWeek).text.toString()
-                )
-                assertEquals(
-                    activity.getString(R.string.week_format, 7),
-                    activity.findViewById<AutoCompleteTextView>(R.id.spinnerEndWeek).text.toString()
-                )
+                val root = activity.window.decorView
+                if (activity.findViewById<View>(R.id.btnSave).isEnabled) ready.countDown()
+                else root.viewTreeObserver.addOnPreDrawListener(object : ViewTreeObserver.OnPreDrawListener {
+                    override fun onPreDraw(): Boolean {
+                        if (activity.findViewById<View>(R.id.btnSave).isEnabled) {
+                            root.viewTreeObserver.removeOnPreDrawListener(this)
+                            ready.countDown()
+                        }
+                        return true
+                    }
+                })
+            }
+            org.junit.Assert.assertTrue(ready.await(10, TimeUnit.SECONDS))
+            scenario.onActivity { activity ->
+                assertEquals(true, activity.findViewById<View>(R.id.day4).isSelected)
+                assertEquals(3, activity.findViewById<NumberPicker>(R.id.sectionStart).value)
+                assertEquals(5, activity.findViewById<NumberPicker>(R.id.sectionEnd).value)
+                assertEquals(7, activity.findViewById<NumberPicker>(R.id.weekStart).value)
+                assertEquals(7, activity.findViewById<NumberPicker>(R.id.weekEnd).value)
             }
         }
     }

@@ -4,6 +4,8 @@ import com.courseschedule.data.backup.ScheduleBackup
 import com.courseschedule.data.backup.SemesterSnapshot
 import com.courseschedule.data.backup.SettingsSnapshot
 import com.courseschedule.data.entity.Course
+import com.courseschedule.data.entity.StudyTask
+import com.courseschedule.domain.StudyTaskRules
 import com.google.gson.Gson
 import com.google.gson.JsonParser
 import com.google.gson.reflect.TypeToken
@@ -16,8 +18,13 @@ data class ParsedImport(
     val courses: List<Course>,
     val semester: SemesterSnapshot? = null,
     val settings: SettingsSnapshot? = null,
-    val sourceLabel: String = ""
-)
+    val sourceLabel: String = "",
+    val explicitReminderCourses: Set<Course> = emptySet(),
+    val studyTasks: List<StudyTask>? = null
+) {
+    fun withDefaultReminder(course: Course, minutes: Int): Course =
+        if (course in explicitReminderCourses) course else course.copy(reminderMinutes = minutes)
+}
 
 enum class AcademicImportErrorCode {
     NO_TIMETABLE,
@@ -48,7 +55,10 @@ class ImportParser(private val defaultTotalWeeks: Int) {
         if (root.isJsonArray) {
             val type = object : TypeToken<List<Course>>() {}.type
             val courses: List<Course> = gson.fromJson(root, type) ?: emptyList()
-            return ParsedImport(courses = courses, sourceLabel = "JSON")
+            val explicit = courses.zip(root.asJsonArray).filter { (_, json) ->
+                json.isJsonObject && json.asJsonObject.has("reminderMinutes")
+            }.map { it.first }.toSet()
+            return ParsedImport(courses = courses, sourceLabel = "JSON", explicitReminderCourses = explicit)
         }
         if (root.isJsonObject && root.asJsonObject.has("courses")) {
             val backup = runCatching { gson.fromJson(root, ScheduleBackup::class.java) }
@@ -56,11 +66,17 @@ class ImportParser(private val defaultTotalWeeks: Int) {
             if (backup.schemaVersion > ScheduleBackup.CURRENT_SCHEMA_VERSION) {
                 throw ImportFormatException("该备份来自更高版本的应用")
             }
+            runCatching {
+                require(backup.studyTasks.orEmpty().size <= 2000)
+                backup.studyTasks.orEmpty().forEach(StudyTaskRules::validate)
+            }.getOrElse { throw ImportFormatException("备份中的学习事项格式无效，未导入。") }
             return ParsedImport(
                 courses = backup.courses,
                 semester = backup.semester,
                 settings = backup.settings,
-                sourceLabel = "完整备份"
+                sourceLabel = "完整备份",
+                explicitReminderCourses = backup.courses.toSet(),
+                studyTasks = backup.studyTasks
             )
         }
         throw ImportFormatException("JSON 中没有课程列表")

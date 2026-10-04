@@ -1,0 +1,28 @@
+{
+  "unit_tests": {
+    "passed": 219,
+    "skipped": 1,
+    "failures": 0,
+    "tests": 220,
+    "errors": 0
+  },
+  "lint": {
+    "Warning": 235,
+    "Error": 0,
+    "Information": 1
+  },
+  "device_tests": {
+    "dark_theme": 1,
+    "regression": 10,
+    "reminder_flow": 2,
+    "small_screen": 1
+  },
+  "build_commands": [
+    "testDebugUnitTest",
+    "lintDebug",
+    "assembleDebug",
+    "assembleDebugAndroidTest"
+  ],
+  "source_files_verified": 24,
+  "base_commit": "f67b2dbebf0b8e659f78ab8950e268e4c693581f"
+}

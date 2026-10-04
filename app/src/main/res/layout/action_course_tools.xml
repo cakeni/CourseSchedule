@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.AppCompatImageButton xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="48dp"
+    android:layout_height="48dp"
+    android:background="@drawable/control_focus"
+    android:contentDescription="@string/course_tools"
+    android:padding="12dp"
+    android:src="@drawable/ic_more"
+    app:tint="@color/primary_variant"  android:stateListAnimator="@animator/press_feedback_icon" />

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="CourseSchedule.Button" parent="Widget.MaterialComponents.Button">
+        <item name="android:stateListAnimator">@animator/press_feedback</item>
+        <item name="rippleColor">@color/control_focus_overlay</item>
+    </style>
+    <style name="CourseSchedule.TextButton" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:stateListAnimator">@animator/press_feedback</item>
+        <item name="rippleColor">@color/control_focus_overlay</item>
+    </style>
+    <style name="CourseSchedule.OutlinedButton" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="android:stateListAnimator">@animator/press_feedback</item>
+        <item name="rippleColor">@color/control_focus_overlay</item>
+    </style>
+    <style name="CourseSchedule.ImageButton" parent="Widget.AppCompat.ImageButton">
+        <item name="android:background">@drawable/control_focus</item>
+        <item name="android:stateListAnimator">@animator/press_feedback_icon</item>
+    </style>
+    <style name="CourseSchedule.ToolbarButton" parent="Widget.AppCompat.Toolbar.Button.Navigation">
+        <item name="android:background">@drawable/control_focus</item>
+        <item name="android:stateListAnimator">@animator/press_feedback_icon</item>
+    </style>
+    <style name="CourseSchedule.ActionButton" parent="Widget.AppCompat.ActionButton">
+        <item name="android:background">@drawable/control_focus</item>
+        <item name="android:stateListAnimator">@animator/press_feedback_icon</item>
+    </style>
+    <style name="CourseSchedule.OverflowButton" parent="Widget.AppCompat.ActionButton.Overflow">
+        <item name="android:background">@drawable/control_focus</item>
+        <item name="android:stateListAnimator">@animator/press_feedback_icon</item>
+    </style>
+</resources>

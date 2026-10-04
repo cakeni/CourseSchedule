@@ -1,0 +1,44 @@
+{
+  "version": "1.0.30",
+  "versionCode": 31,
+  "uiChecksPassed": 15,
+  "unitTests": {
+    "passed": 191,
+    "failed": 0,
+    "skipped": 1
+  },
+  "lintErrors": 0,
+  "modes": {
+    "animated": {
+      "drawnFramesPerPage": [
+        25,
+        29,
+        34,
+        36,
+        26
+      ],
+      "failures": []
+    },
+    "dark": {
+      "drawnFramesPerPage": [
+        30,
+        37,
+        36,
+        38,
+        11
+      ],
+      "failures": []
+    },
+    "reduced": {
+      "drawnFramesPerPage": [
+        9,
+        9,
+        9,
+        10,
+        4
+      ],
+      "failures": []
+    }
+  },
+  "apkSha256": "3916f1ab5420aa80f14a479caba625cf1ac861efce410b7972ad5a3a40790f3f"
+}
