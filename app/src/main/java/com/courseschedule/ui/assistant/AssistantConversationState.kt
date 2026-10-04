@@ -10,7 +10,7 @@ internal data class AssistantPendingOperation(val semester: Semester, val reply:
 internal data class AssistantUndoBatch(val semester: Semester, val before: List<Course>, val after: List<Course>,
     val conflictBaseline: List<Course>? = null)
 internal data class AssistantRetryRequest(val text: String, val displayedWeek: Int, val requestDate: String? = null,
-    val imageRef: String? = null)
+    val imageRef: String? = null, val boundTarget: Course? = null, val bindingRecorded: Boolean = false)
 internal data class AssistantTargetChoice(val semester: Semester, val request: AssistantRetryRequest,
     val candidates: List<Course>)
 internal data class AssistantConversationState(
@@ -40,7 +40,7 @@ internal object AssistantConversationCodec {
         }
         state.pending?.let {
             val reply = it.reply
-            require(reply.reply.isNotBlank() && reply.requiresConfirmation && !reply.undo && reply.queriedCourses.isEmpty() && reply.query == null && !reply.queryRequested && reply.studyQuery == null)
+            require(reply.reply.isNotBlank() && reply.requiresConfirmation && !reply.cancelPending && !reply.undo && reply.queriedCourses.isEmpty() && reply.query == null && !reply.queryRequested && reply.studyQuery == null)
             reply.studyChanges?.let { changes ->
                 require(reply.courses.isEmpty() && reply.updates.isEmpty() && reply.deletions.isEmpty())
                 AssistantStudyProtocol.validateChanges(changes, semesterId)
@@ -59,10 +59,14 @@ internal object AssistantConversationCodec {
             require(request.text.isNotBlank() && request.text.length <= 2000 && request.displayedWeek in 1..52)
             request.requestDate?.let { LocalDate.parse(it) }
             request.imageRef?.let { require(AssistantImageMessage.valid(it)) }
+            request.boundTarget?.let {
+                require(request.bindingRecorded && it.id > 0 && it.semesterId == semesterId && ScheduleRules.isValidCourse(it, 52))
+                requireNotNull(it.teacher); requireNotNull(it.classroom); requireNotNull(it.note)
+            }
         }
         state.retryRequest?.let(::validateRequest)
         state.targetChoice?.let {
-            require(state.pending == null && !state.requestRunning)
+            require(state.pending == null)
             validateRequest(it.request)
             requireNotNull(it.request.requestDate)
             validate(it.semester, it.candidates)

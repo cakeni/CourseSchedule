@@ -179,12 +179,14 @@ class CourseAssistantActivity : AppCompatActivity() {
                 val inset = ((if (user) 48 else 4) * resources.displayMetrics.density).toInt()
                 row.root.setPaddingRelative(if (user) inset else 0, 0, if (user) 0 else inset, 0)
                 row.messageBubble.setCardBackgroundColor(ContextCompat.getColor(this,
-                    if (user) R.color.assistant_selected_surface else if (message.kind == "error") R.color.assistant_pending_surface else R.color.assistant_soft_surface))
+                    if (user) R.color.assistant_selected_surface else if (message.kind in setOf("error", "reply_error")) R.color.assistant_pending_surface else R.color.assistant_soft_surface))
                 val sender = getString(if (user) R.string.assistant_you else R.string.assistant_name)
                 val kind = when (message.kind) {
                     "result", "reminder_result" -> " · 已保存"
+                    "query", "query_text", "task_query" -> " · 查询结果"
                     "confirmation" -> if (message == messages.lastOrNull() && viewModel.pendingChanges.value != null) " · 待确认" else " · 操作方案"
-                    "error" -> " · 未完成"
+                    "error" -> " · 操作未执行"
+                    "reply_error" -> " · 回复失败"
                     "interrupted" -> " · 已中断"
                     "cancel" -> " · 已取消"
                     else -> ""
@@ -276,6 +278,7 @@ class CourseAssistantActivity : AppCompatActivity() {
         }
         viewModel.canUndo.observe(this) { updateControls() }
         viewModel.canRetry.observe(this) { updateControls() }
+        viewModel.requestProgress.observe(this) { updateControls() }
         viewModel.canStop.observe(this) { updateControls() }
     }
 
@@ -340,8 +343,8 @@ class CourseAssistantActivity : AppCompatActivity() {
         binding.btnAttachImage.visibility = if (busy) View.GONE else View.VISIBLE
         binding.btnAttachImage.isEnabled = canChat && !pending && viewModel.targetChoice.value == null
         binding.btnRemoveImage.isEnabled = canChat
-        binding.tvComposerMode.visibility = if (busy) View.GONE else View.VISIBLE
-        binding.tvComposerMode.text = if (pending && !binding.etMessage.text.isNullOrBlank()) "补充尚未发送" else if (pending) getString(R.string.assistant_revise_send) else ""
+        binding.tvComposerMode.visibility = View.VISIBLE
+        binding.tvComposerMode.text = if (busy) viewModel.requestProgress.value.orEmpty() else if (pending && !binding.etMessage.text.isNullOrBlank()) "补充尚未发送" else if (pending) getString(R.string.assistant_revise_send) else ""
         binding.btnUndoLastAction.visibility = if (viewModel.canUndo.value == true && !pending &&
             viewModel.targetChoice.value == null && viewModel.historyLocation.value == null) View.VISIBLE else View.GONE
         binding.btnUndoLastAction.isEnabled = canChat

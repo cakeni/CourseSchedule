@@ -15,7 +15,7 @@ class AssistantHistorySearchTest {
         assertEquals(listOf(42L), message.courseIds)
         assertFalse(message.content.contains("courseIds"))
         assertEquals(1234L, message.createdAt)
-        assertEquals("result", message.kind)
+        assertEquals("query", message.kind)
     }
 
     @Test fun brokenQueryDoesNotExposeStorageAndPlainTextRemainsLiteral() {

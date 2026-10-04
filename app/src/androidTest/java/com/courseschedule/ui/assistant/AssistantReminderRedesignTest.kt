@@ -95,14 +95,14 @@ class AssistantReminderRedesignTest {
                     scenario.recreate()
                     scenario.onActivity { model = ViewModelProvider(it)[CourseAssistantViewModel::class.java] }
                     idle(model)
-                    onView(withId(R.id.etMessage)).perform(replaceText("下午6点"), closeSoftKeyboard())
+                    onView(withId(R.id.etMessage)).perform(replaceText("6点"), closeSoftKeyboard())
                     onView(withId(R.id.btnSend)).perform(click())
                     idle(model)
                     assertEquals("reminder_question", model.messages.value!!.last().kind)
                     scenario.recreate()
                     scenario.onActivity { model = ViewModelProvider(it)[CourseAssistantViewModel::class.java] }
                     idle(model)
-                    onView(withId(R.id.etMessage)).perform(replaceText("明天"), closeSoftKeyboard())
+                    onView(withId(R.id.etMessage)).perform(replaceText("明天下午"), closeSoftKeyboard())
                     onView(withId(R.id.btnSend)).perform(click())
                     idle(model)
                     assertEquals("吃饭", model.pendingChanges.value!!.studyChanges!!.single().after!!.title)
@@ -129,6 +129,52 @@ class AssistantReminderRedesignTest {
                     withContext(Dispatchers.Main) {
                         if (config.apiKey.isNotBlank()) model.configure(config, remember)
                     }
+                }
+            }
+        }
+    }
+
+    @Test fun dottedTimeAndMissingTitleStayLocalAcrossRestartsAndRevisions(): Unit = runBlocking {
+        fixture { semester ->
+            ActivityScenario.launch<CourseAssistantActivity>(Intent(context, CourseAssistantActivity::class.java)).use { scenario ->
+                lateinit var model: CourseAssistantViewModel
+                scenario.onActivity { model = ViewModelProvider(it)[CourseAssistantViewModel::class.java] }
+                idle(model)
+                val config = model.config
+                val remember = model.remembersKey
+                fun send(text: String) {
+                    onView(withId(R.id.etMessage)).perform(replaceText(text), closeSoftKeyboard())
+                    onView(withId(R.id.btnSend)).perform(click())
+                    idle(model)
+                }
+                try {
+                    withContext(Dispatchers.Main) { model.clearConfig() }
+                    send("三点半提醒我")
+                    assertEquals("reminder_question", model.messages.value!!.last().kind)
+                    scenario.recreate()
+                    scenario.onActivity { model = ViewModelProvider(it)[CourseAssistantViewModel::class.java] }
+                    idle(model)
+                    send("喝水")
+                    assertEquals("reminder_question", model.messages.value!!.last().kind)
+                    send("明天下午")
+                    assertTrue(model.pendingChanges.value!!.requiresConfirmation)
+                    send("改成明天14.05")
+                    val task = model.pendingChanges.value!!.studyChanges!!.single().after!!
+                    assertEquals("喝水", task.title)
+                    assertEquals(LocalDate.now().plusDays(1).atTime(14, 5).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(), task.dueAt)
+                    assertTrue(db.studyTaskDao().forSemester(semester.id).isEmpty())
+                    assertFalse(model.canRetry.value!!)
+                    screenshot("dotted-reminder-confirm")
+                    scenario.recreate()
+                    scenario.onActivity { model = ViewModelProvider(it)[CourseAssistantViewModel::class.java] }
+                    idle(model)
+                    onView(withId(R.id.btnConfirmPending)).perform(scrollTo(), click())
+                    idle(model)
+                    assertEquals(task.dueAt, db.studyTaskDao().forSemester(semester.id).single().dueAt)
+                    assertEquals("reminder_result", model.messages.value!!.last().kind)
+                    screenshot("dotted-reminder-saved")
+                } finally {
+                    withContext(Dispatchers.Main) { if (config.apiKey.isNotBlank()) model.configure(config, remember) }
                 }
             }
         }

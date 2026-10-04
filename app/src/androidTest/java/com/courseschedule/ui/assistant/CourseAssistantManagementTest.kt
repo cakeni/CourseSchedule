@@ -216,7 +216,7 @@ class CourseAssistantManagementTest {
                     "query":{"courseName":"不存在的课程"}}""", semester, original), semester)
             }
             assertTrue(model.messages.value!!.last().content.contains("没有找到"))
-            assertEquals("result", model.messages.value!!.last().kind)
+            assertEquals("query_text", model.messages.value!!.last().kind)
             withContext(Dispatchers.Main) {
                 model.receiveReply(decode("""{"version":1,"action":"query","reply":"空闲",
                     "query":{"whenTo":{"week":2},"dayOfWeek":2,"startSection":1,"endSection":4,"freeSlots":true}}""",
