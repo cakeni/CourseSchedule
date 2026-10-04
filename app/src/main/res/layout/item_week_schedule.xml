@@ -62,7 +62,7 @@
             android:layout_width="280dp"
             android:layout_height="wrap_content"
             android:layout_gravity="top|center_horizontal"
-            android:layout_marginTop="96dp"
+            android:layout_marginTop="64dp"
             android:gravity="center"
             android:orientation="vertical"
             android:visibility="gone"
@@ -70,17 +70,16 @@
 
             <FrameLayout
                 android:id="@+id/emptyIconContainer"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
+                android:layout_width="128dp"
+                android:layout_height="128dp"
                 android:contentDescription="@string/no_courses_this_week">
 
-                <ImageView
-                    android:layout_width="42dp"
-                    android:layout_height="42dp"
+                <com.courseschedule.view.EmptyCalendarView
+                    android:id="@+id/emptyCalendar"
+                    android:layout_width="128dp"
+                    android:layout_height="128dp"
                     android:layout_gravity="center"
-                    android:contentDescription="@null"
-                    android:src="@drawable/ic_empty_schedule"
-                    app:tint="@color/primary" />
+                    android:contentDescription="@null" />
             </FrameLayout>
 
             <TextView

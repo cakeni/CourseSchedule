@@ -107,6 +107,9 @@ class MainActivity : AppCompatActivity() {
         }
 
         override fun onPageSelected(position: Int) {
+            // Start the selected empty illustration during the page transition,
+            // rather than waiting for idle or carrying an old looping playhead.
+            weekPagerAdapter.selectPage(binding.weekPager, position)
             if (position != lastPagerPosition) cancelScheduleReturnEntrance()
             val previousPosition = lastPagerPosition
             lastPagerPosition = position
@@ -130,7 +133,10 @@ class MainActivity : AppCompatActivity() {
         }
 
         override fun onPageScrollStateChanged(state: Int) {
-            if (state == ViewPager2.SCROLL_STATE_DRAGGING) cancelScheduleReturnEntrance()
+            if (state == ViewPager2.SCROLL_STATE_DRAGGING) {
+                cancelScheduleReturnEntrance()
+                weekPagerAdapter.prepareNeighborIllustrations(binding.weekPager)
+            }
             if (state == ViewPager2.SCROLL_STATE_IDLE) {
                 continuityProgress = 0f
                 binding.courseContinuityOverlay.clear()
@@ -454,6 +460,7 @@ class MainActivity : AppCompatActivity() {
     private fun showWeekPagerWhenReady() {
         if (semesterDataLoaded && coursesDataLoaded) {
             binding.weekPager.visibility = View.VISIBLE
+            weekPagerAdapter.selectPage(binding.weekPager, binding.weekPager.currentItem)
         }
     }
 

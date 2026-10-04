@@ -12,8 +12,8 @@ android {
         applicationId "com.courseschedule"
         minSdk 26
         targetSdk 34
-        versionCode 36
-        versionName "1.0.35"
+        versionCode 41
+        versionName "1.0.40"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -62,6 +62,9 @@ dependencies {
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'androidx.viewpager2:viewpager2:1.0.0'
     implementation 'androidx.dynamicanimation:dynamicanimation:1.1.0'
+
+    // Authored vector illustrations for timetable empty states.
+    implementation 'com.airbnb.android:lottie:6.7.1'
 
     // Rive mascot runtime
     implementation 'app.rive:rive-android:9.13.10'

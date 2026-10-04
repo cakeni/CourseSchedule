@@ -12,6 +12,7 @@ import android.os.Handler
 import android.os.Looper
 import android.view.View
 import android.view.ViewTreeObserver
+import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso.onView
@@ -30,6 +31,9 @@ import com.courseschedule.data.entity.Semester
 import com.courseschedule.domain.WeekMotionStyle
 import com.courseschedule.utils.SchedulePreferences
 import com.courseschedule.view.CourseTableView
+import com.courseschedule.view.EmptyCalendarView
+import com.airbnb.lottie.LottieCompositionFactory
+import com.airbnb.lottie.LottieDrawable
 import com.google.gson.Gson
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
@@ -307,6 +311,377 @@ class HybridCourseMotionTest {
         }
     }
 
+    @Test fun emptyWeekContentArrivesOnceAndStaysSettledThroughRetargeting(): Unit = runBlocking {
+        WeekMotionStyle.entries.forEach { style ->
+            fixture { courses ->
+                SchedulePreferences(context).weekMotionStyle = style
+                val first = courses.take(2).map { it.copy(id = 0L, startWeek = 1, endWeek = 1) }
+                val third = first.map { it.copy(id = 0L, startWeek = 3, endWeek = 20) }
+                database.courseDao().replaceCoursesBySemester(courses.first().semesterId, first + third)
+                ActivityScenario.launch(MainActivity::class.java).use { scenario ->
+                    ready(scenario, expectedCourses = 2)
+                    lateinit var pager: ViewPager2
+                    lateinit var listener: ViewTreeObserver.OnPreDrawListener
+                    val failures = mutableListOf<String>()
+                    var settledEmptyFrames = 0
+                    var checking = false
+                    scenario.onActivity { activity ->
+                        pager = activity.findViewById(R.id.weekPager)
+                        listener = ViewTreeObserver.OnPreDrawListener {
+                            if (checking && pager.scrollState == ViewPager2.SCROLL_STATE_IDLE) {
+                                val page = holder(pager)
+                                if (page.findViewById<CourseTableView>(R.id.courseTableView).continuityCourses().isEmpty()) {
+                                    settledEmptyFrames++
+                                    val empty = page.findViewById<View>(R.id.emptyState)
+                                    if (empty.visibility != View.VISIBLE) failures += "Empty content disappeared after landing"
+                                    listOf(R.id.emptyState, R.id.emptyIconContainer, R.id.tvEmptyTitle, R.id.btnEmptyAdd).forEach { id ->
+                                        val view = page.findViewById<View>(id)
+                                        if (view.alpha != 1f || view.translationX != 0f || view.translationY != 0f ||
+                                            view.scaleX != 1f || view.scaleY != 1f) failures += "An empty-state element restarted its entrance"
+                                    }
+                                }
+                            }
+                            true
+                        }
+                        activity.window.decorView.viewTreeObserver.addOnPreDrawListener(listener)
+                        checking = true
+                    }
+                    try {
+                        onView(withId(R.id.weekPager)).perform(swipeLeft()); settle(800L)
+                        screenshot("empty-arrived-${style.storedValue}")
+                        scenario.onActivity {
+                            assertEquals(1, pager.currentItem)
+                            assertTrue(holder(pager).findViewById<View>(R.id.btnEmptyAdd).isClickable)
+                        }
+                        onView(withId(R.id.weekPager)).perform(swipeLeft()); settle(650L)
+                        onView(withId(R.id.weekPager)).perform(swipeRight()); settle(800L)
+                        onView(withId(R.id.weekPager)).perform(swipeRight()); settle(650L)
+                        scenario.onActivity { activity ->
+                            assertEquals(0, pager.currentItem)
+                            activity.findViewById<View>(R.id.btnNextWeek).performClick()
+                            Handler(Looper.getMainLooper()).postDelayed({ activity.findViewById<View>(R.id.btnNextWeek).performClick() }, 85L)
+                        }
+                        settle(1000L)
+                        scenario.onActivity {
+                            assertEquals(2, pager.currentItem)
+                            assertEquals(View.GONE, holder(pager).findViewById<View>(R.id.emptyState).visibility)
+                            assertTrue("The rendered empty weeks must be observed", settledEmptyFrames > 0)
+                            proof("empty-settled-${style.storedValue}", mapOf("settledFrames" to settledEmptyFrames, "failures" to failures))
+                            assertTrue(failures.take(5).joinToString("\n"), failures.isEmpty())
+                        }
+                    } finally {
+                        scenario.onActivity { activity ->
+                            checking = false
+                            activity.window.decorView.viewTreeObserver.removeOnPreDrawListener(listener)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Test fun consecutiveEmptyWeeksVisiblyChangeAndReverseWithoutRestarting(): Unit = runBlocking {
+        WeekMotionStyle.entries.forEach { style ->
+            fixture { courses ->
+                SchedulePreferences(context).weekMotionStyle = style
+                database.courseDao().replaceCoursesBySemester(courses.first().semesterId, emptyList())
+                ActivityScenario.launch(MainActivity::class.java).use { scenario ->
+                    ready(scenario, expectedCourses = 0)
+                    lateinit var pager: ViewPager2
+                    lateinit var overlay: CourseContinuityOverlay
+                    lateinit var empty: View
+                    lateinit var resting: Bitmap
+                    var left = 0
+                    var top = 0
+                    val changedPixels = mutableListOf<Int>()
+                    scenario.onActivity { activity ->
+                        pager = activity.findViewById(R.id.weekPager)
+                        overlay = activity.findViewById(R.id.courseContinuityOverlay)
+                        empty = holder(pager).findViewById(R.id.emptyState)
+                        resting = Bitmap.createBitmap(empty.width, empty.height, Bitmap.Config.ARGB_8888)
+                        empty.draw(Canvas(resting))
+                        val location = IntArray(2).also { empty.getLocationInWindow(it) }
+                        val origin = IntArray(2).also { overlay.getLocationInWindow(it) }
+                        left = location[0] - origin[0]
+                        top = location[1] - origin[1]
+                        assertTrue(pager.beginFakeDrag()); pager.fakeDragBy(-pager.width * .2f)
+                    }
+                    try {
+                        for ((index, progress) in listOf(.2f, .5f, .8f).withIndex()) {
+                            if (index > 0) scenario.onActivity { pager.fakeDragBy(-pager.width * .3f) }
+                            settle(160L, waitForIdle = false)
+                            scenario.onActivity {
+                                assertTrue(overlay.isChangingWeeks)
+                                assertEquals(View.INVISIBLE, empty.visibility)
+                                val stage = Bitmap.createBitmap(overlay.width, overlay.height, Bitmap.Config.ARGB_8888)
+                                overlay.draw(Canvas(stage))
+                                var changed = 0
+                                for (y in 0 until resting.height) for (x in 0 until resting.width) {
+                                    val pixel = resting.getPixel(x, y)
+                                    if (android.graphics.Color.alpha(pixel) == 255 && left + x in 0 until stage.width && top + y in 0 until stage.height) {
+                                        if (pixel != stage.getPixel(left + x, top + y)) changed++
+                                    }
+                                }
+                                if (ValueAnimator.areAnimatorsEnabled()) {
+                                    assertTrue("The icon and text must visibly change at progress $progress in $style", changed > 500)
+                                } else assertEquals("Reduced motion keeps the shared empty message still", 0, changed)
+                                changedPixels += changed
+                                stage.recycle()
+                            }
+                        }
+                        screenshot("empty-to-empty-${style.storedValue}")
+                        scenario.onActivity { pager.fakeDragBy(pager.width * .8f); pager.endFakeDrag() }
+                        settle(650L)
+                        scenario.onActivity {
+                            assertEquals(0, pager.currentItem)
+                            assertEquals(View.VISIBLE, empty.visibility)
+                            assertFalse(overlay.isChangingWeeks)
+                            val restored = Bitmap.createBitmap(empty.width, empty.height, Bitmap.Config.ARGB_8888)
+                            empty.draw(Canvas(restored))
+                            // The calendar is a live illustration; cancellation
+                            // restores the message without freezing its paper.
+                            val textTop = holder(pager).findViewById<View>(R.id.emptyIconContainer).height
+                            for (y in textTop until resting.height) for (x in 0 until resting.width) {
+                                assertEquals("Cancelling restores the original text and action", resting.getPixel(x, y), restored.getPixel(x, y))
+                            }
+                            restored.recycle()
+                            proof("empty-moving-${style.storedValue}", mapOf("changedPixels" to changedPixels))
+                        }
+                        onView(withId(R.id.btnNextWeek)).perform(click()); settle(800L)
+                        scenario.onActivity {
+                            assertEquals(1, pager.currentItem)
+                            assertEquals(1f, holder(pager).findViewById<View>(R.id.emptyState).alpha, 0f)
+                        }
+                    } finally { resting.recycle() }
+                }
+            }
+        }
+    }
+
+    @Test fun nativeEmptyWeekPreview(): Unit = runBlocking {
+        fixture { courses ->
+            val style = WeekMotionStyle.fromStoredValue(InstrumentationRegistry.getArguments().getString("previewStyle"))
+            SchedulePreferences(context).weekMotionStyle = style
+            database.courseDao().replaceCoursesBySemester(courses.first().semesterId,
+                courses.take(2).map { it.copy(id = 0L, startWeek = 1, endWeek = 1) })
+            ActivityScenario.launch(MainActivity::class.java).use { scenario ->
+                ready(scenario, expectedCourses = 2)
+                screenshot("empty-preview-before-${style.storedValue}")
+                onView(withId(R.id.weekPager)).perform(swipeLeft()); settle(650L)
+                scenario.onActivity { activity ->
+                    val pager = activity.findViewById<ViewPager2>(R.id.weekPager)
+                    assertEquals(1, pager.currentItem)
+                    assertEquals(1f, holder(pager).findViewById<View>(R.id.emptyState).alpha, 0f)
+                }
+                screenshot("empty-preview-resting-${style.storedValue}")
+                onView(withId(R.id.weekPager)).perform(swipeLeft()); settle(650L)
+                onView(withId(R.id.weekPager)).perform(swipeRight()); settle(650L)
+                onView(withId(R.id.weekPager)).perform(swipeRight()); settle(650L)
+                scenario.onActivity { activity ->
+                    val pager = activity.findViewById<ViewPager2>(R.id.weekPager)
+                    assertEquals(0, pager.currentItem)
+                    assertEquals(View.GONE, holder(pager).findViewById<View>(R.id.emptyState).visibility)
+                }
+            }
+        }
+    }
+
+    @Test fun emptyIllustrationStartsOnSelectionPlaysOnceAndStaysStopped(): Unit = runBlocking {
+        val composition = LottieCompositionFactory.fromRawResSync(context, R.raw.empty_calendar).value
+        assertNotNull("The bundled illustration must parse", composition)
+        assertTrue("Every authored layer must be supported", composition!!.warnings.isEmpty())
+        assertEquals(60f, composition.frameRate, 0f)
+        val storyboard = Bitmap.createBitmap(2048, 1536, Bitmap.Config.ARGB_8888)
+        val storyboardCanvas = Canvas(storyboard)
+        storyboardCanvas.drawColor(android.graphics.Color.rgb(232, 239, 247))
+        instrumentation.runOnMainSync {
+            val drawable = LottieDrawable().apply {
+                setComposition(composition)
+                setBounds(0, 0, 512, 512)
+            }
+            val poses = listOf(0f, 12f, 27f, 46f, 57f, 72f, 91f, 110f, 125f, 140f, 162f, 168f)
+            poses.forEachIndexed { index, frame ->
+                drawable.progress = frame / 168f
+                val tile = Bitmap.createBitmap(512, 512, Bitmap.Config.ARGB_8888)
+                drawable.draw(Canvas(tile))
+                storyboardCanvas.drawBitmap(tile, index % 4 * 512f, index / 4 * 512f, null)
+                tile.recycle()
+            }
+        }
+        val suffix = InstrumentationRegistry.getArguments().getString("proofSuffix", "native")
+        val storyboardFile = File(context.getExternalFilesDir(null), "course-transition-proof/calendar-storyboard-$suffix.png")
+        storyboardFile.parentFile!!.mkdirs()
+        storyboardFile.outputStream().use { storyboard.compress(Bitmap.CompressFormat.PNG, 100, it) }
+        storyboard.recycle()
+        WeekMotionStyle.entries.forEach { style ->
+            fixture { courses ->
+                SchedulePreferences(context).weekMotionStyle = style
+                database.courseDao().replaceCoursesBySemester(courses.first().semesterId,
+                    courses.take(2).map { it.copy(id = 0L, startWeek = 1, endWeek = 1) })
+                ActivityScenario.launch(MainActivity::class.java).use { scenario ->
+                    ready(scenario, expectedCourses = 2)
+                    lateinit var pager: ViewPager2
+                    lateinit var calendar: EmptyCalendarView
+                    lateinit var title: View
+                    lateinit var button: View
+                    lateinit var initialTitle: Bitmap
+                    lateinit var initialButton: Bitmap
+                    fun snapshot(view: View) = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
+                        .also { view.draw(Canvas(it)) }
+                    val phases = mutableListOf<Float>()
+                    val running = mutableListOf<Boolean>()
+                    val frames = mutableListOf<Bitmap>()
+                    val delays = listOf(180L, 600L, 1250L, 2000L, 4500L, 5900L, 7900L)
+                    val sampled = CountDownLatch(1)
+                    val arrived = CountDownLatch(1)
+                    var arrivalPhase = -1f
+                    var sampleError: Throwable? = null
+                    fun enterEmptyPage(onArrival: (Float) -> Unit) {
+                        val animate = ValueAnimator.areAnimatorsEnabled()
+                        val callback = object : ViewPager2.OnPageChangeCallback() {
+                            override fun onPageScrollStateChanged(state: Int) {
+                                if (state == ViewPager2.SCROLL_STATE_IDLE && pager.currentItem == 1) {
+                                    pager.postOnAnimation {
+                                        onArrival(calendar.motionProgress)
+                                        pager.unregisterOnPageChangeCallback(this)
+                                    }
+                                }
+                            }
+                        }
+                        if (animate) pager.registerOnPageChangeCallback(callback)
+                        pager.setCurrentItem(1, animate)
+                        if (!animate) pager.postOnAnimation { onArrival(calendar.motionProgress) }
+                    }
+                    scenario.onActivity { activity ->
+                        pager = activity.findViewById(R.id.weekPager)
+                        val page = holder(pager, 1)
+                        calendar = page.findViewById(R.id.emptyCalendar)
+                        title = page.findViewById(R.id.tvEmptyTitle)
+                        button = page.findViewById(R.id.btnEmptyAdd)
+                        assertEquals("Preloaded empty weeks must not play", 0, calendar.entranceCount)
+                        assertFalse(calendar.isMotionRunning)
+                        initialTitle = snapshot(title)
+                        initialButton = snapshot(button)
+                        enterEmptyPage { phase -> arrivalPhase = phase; arrived.countDown() }
+                        val began = android.os.SystemClock.uptimeMillis()
+                        val handler = Handler(Looper.getMainLooper())
+                        val sampler = object : Runnable {
+                            private var index = 0
+                            override fun run() {
+                                try {
+                                    frames += snapshot(calendar)
+                                    phases += calendar.motionProgress
+                                    running += calendar.isMotionRunning
+                                    val titleFrame = snapshot(title)
+                                    val buttonFrame = snapshot(button)
+                                    assertTrue("The entrance must keep text still", initialTitle.sameAs(titleFrame))
+                                    assertTrue("The entrance must keep the action still", initialButton.sameAs(buttonFrame))
+                                    titleFrame.recycle(); buttonFrame.recycle()
+                                    index++
+                                    if (index < delays.size) handler.postAtTime(this, began + delays[index])
+                                    else sampled.countDown()
+                                } catch (error: Throwable) {
+                                    sampleError = error
+                                    sampled.countDown()
+                                }
+                            }
+                        }
+                        handler.postAtTime(sampler, began + delays.first())
+                    }
+                    try {
+                        assertTrue("One-shot sampling must finish", sampled.await(12, TimeUnit.SECONDS))
+                        assertTrue("The empty page must arrive", arrived.await(2, TimeUnit.SECONDS))
+                        sampleError?.let { throw it }
+                        scenario.onActivity {
+                            if (ValueAnimator.areAnimatorsEnabled()) {
+                                assertTrue("The first arrived frame must already be playing ($style: $arrivalPhase)", arrivalPhase > 0f && arrivalPhase < .3f)
+                                assertTrue("The sheet must visibly turn", !frames[0].sameAs(frames[2]))
+                                assertTrue(running.take(4).any { it })
+                            } else {
+                                assertTrue(phases.all { it == 1f })
+                                assertTrue(running.none { it })
+                            }
+                            assertTrue("Finished animation must stay finished", phases.drop(4).all { it == 1f })
+                            assertTrue("Finished animation must stop frame callbacks", running.drop(4).none { it })
+                            assertTrue("A long stay must not replay the illustration", frames[4].sameAs(frames[5]) && frames[5].sameAs(frames[6]))
+                            assertEquals("Only the selection event may start it", 1, calendar.entranceCount)
+                            assertTrue(button.isClickable)
+                            proof("calendar-once-${style.storedValue}", mapOf("phases" to phases, "running" to running,
+                                "phaseAtFirstArrivedFrame" to arrivalPhase, "textStable" to true,
+                                "noReplayAfter7900ms" to true, "entrances" to calendar.entranceCount))
+                        }
+                        scenario.moveToState(Lifecycle.State.CREATED)
+                        scenario.moveToState(Lifecycle.State.RESUMED)
+                        settle(200L, waitForIdle = false)
+                        scenario.onActivity {
+                            assertEquals("Foregrounding must not replay a finished entrance", 1, calendar.entranceCount)
+                            assertEquals(1f, calendar.motionProgress, 0f)
+                            pager.setCurrentItem(0, false)
+                            assertFalse("Leaving must stop the old illustration", calendar.isMotionRunning)
+                        }
+                        settle(300L, waitForIdle = false)
+                        val reentry = CountDownLatch(1)
+                        var reentryPhase = 1f
+                        scenario.onActivity {
+                            enterEmptyPage { phase -> reentryPhase = phase; reentry.countDown() }
+                        }
+                        assertTrue(reentry.await(5, TimeUnit.SECONDS))
+                        if (ValueAnimator.areAnimatorsEnabled()) assertTrue("Each reentry starts afresh", reentryPhase > 0f && reentryPhase < .3f)
+                        settle(2900L, waitForIdle = false)
+                        scenario.onActivity {
+                            assertEquals(2, calendar.entranceCount)
+                            assertFalse(calendar.isMotionRunning)
+                            assertEquals(1f, calendar.motionProgress, 0f)
+                            assertTrue(pager.beginFakeDrag())
+                            pager.fakeDragBy(-pager.width * .22f)
+                            pager.fakeDragBy(pager.width * .22f)
+                            pager.endFakeDrag()
+                        }
+                        settle(500L, waitForIdle = false)
+                        scenario.onActivity {
+                            assertEquals("Cancelled drags must not start another entrance", 2, calendar.entranceCount)
+                            assertFalse(calendar.isMotionRunning)
+                            assertEquals("A cancelled neighboring page must never play", 0,
+                                holder(pager, 2).findViewById<EmptyCalendarView>(R.id.emptyCalendar).entranceCount)
+                            proof("calendar-reentry-${style.storedValue}", mapOf("phaseAtFirstArrivedFrame" to reentryPhase,
+                                "entrances" to calendar.entranceCount, "cancelDidNotReplay" to true, "foregroundDidNotReplay" to true))
+                        }
+                    } finally {
+                        frames.forEach(Bitmap::recycle)
+                        initialTitle.recycle(); initialButton.recycle()
+                    }
+                }
+            }
+        }
+    }
+
+    @Test fun nativeCalendarIllustrationPreview(): Unit = runBlocking {
+        fixture { courses ->
+            val style = WeekMotionStyle.fromStoredValue(InstrumentationRegistry.getArguments().getString("previewStyle"))
+            SchedulePreferences(context).weekMotionStyle = style
+            database.courseDao().replaceCoursesBySemester(courses.first().semesterId,
+                courses.take(2).map { it.copy(id = 0L, startWeek = 1, endWeek = 1) })
+            ActivityScenario.launch(MainActivity::class.java).use { scenario ->
+                ready(scenario, expectedCourses = 2)
+                scenario.onActivity { it.findViewById<ViewPager2>(R.id.weekPager).setCurrentItem(1, true) }
+                settle(3800L, waitForIdle = false)
+                screenshot("calendar-preview-${style.storedValue}")
+                settle(3800L, waitForIdle = false)
+                scenario.onActivity { it.findViewById<ViewPager2>(R.id.weekPager).setCurrentItem(2, true) }
+                settle(3300L, waitForIdle = false)
+                scenario.onActivity { it.findViewById<ViewPager2>(R.id.weekPager).setCurrentItem(1, true) }
+                settle(3300L, waitForIdle = false)
+                scenario.onActivity { activity ->
+                    val pager = activity.findViewById<ViewPager2>(R.id.weekPager)
+                    assertEquals(1, pager.currentItem)
+                    val calendar = holder(pager).findViewById<EmptyCalendarView>(R.id.emptyCalendar)
+                    assertEquals(2, calendar.entranceCount)
+                    assertFalse(calendar.isMotionRunning)
+                }
+            }
+        }
+    }
+
     @Test fun settingsSwitchBetweenBothEffectsAndPersistTheSelectedStyle(): Unit = runBlocking {
         fixture {
             SchedulePreferences(context).weekMotionStyle = WeekMotionStyle.SOFT_SLIDE
@@ -358,6 +733,7 @@ class HybridCourseMotionTest {
                 lateinit var empty: View
                 lateinit var icon: View
                 lateinit var iconBounds: RectF
+                lateinit var emptyBounds: RectF
                 scenario.onActivity { activity ->
                     pager = activity.findViewById(R.id.weekPager)
                     overlay = activity.findViewById(R.id.courseContinuityOverlay)
@@ -365,6 +741,9 @@ class HybridCourseMotionTest {
                     icon = holder(pager).findViewById(R.id.emptyIconContainer)
                     val iconOrigin = IntArray(2).also { icon.getLocationInWindow(it) }
                     val stageOrigin = IntArray(2).also { overlay.getLocationInWindow(it) }
+                    val emptyOrigin = IntArray(2).also { empty.getLocationInWindow(it) }
+                    emptyBounds = RectF((emptyOrigin[0] - stageOrigin[0]).toFloat(), (emptyOrigin[1] - stageOrigin[1]).toFloat(),
+                        (emptyOrigin[0] - stageOrigin[0] + empty.width).toFloat(), (emptyOrigin[1] - stageOrigin[1] + empty.height).toFloat())
                     iconBounds = RectF((iconOrigin[0] - stageOrigin[0]).toFloat(), (iconOrigin[1] - stageOrigin[1]).toFloat(),
                         (iconOrigin[0] - stageOrigin[0] + icon.width).toFloat(), (iconOrigin[1] - stageOrigin[1] + icon.height).toFloat())
                     assertEquals(View.VISIBLE, empty.visibility)
@@ -380,6 +759,14 @@ class HybridCourseMotionTest {
                         activity.resources.displayMetrics.density, ValueAnimator.areAnimatorsEnabled())
                     val pivotX = (pager.width + monthWidth) / 2f
                     val pivotY = headerHeight.toFloat()
+                    val emptyFrame = EmptyWeekMotion.frame(-.25f, activity.resources.displayMetrics.density,
+                        true, ValueAnimator.areAnimatorsEnabled())
+                    val emptyPivotY = emptyBounds.top + emptyBounds.height() * .35f
+                    iconBounds = RectF(
+                        emptyBounds.centerX() + (iconBounds.left - emptyBounds.centerX()) * emptyFrame.scale,
+                        emptyPivotY + (iconBounds.top - emptyPivotY) * emptyFrame.scale + emptyFrame.offsetY,
+                        emptyBounds.centerX() + (iconBounds.right - emptyBounds.centerX()) * emptyFrame.scale,
+                        emptyPivotY + (iconBounds.bottom - emptyPivotY) * emptyFrame.scale + emptyFrame.offsetY)
                     val visual = RectF(pivotX + (iconBounds.left - pivotX) * frame.scale + frame.offsetX,
                         pivotY + (iconBounds.top - pivotY) * frame.scale,
                         pivotX + (iconBounds.right - pivotX) * frame.scale + frame.offsetX,
