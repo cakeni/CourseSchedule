@@ -98,9 +98,10 @@ class StudyTaskEditorActivity : AppCompatActivity() {
         binding.tvEditorSemester.text = semester?.name
         binding.btnTaskDelete.visibility = if (original == null) View.GONE else View.VISIBLE
         initial = saved?.getString("initial") ?: stateKey()
-        listOf(binding.btnKindHomework to "homework", binding.btnKindExam to "exam", binding.btnKindReport to "report").forEach { (button, value) ->
+        listOf(binding.btnKindHomework to "homework", binding.btnKindExam to "exam", binding.btnKindReport to "report", binding.btnKindReminder to "reminder").forEach { (button, value) ->
             button.setOnClickListener {
-                kind = value; labels()
+                if (value == "reminder" && reminder == -1) reminder = 0
+                kind = value; labels(); reminderChoices()
             }
         }
         binding.btnTaskDate.setOnClickListener { togglePanel("date") }
@@ -132,11 +133,13 @@ class StudyTaskEditorActivity : AppCompatActivity() {
         binding.btnKindHomework.isChecked = kind == "homework"
         binding.btnKindExam.isChecked = kind == "exam"
         binding.btnKindReport.isChecked = kind == "report"
+        binding.btnKindReminder.isChecked = kind == "reminder"
+        binding.tvTaskScheduleLabel.text = if (kind == "reminder") "提醒时间" else "截止安排"
         binding.tvTaskDateValue.text = date?.format(DateTimeFormatter.ofPattern(
             if (date?.year == LocalDate.now().year) "M月d日 EEE" else "yyyy/M/d EEE", Locale.CHINA)) ?: "选择日期"
         binding.tvTaskTimeValue.text = time?.format(DateTimeFormatter.ofPattern("HH:mm")) ?: "选择时间"
         binding.tvTaskCourseValue.text = courseName.ifBlank { "不关联课程" }
-        binding.tvTaskReminderValue.text = StudyTaskRules.reminders[reminder] ?: "提前${reminder}分钟"
+        binding.tvTaskReminderValue.text = if (kind == "reminder" && reminder == 0) "准时提醒" else StudyTaskRules.reminders[reminder] ?: "提前${reminder}分钟"
         listOf(binding.tvTaskDateValue to (date != null), binding.tvTaskTimeValue to (time != null),
             binding.tvTaskCourseValue to courseName.isNotBlank(), binding.tvTaskReminderValue to (reminder >= 0)).forEach { (view, chosen) ->
             view.setTextColor(color(if (chosen) R.color.study_accent else R.color.study_text_secondary))
@@ -277,6 +280,7 @@ class StudyTaskEditorActivity : AppCompatActivity() {
     private fun reminderChoices() {
         binding.reminderPanel.removeAllViews()
         val options = LinkedHashMap(StudyTaskRules.reminders)
+        if (kind == "reminder") options[0] = "准时提醒"
         if (reminder !in options) options[reminder] = "提前${reminder}分钟"
         options.forEach { (value, label) -> binding.reminderPanel.addView(choice(label, value == reminder) {
             reminder = value; labels(); reminderChoices(); showPanel("")

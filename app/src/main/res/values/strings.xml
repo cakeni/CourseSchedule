@@ -389,13 +389,13 @@
     <string name="reminder_operation_failed">提醒更新失败，请重试。</string>
     <string name="assistant_title">课程助手</string>
     <string name="assistant_chat_greeting">今天，想安排些什么？</string>
-    <string name="assistant_chat_welcome">查课、调课、记作业，都可以直接说。</string>
+    <string name="assistant_chat_welcome">课程、课业和生活提醒，交给我一起安排。</string>
     <string name="assistant_quick_add">添加课程</string>
     <string name="assistant_quick_query">查看课表</string>
     <string name="assistant_quick_change">修改教室</string>
     <string name="assistant_quick_delete">删除课程</string>
     <string name="assistant_quick_prompts">常用指令</string>
-    <string name="assistant_connect_service">设置服务，开始使用</string>
+    <string name="assistant_connect_service">连接服务，开启课程对话</string>
     <string name="assistant_service_settings">服务设置</string>
     <string name="assistant_close_history">关闭会话侧栏</string>
     <string name="assistant_drawer_search_hint">搜索对话内容</string>
@@ -405,7 +405,7 @@
     <string name="assistant_history_week">近 7 天</string>
     <string name="assistant_history_older">更早</string>
     <string name="assistant_return_schedule">返回课表</string>
-    <string name="assistant_composer_notice">改动需确认 · 图片、对话和课业信息发送至所选服务</string>
+    <string name="assistant_composer_notice">本地提醒无需联网 · 其他请求发送至所选服务</string>
     <string name="assistant_welcome">查课程、加新课、改时间地点、删除课程或设置提醒，都可以直接说。目标不明确时会先问你。</string>
     <string name="import_from_assistant">AI 对话导入</string>
     <string name="assistant_import_description">对话查课、加课和管理课表 · 自带 API</string>
@@ -431,7 +431,7 @@
     <string name="assistant_undo_action">撤销</string>
     <string name="assistant_api_config">API 配置</string>
     <string name="assistant_unconfigured">填写服务地址、模型和密钥</string>
-    <string name="assistant_message_hint">想对课表做些什么？</string>
+    <string name="assistant_message_hint">说说你想安排的事…</string>
     <string name="assistant_send">发送</string>
     <string name="assistant_revise_send">修改方案</string>
     <string name="assistant_revision_hint">补充修改，例如：教室改成 B302</string>
@@ -468,4 +468,6 @@
     <string name="assistant_stop_request">停止请求</string>
     <string name="assistant_retry_request">重试上一条消息</string>
     <string name="assistant_message_metadata">%1$s · %2$s%3$s</string>
+    <string name="assistant_quick_reminder">生活提醒</string>
+    <string name="assistant_example_reminder">提醒我吃饭</string>
 </resources>

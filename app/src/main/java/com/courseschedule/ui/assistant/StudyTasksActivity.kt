@@ -238,7 +238,7 @@ class StudyTasksActivity : AppCompatActivity() {
                 deadline.year != today.year -> "yyyy/M/d HH:mm"
                 else -> "M月d日 HH:mm"
             }))
-            row.tvTaskDue.text = listOfNotNull(task.courseName.takeIf { it.isNotBlank() }, "$due 截止").joinToString(" · ")
+            row.tvTaskDue.text = listOfNotNull(task.courseName.takeIf { it.isNotBlank() }, if (task.kind == "reminder") "$due 提醒" else "$due 截止").joinToString(" · ")
             row.tvTaskDue.setTextColor(ContextCompat.getColor(this, if (task.completedAt == null && task.dueAt < now) R.color.study_today else R.color.study_text_secondary))
             row.root.contentDescription = StudyTaskRules.describe(task)
             row.tvTaskTitle.alpha = if (task.completedAt == null) 1f else 0.55f

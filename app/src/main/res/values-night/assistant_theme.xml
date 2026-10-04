@@ -1,16 +1,19 @@
 <resources>
-    <color name="assistant_background">#000000</color>
-    <color name="assistant_soft_surface">#1C1C1E</color>
-    <color name="assistant_selected_surface">#2C2C2E</color>
-    <color name="assistant_accent">#F5F5F7</color>
-    <color name="assistant_on_accent">#1C1C1E</color>
-    <color name="assistant_text">#F5F5F7</color>
-    <color name="assistant_text_secondary">#98989D</color>
-    <color name="assistant_divider">#38383A</color>
-    <color name="assistant_hero_surface">#F5F5F7</color>
-    <color name="assistant_prompt_add">#1C1C1E</color>
-    <color name="assistant_prompt_query">#1C1C1E</color>
-    <color name="assistant_prompt_change">#1C1C1E</color>
-    <color name="assistant_prompt_delete">#1C1C1E</color>
-    <color name="assistant_hero_highlight">#1C1C1E</color>
+    <color name="assistant_background">#101010</color>
+    <color name="assistant_soft_surface">#1C1C1C</color>
+    <color name="assistant_selected_surface">#303030</color>
+    <color name="assistant_accent">#F2F2F2</color>
+    <color name="assistant_on_accent">#171717</color>
+    <color name="assistant_text">#F5F5F5</color>
+    <color name="assistant_text_secondary">#AEAEAE</color>
+    <color name="assistant_divider">#393939</color>
+    <color name="assistant_hero_surface">#2A2A2A</color>
+    <color name="assistant_prompt_add">#242424</color>
+    <color name="assistant_prompt_query">#242424</color>
+    <color name="assistant_prompt_change">#242424</color>
+    <color name="assistant_prompt_delete">#242424</color>
+    <color name="assistant_hero_highlight">#FFFFFF</color>
+    <color name="assistant_pending_surface">#252525</color>
+    <color name="assistant_on_hero">#FFFFFF</color>
+    <color name="assistant_hero_secondary">#E8E8E8</color>
 </resources>

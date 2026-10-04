@@ -26,6 +26,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.UUID
 import java.time.LocalDate
+import java.time.ZonedDateTime
 import android.net.Uri
 import com.courseschedule.domain.StudyTaskRules
 
@@ -209,8 +210,35 @@ internal class CourseAssistantViewModel @JvmOverloads constructor(application: A
         }
     }
 
+    private fun localReminderReply(text: String): AssistantCourseReply? {
+        if (imageDraft.value != null || state.targetChoice != null) return null
+        val semesterId = conversation?.semesterId ?: return null
+        val prior = messages.value.orEmpty()
+        val start = prior.indexOfLast { it.role == "user" && AssistantLocalReminder.recognizes(it.content) }
+        val source = if (prior.lastOrNull()?.kind == "reminder_question" && start >= 0) {
+            prior.drop(start + 1).filter { it.role == "user" }.asReversed().joinToString(" ") { it.content } + " " + prior[start].content
+        } else null
+        return AssistantLocalReminder.reply(text, semesterId, ZonedDateTime.now(), source, pendingChanges.value)
+    }
+
+    fun canSendLocally(text: String) = localReminderReply(text) != null
+
     fun send(text: String, displayedWeek: Int) {
         if (busy.value == true || (text.isBlank() && imageDraft.value == null)) return
+        require(text.length <= 2000) { "每条消息最多2000字。" }
+        val local = localReminderReply(text)
+        if (local != null) {
+            launchOperation {
+                val semester = currentSemester()
+                ensureConversation(semester)
+                require(local.studyChanges.orEmpty().all { it.after?.semesterId == semester.id }) { "学期已变化，请重新描述。" }
+                append("user", text, next = state.copy(retryRequest = null, requestRunning = false))
+                updateDraft("")
+                if (local.studyChanges.isNullOrEmpty()) append("assistant", local.reply, "reminder_question")
+                else receiveReply(local, semester)
+            }
+            return
+        }
         val message = text.ifBlank { "请读取图片中的课表或通知，整理成待确认方案；不清楚或缺少的信息请先问我。" }
         val bound = state.selectedTarget?.takeIf { selected ->
             Regex("它|这门|那门|这节|刚才.*课").containsMatchIn(text) &&
@@ -351,7 +379,9 @@ internal class CourseAssistantViewModel @JvmOverloads constructor(application: A
             } ?: require(!reply.revisedPending)
             require(changes.all { it.original == null || database.studyTaskDao().find(it.original.id) == it.original }) { "学习事项已变化，请重新描述。" }
             val pendingReply = reply.copy(revisedPending = false)
-            append("assistant", "学习事项已整理好，请核对截止时间与提醒，确认后才保存。\n日期基准：$today\n\n" + pendingSummary(pendingReply),
+            val intro = if (changes.all { (it.after ?: it.original)?.kind == "reminder" }) "提醒方案已整理，确认后保存。"
+                else "事项已整理好，请核对时间与提醒，确认后才保存。\n日期基准：$today"
+            append("assistant", "$intro\n\n" + pendingSummary(pendingReply),
                 "confirmation", completed.copy(pending = AssistantPendingOperation(semester, pendingReply), targetChoice = null, selectedTarget = null))
             return
         }
@@ -484,16 +514,33 @@ internal class CourseAssistantViewModel @JvmOverloads constructor(application: A
                 val after = change.after
                 require(old == null || database.studyTaskDao().find(old.id) == old) { "事项已被修改或删除，本次未保存，请重新描述。" }
                 if (after == null) database.studyTaskDao().delete(requireNotNull(old).id) else {
+                    StudyTaskRules.validateReminderTime(after, old)
                     if (after.courseName.isNotBlank() && after.courseName != old?.courseName) require(courses.any { it.courseName == after.courseName }) { "关联课程已变化，请重新选择。" }
                     require(old != null || existing.none { it.title == after.title && it.courseName == after.courseName && it.kind == after.kind && it.dueAt == after.dueAt }) { "已有相同学习事项，请勿重复添加。" }
                     if (old == null) database.studyTaskDao().insert(after) else require(database.studyTaskDao().update(after) == 1)
                 }
             }
-            writeMessage("assistant", "已保存${changes.size}项学习事项变更。\n\n${AssistantStudyProtocol.summary(changes)}\n\n可在菜单的「学习事项」中查看、编辑或重新打开。", "result", next)
+            val reminders = changes.all { (it.after ?: it.original)?.kind == "reminder" }
+            val summary = if (reminders) changes.joinToString("\n\n") {
+                it.after?.let(StudyTaskRules::describe) ?: "已删除提醒：${it.original!!.title}"
+            } else AssistantStudyProtocol.summary(changes)
+            writeMessage("assistant", "已保存${changes.size}项安排。\n\n$summary\n\n可在「待办」中查看或编辑。${studyReminderNotice(changes.mapNotNull { it.after })}",
+                if (reminders) "reminder_result" else "result", next)
         }
         applyWritten(updated, next)
         changes.filter { it.after == null }.forEach { ReminderManager(getApplication()).cancelStudyReminder(it.original!!.id) }
         syncReminders(emptyList())
+    }
+
+    private fun studyReminderNotice(tasks: List<com.courseschedule.data.entity.StudyTask>): String {
+        if (tasks.none { it.reminderMinutes >= 0 && it.completedAt == null }) return ""
+        val manager = ReminderManager(getApplication())
+        return when {
+            !SchedulePreferences(getApplication()).reminderEnabled -> "\n提醒时间已保存，但总提醒开关关闭。请从菜单打开提醒设置。"
+            !AlarmReceiver.notificationsAvailable(getApplication()) -> "\n提醒时间已保存，但系统通知未开启。请从菜单打开提醒设置并允许通知。"
+            !manager.canScheduleExactAlarms() -> "\n提醒已安排；系统未允许精确闹钟，通知可能延迟。可从菜单打开提醒设置。"
+            else -> "\n将通过本地通知提醒，关闭聊天后仍可接收。"
+        }
     }
 
     private suspend fun executeChanges(reply: AssistantCourseReply, semester: Semester) {
