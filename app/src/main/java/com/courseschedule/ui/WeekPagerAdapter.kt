@@ -297,7 +297,7 @@ class WeekPagerAdapter(
             }
             val showToday = status?.phase == SemesterPhase.ACTIVE && week == status.week
             val normalColor = ContextCompat.getColor(context, R.color.text_secondary)
-            val highlightColor = ContextCompat.getColor(context, R.color.primary)
+            val highlightColor = ContextCompat.getColor(context, R.color.schedule_accent)
 
             dayViews.forEachIndexed { index, textView ->
                 val weekday = days.getOrElse(index) { "" }

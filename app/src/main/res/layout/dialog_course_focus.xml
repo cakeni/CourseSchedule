@@ -1,0 +1,117 @@
+<?xml version='1.0' encoding='utf-8'?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:id="@+id/courseDetailContent" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="20dp" android:focusableInTouchMode="true">
+    <LinearLayout android:id="@+id/detailHero" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+        <FrameLayout android:layout_width="match_parent" android:layout_height="48dp">
+            <ImageButton android:id="@+id/btnCloseCourse" android:layout_width="48dp" android:layout_height="48dp" android:background="@drawable/bg_course_focus_back" android:contentDescription="@string/back" android:padding="14dp" android:src="@drawable/ic_back" app:tint="@color/course_focus_text" />
+            <TextView android:layout_width="wrap_content" android:layout_height="match_parent" android:layout_gravity="center" android:fontFamily="sans-serif-medium" android:gravity="center" android:text="@string/course_focus_heading" android:textColor="@color/course_focus_text" android:textSize="14sp" />
+        </FrameLayout>
+    </LinearLayout>
+    <androidx.core.widget.NestedScrollView android:id="@+id/courseDetailScroll" android:layout_width="match_parent" android:layout_height="0dp" android:layout_marginTop="16dp" android:layout_weight="1" android:clipToPadding="false" android:overScrollMode="never" android:paddingBottom="4dp">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:id="@+id/detailForm" android:paddingBottom="8dp">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:gravity="center_vertical" android:orientation="horizontal">
+                <View android:id="@+id/detailCourseColor" android:layout_width="10dp" android:layout_height="10dp" android:importantForAccessibility="no" />
+                <TextView style="@style/CourseFocus.Label" android:layout_marginStart="8dp" android:text="@string/course_focus_arrangement" android:textColor="@color/course_focus_text" />
+            </LinearLayout>
+            <androidx.appcompat.widget.AppCompatEditText android:id="@+id/tvDetailTitle" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:maxLines="3" android:textColor="@color/course_focus_text" android:textSize="28sp" style="@style/CourseFocus.Field" android:hint="@string/course_focus_name_hint" android:inputType="textCapSentences|textMultiLine" android:imeOptions="actionNext" android:maxLength="120" android:layout_marginBottom="18dp" />
+            <com.google.android.material.card.MaterialCardView style="@style/CourseFocus.Paper">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="20dp">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:minHeight="64dp" android:clickable="true" android:focusable="true" android:background="@drawable/control_focus" android:id="@+id/rowFocusTime">
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:orientation="vertical" android:layout_weight="1">
+                            <TextView android:text="@string/course_focus_time" style="@style/CourseFocus.Label" />
+                            <TextView android:id="@+id/tvDetailTime" style="@style/CourseFocus.Value" android:textSize="20sp" android:textIsSelectable="false" />
+                        </LinearLayout>
+                        <ImageView android:id="@+id/focusTimeChevron" android:layout_width="18dp" android:layout_height="18dp" android:layout_marginStart="12dp" android:src="@drawable/ic_chevron_right" android:importantForAccessibility="no" app:tint="@color/course_focus_secondary" />
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone" android:layout_marginTop="8dp" android:id="@+id/focusTimePanel">
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                            <com.google.android.material.button.MaterialButton android:id="@+id/focusDay1" android:text="@string/editor_day_1" style="@style/CourseFocus.Choice" />
+                            <com.google.android.material.button.MaterialButton android:id="@+id/focusDay2" android:text="@string/editor_day_2" style="@style/CourseFocus.Choice" />
+                            <com.google.android.material.button.MaterialButton android:id="@+id/focusDay3" android:text="@string/editor_day_3" style="@style/CourseFocus.Choice" />
+                            <com.google.android.material.button.MaterialButton android:id="@+id/focusDay4" android:text="@string/editor_day_4" style="@style/CourseFocus.Choice" />
+                            <com.google.android.material.button.MaterialButton android:id="@+id/focusDay5" android:text="@string/editor_day_5" style="@style/CourseFocus.Choice" />
+                            <com.google.android.material.button.MaterialButton android:id="@+id/focusDay6" android:text="@string/editor_day_6" style="@style/CourseFocus.Choice" />
+                            <com.google.android.material.button.MaterialButton android:id="@+id/focusDay7" android:text="@string/editor_day_7" style="@style/CourseFocus.Choice" />
+                        </LinearLayout>
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center">
+                            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:orientation="vertical" android:layout_weight="1">
+                                <TextView android:text="@string/editor_start" style="@style/CourseFocus.Label" android:layout_width="match_parent" android:gravity="center" />
+                                <NumberPicker android:id="@+id/focusSectionStart" android:layout_width="match_parent" android:layout_height="132dp" android:importantForAccessibility="yes" android:contentDescription="@string/start_section" />
+                            </LinearLayout>
+                            <TextView android:layout_width="24dp" android:layout_height="132dp" android:gravity="center" android:text="—" android:textSize="18sp" android:textColor="@color/course_focus_secondary" />
+                            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:orientation="vertical" android:layout_weight="1">
+                                <TextView android:text="@string/editor_end" style="@style/CourseFocus.Label" android:layout_width="match_parent" android:gravity="center" />
+                                <NumberPicker android:id="@+id/focusSectionEnd" android:layout_width="match_parent" android:layout_height="132dp" android:importantForAccessibility="yes" android:contentDescription="@string/end_section" />
+                            </LinearLayout>
+                        </LinearLayout>
+                        <com.google.android.material.button.MaterialButton android:id="@+id/btnFocusTimeDone" android:text="@string/editor_done" style="@style/CourseFocus.Choice" android:layout_width="match_parent" android:layout_weight="0" />
+                    </LinearLayout>
+                    <View android:layout_width="match_parent" android:layout_height="1dp" android:layout_marginVertical="12dp" android:background="@color/course_focus_divider" />
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:minHeight="64dp" android:clickable="true" android:focusable="true" android:background="@drawable/control_focus" android:id="@+id/rowFocusWeeks">
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:orientation="vertical" android:layout_weight="1">
+                            <TextView android:text="@string/course_focus_weeks" style="@style/CourseFocus.Label" />
+                            <TextView android:id="@+id/tvDetailWeeks" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:textColor="@color/course_focus_text" android:textSize="15sp" />
+                        </LinearLayout>
+                        <ImageView android:id="@+id/focusWeeksChevron" android:layout_width="18dp" android:layout_height="18dp" android:layout_marginStart="12dp" android:src="@drawable/ic_chevron_right" android:importantForAccessibility="no" app:tint="@color/course_focus_secondary" />
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone" android:layout_marginTop="8dp" android:id="@+id/focusWeeksPanel">
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center">
+                            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:orientation="vertical" android:layout_weight="1">
+                                <TextView android:text="@string/editor_start" style="@style/CourseFocus.Label" android:layout_width="match_parent" android:gravity="center" />
+                                <NumberPicker android:id="@+id/focusWeekStart" android:layout_width="match_parent" android:layout_height="132dp" android:importantForAccessibility="yes" android:contentDescription="@string/start_week" />
+                            </LinearLayout>
+                            <TextView android:layout_width="24dp" android:layout_height="132dp" android:gravity="center" android:text="—" android:textSize="18sp" android:textColor="@color/course_focus_secondary" />
+                            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:orientation="vertical" android:layout_weight="1">
+                                <TextView android:text="@string/editor_end" style="@style/CourseFocus.Label" android:layout_width="match_parent" android:gravity="center" />
+                                <NumberPicker android:id="@+id/focusWeekEnd" android:layout_width="match_parent" android:layout_height="132dp" android:importantForAccessibility="yes" android:contentDescription="@string/end_week" />
+                            </LinearLayout>
+                        </LinearLayout>
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                            <com.google.android.material.button.MaterialButton android:id="@+id/focusEveryWeek" android:text="@string/every_week" style="@style/CourseFocus.Choice" />
+                            <com.google.android.material.button.MaterialButton android:id="@+id/focusOddWeek" android:text="@string/odd_week" style="@style/CourseFocus.Choice" />
+                            <com.google.android.material.button.MaterialButton android:id="@+id/focusEvenWeek" android:text="@string/even_week" style="@style/CourseFocus.Choice" />
+                        </LinearLayout>
+                        <com.google.android.material.button.MaterialButton android:id="@+id/btnFocusWeeksDone" android:text="@string/editor_done" style="@style/CourseFocus.Choice" android:layout_width="match_parent" android:layout_weight="0" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+            <com.google.android.material.card.MaterialCardView style="@style/CourseFocus.Paper" android:layout_marginTop="12dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="20dp">
+                    <TextView style="@style/CourseFocus.Label" android:text="@string/course_focus_room" />
+                    <androidx.appcompat.widget.AppCompatEditText android:id="@+id/tvDetailClassroom" style="@style/CourseFocus.Field" android:hint="@string/course_focus_room_hint" android:inputType="textCapSentences" android:imeOptions="actionNext" android:maxLength="120" android:singleLine="true" />
+                    <View android:layout_width="match_parent" android:layout_height="1dp" android:layout_marginVertical="18dp" android:background="@color/course_focus_divider" />
+                    <TextView style="@style/CourseFocus.Label" android:text="@string/course_focus_teacher" />
+                    <androidx.appcompat.widget.AppCompatEditText android:id="@+id/tvDetailTeacher" style="@style/CourseFocus.Field" android:hint="@string/course_focus_teacher_hint" android:inputType="textPersonName" android:imeOptions="actionNext" android:maxLength="120" android:singleLine="true" />
+                    <TextView android:id="@+id/tvTeacherHint" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:text="@string/course_focus_missing_teacher" android:textColor="@color/course_focus_secondary" android:textSize="13sp" android:visibility="gone" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+            <com.google.android.material.card.MaterialCardView android:id="@+id/rowDetailNote" style="@style/CourseFocus.Paper" android:layout_marginTop="12dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="20dp">
+                    <TextView style="@style/CourseFocus.Label" android:text="@string/course_focus_note" />
+                    <androidx.appcompat.widget.AppCompatEditText android:id="@+id/tvDetailNote" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:lineSpacingExtra="4dp" android:textColor="@color/course_focus_text" android:textSize="15sp" style="@style/CourseFocus.Field" android:hint="@string/course_focus_note_hint" android:inputType="textCapSentences|textMultiLine" android:imeOptions="actionDone" android:maxLength="2000" android:maxLines="5" android:fontFamily="sans-serif" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+            <com.google.android.material.button.MaterialButton android:id="@+id/btnFocusMore" android:text="@string/course_focus_more" style="@style/CourseFocus.Choice" android:layout_width="match_parent" android:layout_weight="0" android:layout_marginTop="8dp" />
+            <com.google.android.material.card.MaterialCardView android:id="@+id/focusMorePanel" android:visibility="gone" style="@style/CourseFocus.Paper">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="20dp">
+                    <TextView android:text="@string/course_focus_color" style="@style/CourseFocus.Label" />
+                    <androidx.recyclerview.widget.RecyclerView android:id="@+id/focusColorChoices" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:nestedScrollingEnabled="false" />
+                    <TextView android:text="@string/course_focus_reminder" style="@style/CourseFocus.Label" />
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:id="@+id/focusReminderChoices" />
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btnFocusDelete" android:text="@string/delete_course" style="@style/CourseFocus.Choice" android:layout_width="match_parent" android:layout_weight="0" android:textColor="@color/error" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+    <TextView android:id="@+id/focusError" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:textSize="13sp" android:textColor="@color/error" android:visibility="gone" android:accessibilityLiveRegion="polite" />
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone" android:layout_marginTop="12dp" android:id="@+id/focusConfirmation">
+        <TextView android:id="@+id/focusConfirmationText" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/course_focus_text" android:textSize="14sp" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+            <com.google.android.material.button.MaterialButton android:id="@+id/btnFocusKeep" android:text="@string/course_focus_keep" style="@style/CourseFocus.Choice" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/btnFocusDiscard" android:text="@string/course_focus_discard" style="@style/CourseFocus.Choice" />
+        </LinearLayout>
+    </LinearLayout>
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center" android:layout_marginTop="16dp" android:id="@+id/focusActions">
+        <com.google.android.material.button.MaterialButton android:id="@+id/btnFocusCancel" android:text="@string/cancel" style="@style/CourseFocus.Choice" android:layout_width="64dp" android:layout_weight="0" android:layout_marginEnd="12dp" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/btnEditCourse" style="@style/CourseSchedule.Button" android:layout_width="wrap_content" android:layout_height="52dp" android:layout_gravity="center_horizontal" android:insetTop="0dp" android:insetBottom="0dp" android:minWidth="160dp" android:paddingHorizontal="28dp" android:text="@string/course_focus_save" android:textAllCaps="false" android:textColor="@color/course_focus_action_text" android:textSize="15sp" app:backgroundTint="@color/course_focus_action" app:cornerRadius="26dp" app:elevation="0dp" app:strokeWidth="0dp" app:strokeColor="@color/course_focus_action_edge" android:enabled="false" />
+    </LinearLayout>
+</LinearLayout>

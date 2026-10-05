@@ -12,8 +12,8 @@ android {
         applicationId "com.courseschedule"
         minSdk 26
         targetSdk 34
-        versionCode 43
-        versionName "1.0.42"
+        versionCode 56
+        versionName "1.0.55"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }

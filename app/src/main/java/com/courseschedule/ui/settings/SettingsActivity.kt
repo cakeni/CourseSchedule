@@ -45,6 +45,7 @@ import com.courseschedule.databinding.ActivitySettingsBinding
 import com.courseschedule.domain.ScheduleRules
 import com.courseschedule.domain.SemesterPhase
 import com.courseschedule.domain.WeekMotionStyle
+import com.courseschedule.ui.enterReferenceContent
 import com.courseschedule.ui.installPressScale
 import com.courseschedule.ui.playNavigationMotion
 import com.courseschedule.ui.selectItemWithoutAnimation
@@ -398,24 +399,7 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun animateSettingsEntrance() {
-        val container = binding.settingsContent
-        val children = List(container.childCount, container::getChildAt)
-        children.forEach { child ->
-            child.alpha = 0.18f
-            child.translationX = dp(32).toFloat()
-        }
-        container.doOnPreDraw {
-            children.forEachIndexed { index, child ->
-                child.animate()
-                    .alpha(1f)
-                    .translationX(0f)
-                    .setStartDelay(index * 56L)
-                    .setDuration(620L)
-                    .setInterpolator(motionInterpolator)
-                    .withLayer()
-                    .start()
-            }
-        }
+        binding.settingsContent.enterReferenceContent()
     }
 
     private fun observeData() {

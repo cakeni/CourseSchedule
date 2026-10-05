@@ -1,19 +1,19 @@
 <resources>
-    <color name="assistant_background">#101010</color>
-    <color name="assistant_soft_surface">#1C1C1C</color>
-    <color name="assistant_selected_surface">#303030</color>
-    <color name="assistant_accent">#F2F2F2</color>
-    <color name="assistant_on_accent">#171717</color>
-    <color name="assistant_text">#F5F5F5</color>
-    <color name="assistant_text_secondary">#AEAEAE</color>
-    <color name="assistant_divider">#393939</color>
-    <color name="assistant_hero_surface">#2A2A2A</color>
-    <color name="assistant_prompt_add">#242424</color>
-    <color name="assistant_prompt_query">#242424</color>
-    <color name="assistant_prompt_change">#242424</color>
-    <color name="assistant_prompt_delete">#242424</color>
+    <color name="assistant_background">@color/background</color>
+    <color name="assistant_soft_surface">@color/surface</color>
+    <color name="assistant_selected_surface">@color/reference_blue_surface</color>
+    <color name="assistant_accent">@color/primary</color>
+    <color name="assistant_on_accent">@color/on_primary</color>
+    <color name="assistant_text">@color/text_primary</color>
+    <color name="assistant_text_secondary">@color/text_secondary</color>
+    <color name="assistant_divider">@color/divider</color>
+    <color name="assistant_hero_surface">@color/reference_hero_surface</color>
+    <color name="assistant_prompt_add">@color/reference_warm_surface</color>
+    <color name="assistant_prompt_query">@color/reference_blue_surface</color>
+    <color name="assistant_prompt_change">@color/reference_teal_surface</color>
+    <color name="assistant_prompt_delete">@color/reference_rose_surface</color>
     <color name="assistant_hero_highlight">#FFFFFF</color>
-    <color name="assistant_pending_surface">#252525</color>
-    <color name="assistant_on_hero">#FFFFFF</color>
-    <color name="assistant_hero_secondary">#E8E8E8</color>
+    <color name="assistant_pending_surface">@color/reference_warm_surface</color>
+    <color name="assistant_on_hero">@color/reference_hero_text</color>
+    <color name="assistant_hero_secondary">@color/reference_hero_secondary</color>
 </resources>

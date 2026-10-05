@@ -1,29 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:background="@color/study_background">
+    android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:background="@color/surface">
     <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="vertical">
         <androidx.core.widget.NestedScrollView android:id="@+id/taskScroll" android:layout_width="match_parent" android:layout_height="match_parent" android:fillViewport="true" android:clipToPadding="false">
-            <LinearLayout android:id="@+id/taskContent" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingHorizontal="20dp" android:paddingTop="22dp" android:paddingBottom="20dp" android:clipChildren="false" android:clipToPadding="false">
+            <LinearLayout android:id="@+id/taskContent" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingHorizontal="24dp" android:paddingTop="22dp" android:paddingBottom="20dp" android:clipChildren="false" android:clipToPadding="false">
                 <LinearLayout android:id="@+id/taskHeader" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical">
                     <ImageButton android:id="@+id/btnStudyBack" android:layout_width="40dp" android:layout_height="48dp" android:layout_marginEnd="4dp" android:background="@drawable/control_focus"
                         android:src="@drawable/ic_back" app:tint="@color/study_text" android:contentDescription="@string/back"  android:stateListAnimator="@animator/press_feedback_icon" />
                     <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical">
                         <TextView android:id="@+id/tvTaskOverview" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/study_title"
-                            android:textColor="@color/study_text" android:textSize="27sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" />
+                            android:textColor="@color/study_text" android:textSize="26sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" />
                         <TextView android:id="@+id/tvTaskSemester" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="6dp"
                             android:textColor="@color/study_text_secondary" android:textSize="11sp" />
                     </LinearLayout>
-                    <ImageButton android:id="@+id/btnStudyReminders" android:layout_width="44dp" android:layout_height="44dp" android:layout_marginStart="8dp" android:background="@drawable/bg_study_group"
+                    <ImageButton android:id="@+id/btnStudyReminders" android:layout_width="44dp" android:layout_height="44dp" android:layout_marginStart="8dp" android:background="@drawable/bg_reference_circle"
                         android:padding="12dp" android:src="@drawable/ic_assistant_reminder" app:tint="@color/study_text" android:contentDescription="@string/study_reminder_settings" />
                 </LinearLayout>
                 <TextView android:id="@+id/tvTaskReminderStatus" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp"
                     android:minHeight="36dp" android:gravity="center_vertical" android:textColor="@color/study_text_secondary" android:textSize="12sp" android:lineSpacingExtra="3dp" android:visibility="gone" />
-                <LinearLayout android:id="@+id/taskFilters" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginTop="22dp" android:clipChildren="false" android:clipToPadding="false">
+                <LinearLayout android:id="@+id/taskFilters" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginTop="20dp" android:clipChildren="false" android:clipToPadding="false">
                     <com.google.android.material.button.MaterialButton android:id="@+id/btnTasksToday" style="@style/Study.OverviewTile" android:text="@string/study_today" android:layout_marginEnd="8dp" />
                     <com.google.android.material.button.MaterialButton android:id="@+id/btnTasksUpcoming" style="@style/Study.OverviewTile" android:text="@string/study_upcoming" android:layout_marginEnd="8dp" />
                     <com.google.android.material.button.MaterialButton android:id="@+id/btnTasksPending" style="@style/Study.OverviewTile" android:text="@string/study_all" />
                 </LinearLayout>
-                <com.google.android.material.textfield.TextInputLayout android:id="@+id/taskSearch" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp"
+                <com.google.android.material.textfield.TextInputLayout android:id="@+id/taskSearch" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="14dp"
                     android:background="@drawable/bg_study_group" app:boxBackgroundMode="none" app:hintEnabled="false" app:startIconDrawable="@drawable/ic_search"
                     app:startIconTint="@color/study_text_secondary" app:endIconMode="clear_text">
                     <com.google.android.material.textfield.TextInputEditText android:id="@+id/etTaskSearch" android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@null"
@@ -45,15 +45,18 @@
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>
     </LinearLayout>
-    <com.google.android.material.button.MaterialButton android:id="@+id/btnAddTask" style="@style/CourseSchedule.TextButton"
-        android:layout_width="wrap_content" android:layout_height="52dp" android:layout_marginStart="12dp" android:layout_marginVertical="2dp" android:minWidth="0dp"
-        android:paddingHorizontal="12dp" android:text="@string/study_new" android:textSize="15sp" android:fontFamily="sans-serif-medium" android:textColor="@color/study_accent"
-        app:icon="@drawable/ic_add" app:iconTint="@color/study_accent" app:iconSize="22dp" app:iconGravity="textStart" app:iconPadding="8dp" app:cornerRadius="12dp"
-        android:elevation="0dp" android:stateListAnimator="@animator/press_feedback" android:contentDescription="@string/study_new" />
-    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/study_divider" />
+    <com.google.android.material.button.MaterialButton android:id="@+id/btnAddTask"
+        style="@style/CourseSchedule.Button" android:layout_width="match_parent" android:layout_height="52dp"
+        android:layout_marginHorizontal="24dp" android:layout_marginTop="8dp" android:layout_marginBottom="12dp"
+        android:insetTop="0dp" android:insetBottom="0dp" android:text="@string/study_new" android:textSize="14sp"
+        android:textColor="@color/reference_capsule_content" android:fontFamily="sans-serif-medium"
+        app:backgroundTint="@color/reference_capsule" app:icon="@drawable/ic_add"
+        app:iconTint="@color/reference_capsule_content" app:iconSize="18dp" app:iconGravity="textStart"
+        app:cornerRadius="26dp" app:strokeColor="@color/reference_capsule_edge" app:strokeWidth="1dp"
+        android:elevation="1dp" android:stateListAnimator="@animator/press_feedback" />
     <com.google.android.material.bottomnavigation.BottomNavigationView android:id="@+id/bottomNavigation" android:layout_width="match_parent" android:layout_height="72dp"
-        android:background="@color/study_background" android:elevation="0dp" app:itemActiveIndicatorStyle="@style/Study.NavigationIndicator"
-        app:itemIconSize="22dp" app:itemIconTint="@color/study_navigation_color" app:itemTextColor="@color/study_navigation_color" app:itemRippleColor="@color/control_focus_overlay"
+        android:background="@drawable/bg_bottom_navigation" android:elevation="0dp" app:itemActiveIndicatorStyle="@style/Study.NavigationIndicator"
+        app:itemIconSize="22dp" app:itemIconTint="@color/study_navigation_color" app:itemTextColor="@color/reference_nav_text" app:itemRippleColor="@color/control_focus_overlay"
         app:itemHorizontalTranslationEnabled="false" app:labelVisibilityMode="labeled" app:menu="@menu/menu_bottom_navigation"
         app:itemTextAppearanceActive="@style/CourseSchedule.NavigationLabel" app:itemTextAppearanceInactive="@style/CourseSchedule.NavigationLabel"
         app:itemPaddingTop="12dp" app:itemPaddingBottom="12dp" />

@@ -22,6 +22,12 @@ class CourseEditorViewModel(application: Application) : AndroidViewModel(applica
     private val database = AppDatabase.getDatabase(application)
     private var completionFeedbackConsumed = false
 
+    fun beginSession() {
+        if (writing.value == true) return
+        result.value = null
+        completionFeedbackConsumed = false
+    }
+
     fun consumeCompletionFeedback(): Boolean {
         if (result.value?.saved != true || completionFeedbackConsumed) return false
         completionFeedbackConsumed = true

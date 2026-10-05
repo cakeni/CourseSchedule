@@ -27,6 +27,7 @@ import com.courseschedule.databinding.ActivityImportBinding
 import com.courseschedule.domain.ScheduleRules
 import com.courseschedule.ui.MainActivity
 import com.courseschedule.ui.assistant.CourseAssistantActivity
+import com.courseschedule.ui.enterReferenceContent
 import com.courseschedule.ui.installPressScale
 import com.courseschedule.ui.playNavigationMotion
 import com.courseschedule.ui.selectItemWithoutAnimation
@@ -179,44 +180,7 @@ class ImportActivity : AppCompatActivity() {
     }
 
     private fun animateImportEntrance() {
-        val container = binding.importContent
-        val children = List(container.childCount, container::getChildAt)
-        children.forEach { child ->
-            child.alpha = 0.16f
-            child.translationY = dp(30f)
-            if (child === binding.cardImportSchool) {
-                child.scaleX = 0.9f
-                child.scaleY = 0.9f
-            }
-        }
-        binding.schoolIconContainer.apply {
-            scaleX = 0.2f
-            scaleY = 0.2f
-            rotation = -24f
-        }
-        container.doOnPreDraw {
-            children.forEachIndexed { index, child ->
-                child.animate()
-                    .alpha(1f)
-                    .translationY(0f)
-                    .scaleX(1f)
-                    .scaleY(1f)
-                    .setStartDelay(index * 50L)
-                    .setDuration(540L)
-                    .setInterpolator(motionInterpolator)
-                    .withLayer()
-                    .start()
-            }
-            binding.schoolIconContainer.animate()
-                .scaleX(1f)
-                .scaleY(1f)
-                .rotation(0f)
-                .setStartDelay(150L)
-                .setDuration(720L)
-                .setInterpolator(OvershootInterpolator(1.55f))
-                .withLayer()
-                .start()
-        }
+        binding.importContent.enterReferenceContent()
     }
 
     private fun dp(value: Float): Float = value * resources.displayMetrics.density

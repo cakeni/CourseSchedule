@@ -1,0 +1,23 @@
+<resources>
+    <color name="reference_capsule">@color/primary</color>
+    <color name="reference_capsule_top">@color/primary</color>
+    <color name="reference_capsule_edge">#2064B5</color>
+    <color name="reference_capsule_content">@color/on_primary</color>
+    <color name="reference_blue_surface">#E0EEFF</color>
+    <color name="reference_blue_accent">#205FAE</color>
+    <color name="reference_blue_light">#EFF6FF</color>
+    <color name="reference_blue_deep">#8DBAEC</color>
+    <color name="reference_warm_surface">#FFEAC8</color>
+    <color name="reference_warm_deep">#F8DCA6</color>
+    <color name="reference_success">#D5F1E1</color>
+    <color name="reference_success_text">#246F60</color>
+    <item name="reference_navigation" type="id" />
+    <color name="reference_hero_surface">#3D73A0</color>
+    <color name="reference_hero_text">#FFFFFF</color>
+    <color name="reference_hero_secondary">#FFFFFF</color>
+    <color name="reference_warm_accent">#8A591B</color>
+    <color name="reference_teal_surface">#DDF3EB</color>
+    <color name="reference_teal_accent">#246F60</color>
+    <color name="reference_rose_surface">#FBE3E8</color>
+    <color name="reference_rose_accent">#AA4259</color>
+</resources>

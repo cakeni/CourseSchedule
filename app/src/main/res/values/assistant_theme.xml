@@ -1,17 +1,17 @@
 <resources>
-    <color name="assistant_background">#F7F8FC</color>
-    <color name="assistant_soft_surface">#FFFFFF</color>
-    <color name="assistant_selected_surface">#E8ECF9</color>
-    <color name="assistant_accent">#5363AA</color>
-    <color name="assistant_on_accent">#FFFFFF</color>
-    <color name="assistant_text">#252C43</color>
-    <color name="assistant_text_secondary">#616B83</color>
-    <color name="assistant_divider">#E1E5EF</color>
-    <color name="assistant_hero_surface">#5969A9</color>
-    <color name="assistant_prompt_add">#EDEAF8</color>
-    <color name="assistant_prompt_query">#E8EEFB</color>
-    <color name="assistant_prompt_change">#FBF0E1</color>
-    <color name="assistant_prompt_delete">#ECEEF6</color>
+    <color name="assistant_background">@color/background</color>
+    <color name="assistant_soft_surface">@color/surface</color>
+    <color name="assistant_selected_surface">@color/reference_blue_surface</color>
+    <color name="assistant_accent">@color/primary</color>
+    <color name="assistant_on_accent">@color/on_primary</color>
+    <color name="assistant_text">@color/text_primary</color>
+    <color name="assistant_text_secondary">@color/text_secondary</color>
+    <color name="assistant_divider">@color/divider</color>
+    <color name="assistant_hero_surface">@color/reference_hero_surface</color>
+    <color name="assistant_prompt_add">@color/reference_warm_surface</color>
+    <color name="assistant_prompt_query">@color/reference_blue_surface</color>
+    <color name="assistant_prompt_change">@color/reference_teal_surface</color>
+    <color name="assistant_prompt_delete">@color/reference_rose_surface</color>
     <color name="assistant_hero_highlight">#FFFFFF</color>
     <style name="Assistant.ToolbarTitle" parent="TextAppearance.MaterialComponents.Subtitle1">
         <item name="android:textSize">17sp</item>
@@ -20,7 +20,7 @@
     <style name="Assistant.ToolbarSubtitle" parent="TextAppearance.MaterialComponents.Caption">
         <item name="android:textSize">11sp</item>
     </style>
-    <color name="assistant_pending_surface">#FFF3E2</color>
-    <color name="assistant_on_hero">#FFFFFF</color>
-    <color name="assistant_hero_secondary">#FFFFFF</color>
+    <color name="assistant_pending_surface">@color/reference_warm_surface</color>
+    <color name="assistant_on_hero">@color/reference_hero_text</color>
+    <color name="assistant_hero_secondary">@color/reference_hero_secondary</color>
 </resources>

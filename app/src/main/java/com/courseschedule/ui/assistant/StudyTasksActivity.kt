@@ -1,6 +1,7 @@
 package com.courseschedule.ui.assistant
 
 import android.animation.AnimatorSet
+import android.animation.Animator
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -52,6 +53,7 @@ class StudyTasksActivity : AppCompatActivity() {
     private var writing = false
     private var contentReady = false
     private var pageEntrance: AnimatorSet? = null
+    private var rowCompletion: Animator? = null
     private var selectedFilter = R.id.btnTasksPending
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -130,6 +132,8 @@ class StudyTasksActivity : AppCompatActivity() {
 
     override fun onPause() {
         finishEntrance()
+        rowCompletion?.end()
+        rowCompletion = null
         super.onPause()
     }
 
@@ -156,7 +160,7 @@ class StudyTasksActivity : AppCompatActivity() {
         listOf(binding.btnTasksToday, binding.btnTasksPending, binding.btnTasksUpcoming, binding.btnTasksCompleted).forEach { it.isChecked = it.id == selectedFilter }
         styleTile(binding.btnTasksToday, R.color.study_today, R.color.study_today_surface, R.color.study_today_selected)
         styleTile(binding.btnTasksUpcoming, R.color.study_upcoming, R.color.study_upcoming_surface, R.color.study_upcoming_selected)
-        styleTile(binding.btnTasksPending, R.color.study_accent, R.color.study_all_surface, R.color.study_all_selected)
+        styleTile(binding.btnTasksPending, R.color.reference_blue_accent, R.color.study_all_surface, R.color.study_all_selected)
         binding.tvTaskListTitle.text = when (selectedFilter) {
             R.id.btnTasksToday -> "今天与逾期"
             R.id.btnTasksUpcoming -> "未来7天"
@@ -242,6 +246,14 @@ class StudyTasksActivity : AppCompatActivity() {
             row.tvTaskDue.setTextColor(ContextCompat.getColor(this, if (task.completedAt == null && task.dueAt < now) R.color.study_today else R.color.study_text_secondary))
             row.root.contentDescription = StudyTaskRules.describe(task)
             row.tvTaskTitle.alpha = if (task.completedAt == null) 1f else 0.55f
+            val (kindSurface, kindInk) = when (task.kind) {
+                "exam" -> R.color.reference_warm_surface to R.color.reference_warm_accent
+                "report" -> R.color.reference_teal_surface to R.color.reference_teal_accent
+                "reminder" -> R.color.reference_rose_surface to R.color.reference_rose_accent
+                else -> R.color.reference_blue_surface to R.color.reference_blue_accent
+            }
+            row.tvTaskKind.backgroundTintList = android.content.res.ColorStateList.valueOf(ContextCompat.getColor(this, kindSurface))
+            row.tvTaskKind.setTextColor(ContextCompat.getColor(this, kindInk))
             row.tvTaskTitle.paintFlags = if (task.completedAt == null) row.tvTaskTitle.paintFlags and android.graphics.Paint.STRIKE_THRU_TEXT_FLAG.inv()
                 else row.tvTaskTitle.paintFlags or android.graphics.Paint.STRIKE_THRU_TEXT_FLAG
             row.checkTaskDone.isChecked = task.completedAt != null
@@ -278,7 +290,7 @@ class StudyTasksActivity : AppCompatActivity() {
             try {
                 block()
                 if (completed) StudyFeedback.completed(binding.root)
-                StudyMotion.finishRow(row) { writing = false; render() }
+                rowCompletion = StudyMotion.finishRow(row, completed) { rowCompletion = null; writing = false; render() }
             } catch (error: Exception) {
                 writing = false; render()
                 Toast.makeText(this@StudyTasksActivity, error.message ?: "保存失败，请重试。", Toast.LENGTH_LONG).show()
@@ -293,19 +305,15 @@ class StudyTasksActivity : AppCompatActivity() {
     }
 
     private fun tile(button: com.google.android.material.button.MaterialButton, count: Int, label: String) {
-        val number = count.toString()
-        button.text = SpannableString(getString(R.string.study_count_filter, count, label)).apply {
-            setSpan(RelativeSizeSpan(2f), 0, number.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-            setSpan(StyleSpan(Typeface.BOLD), 0, number.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        }
+        button.text = "$label  $count"
         button.contentDescription = "$label，$count 项"
     }
 
     private fun styleTile(button: com.google.android.material.button.MaterialButton, text: Int, surface: Int, selected: Int) {
-        button.setTextColor(ContextCompat.getColor(this, text))
-        button.backgroundTintList = android.content.res.ColorStateList.valueOf(ContextCompat.getColor(this, if (button.isChecked) selected else surface))
+        button.setTextColor(ContextCompat.getColor(this, if (button.isChecked) R.color.study_on_accent else text))
+        button.backgroundTintList = android.content.res.ColorStateList.valueOf(ContextCompat.getColor(this,
+            if (button.isChecked) selected else surface))
         button.strokeWidth = 0
-        button.strokeColor = android.content.res.ColorStateList.valueOf(ContextCompat.getColor(this, text))
     }
 
     private fun openReminderSettings() {

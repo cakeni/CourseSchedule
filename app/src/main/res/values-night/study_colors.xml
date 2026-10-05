@@ -1,19 +1,19 @@
 <resources>
-    <color name="study_background">#13161D</color>
-    <color name="study_soft_surface">#20252F</color>
-    <color name="study_selected_surface">#223555</color>
-    <color name="study_accent">#8AB4FF</color>
-    <color name="study_on_accent">#142A4D</color>
-    <color name="study_text">#F3F5FA</color>
-    <color name="study_text_secondary">#A4ADBD</color>
-    <color name="study_divider">#303845</color>
-    <color name="study_today">#F7B27B</color>
-    <color name="study_today_surface">#33291F</color>
-    <color name="study_today_selected">#4B3525</color>
-    <color name="study_upcoming">#8AD7B7</color>
-    <color name="study_upcoming_surface">#1C302B</color>
-    <color name="study_upcoming_selected">#224A3C</color>
-    <color name="study_all_surface">#202C43</color>
-    <color name="study_all_selected">#2B4166</color>
+    <color name="study_background">@color/background</color>
+    <color name="study_soft_surface">@color/surface_variant</color>
+    <color name="study_selected_surface">@color/primary_container</color>
+    <color name="study_accent">@color/primary</color>
+    <color name="study_on_accent">@color/on_primary</color>
+    <color name="study_text">@color/text_primary</color>
+    <color name="study_text_secondary">@color/text_secondary</color>
+    <color name="study_divider">@color/divider</color>
+    <color name="study_today">@color/reference_warm_accent</color>
+    <color name="study_today_surface">@color/reference_warm_surface</color>
+    <color name="study_today_selected">@color/course_amber</color>
+    <color name="study_upcoming">@color/reference_teal_accent</color>
+    <color name="study_upcoming_surface">@color/reference_teal_surface</color>
+    <color name="study_upcoming_selected">@color/course_teal</color>
+    <color name="study_all_surface">@color/reference_blue_surface</color>
+    <color name="study_all_selected">@color/primary</color>
     <color name="study_danger">#FF9C94</color>
 </resources>

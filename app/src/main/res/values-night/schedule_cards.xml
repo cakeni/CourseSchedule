@@ -1,0 +1,11 @@
+<resources>
+    <color name="schedule_grid_background">#00000000</color>
+    <color name="schedule_time_text">#858585</color>
+    <color name="schedule_time_column">#111111</color>
+    <color name="schedule_inactive_base">#000000</color>
+    <color name="schedule_course_outline">#00FFFFFF</color>
+    <color name="schedule_accent">#8AB8F5</color>
+    <color name="schedule_today_surface">#202020</color>
+    <color name="project_notice_surface">#262626</color>
+    <color name="project_notice_link">#8AB8F5</color>
+</resources>

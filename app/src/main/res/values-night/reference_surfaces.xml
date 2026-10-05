@@ -1,0 +1,15 @@
+<resources>
+    <color name="reference_blue_surface">#142D4B</color>
+    <color name="reference_blue_accent">#8AB8F5</color>
+    <color name="reference_blue_light">#21466B</color>
+    <color name="reference_blue_deep">#315F8C</color>
+    <color name="reference_warm_surface">#392912</color>
+    <color name="reference_warm_deep">#4A3519</color>
+    <color name="reference_success">#15362D</color>
+    <color name="reference_success_text">#94DCCB</color>
+    <color name="reference_warm_accent">#F2BC72</color>
+    <color name="reference_teal_surface">#15362D</color>
+    <color name="reference_teal_accent">#94DCCB</color>
+    <color name="reference_rose_surface">#3B202A</color>
+    <color name="reference_rose_accent">#F3A4B7</color>
+</resources>

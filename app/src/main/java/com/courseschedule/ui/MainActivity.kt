@@ -35,6 +35,8 @@ import com.courseschedule.R
 import com.courseschedule.data.entity.Course
 import com.courseschedule.data.entity.Semester
 import com.courseschedule.databinding.ActivityMainBinding
+import com.courseschedule.databinding.DialogCourseFocusBinding
+import com.google.gson.Gson
 import com.courseschedule.ui.assistant.CourseAssistantActivity
 import com.courseschedule.domain.ScheduleRules
 import com.courseschedule.ui.addcourse.AddCourseActivity
@@ -47,8 +49,6 @@ import com.courseschedule.utils.ReminderManager
 import kotlinx.coroutines.launch
 import com.courseschedule.view.CourseTableView
 import com.courseschedule.viewmodel.CourseViewModel
-import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -70,6 +70,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var viewModel: CourseViewModel
     private lateinit var weekPagerAdapter: WeekPagerAdapter
     private var courseToolsPopup: PopupWindow? = null
+    private var courseFocusDialog: CourseFocusDialog? = null
+    private var courseFocusEditor: CourseFocusEditor? = null
+    private var pendingCourseFocusState: Bundle? = null
 
     private var returnPreDraw: android.view.ViewTreeObserver.OnPreDrawListener? = null
     private var returnTable: CourseTableView? = null
@@ -158,6 +161,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        pendingCourseFocusState = savedInstanceState?.getBundle("courseFocusState")
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -461,6 +465,14 @@ class MainActivity : AppCompatActivity() {
         if (semesterDataLoaded && coursesDataLoaded) {
             binding.weekPager.visibility = View.VISIBLE
             weekPagerAdapter.selectPage(binding.weekPager, binding.weekPager.currentItem)
+            if (pendingCourseFocusState != null) binding.weekPager.post {
+                val state = pendingCourseFocusState ?: return@post
+                if (isFinishing || isDestroyed) return@post
+                pendingCourseFocusState = null
+                val original = Gson().fromJson(state.getString("original"), Course::class.java)
+                val semester = Gson().fromJson(state.getString("semester"), Semester::class.java)
+                showCourseFocus(original, binding.weekPager, RectF(), semester, state)
+            }
         }
     }
 
@@ -499,127 +511,27 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showCourseDetails(course: Course, sourceView: View, sourceBounds: RectF) {
-        val detailView = layoutInflater.inflate(R.layout.dialog_course_details, null)
-        detailView.findViewById<TextView>(R.id.tvDetailTitle).text = course.courseName
-        val teacherMissing = course.teacher.isBlank()
-        detailView.findViewById<TextView>(R.id.tvDetailTeacher).text = if (teacherMissing) {
-            getString(R.string.teacher_not_provided)
-        } else {
-            course.teacher
-        }
-        detailView.findViewById<TextView>(R.id.tvDetailClassroom).text =
-            course.classroom.ifBlank { getString(R.string.not_set) }
-        detailView.findViewById<TextView>(R.id.tvDetailTime).text = getString(
-            R.string.course_time_detail,
-            resources.getStringArray(R.array.weekdays)
-                .getOrElse(course.dayOfWeek - 1) { getString(R.string.not_set) },
-            course.startSection,
-            course.endSection
-        )
+        val semester = currentSemester ?: return
+        showCourseFocus(course, sourceView, sourceBounds, semester)
+    }
 
-        val weekRange = if (course.startWeek == course.endWeek) {
-            getString(R.string.week_format, course.startWeek)
-        } else {
-            getString(R.string.week_range_format, course.startWeek, course.endWeek)
-        }
-        val weekType = when (course.weekType) {
-            1 -> getString(R.string.odd_week)
-            2 -> getString(R.string.even_week)
-            else -> getString(R.string.every_week)
-        }
-        detailView.findViewById<TextView>(R.id.tvDetailWeeks).text =
-            getString(R.string.course_week_detail, weekRange, weekType)
-        detailView.findViewById<View>(R.id.tvTeacherHint).visibility =
-            if (teacherMissing) View.VISIBLE else View.GONE
-
-        val noteRow = detailView.findViewById<View>(R.id.rowDetailNote)
-        if (course.note.isNotBlank()) {
-            detailView.findViewById<TextView>(R.id.tvDetailNote).text = course.note
-            noteRow.visibility = View.VISIBLE
-        }
-
-        val dialog = BottomSheetDialog(this)
-        detailView.findViewById<View>(R.id.btnEditCourse).apply {
-            installPressScale(0.9f)
-            setOnClickListener {
-                dialog.dismiss()
-                openCourseEditor(course)
+    private fun showCourseFocus(course: Course, sourceView: View, sourceBounds: RectF,
+        semester: Semester, restored: Bundle? = null) {
+        val detail = DialogCourseFocusBinding.inflate(layoutInflater)
+        val dialog = CourseFocusDialog(this, detail.root, course, sourceView, sourceBounds, restored != null)
+        courseFocusDialog?.dismissImmediately()
+        val editor = CourseFocusEditor(this, detail, course, semester, dialog, restored)
+        courseFocusDialog = dialog
+        courseFocusEditor = editor
+        dialog.setOnDismissListener {
+            editor.dispose()
+            if (courseFocusDialog === dialog) {
+                courseFocusDialog = null
+                courseFocusEditor = null
             }
-        }
-        dialog.setContentView(detailView)
-        dialog.setOnShowListener {
-            dialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)?.apply {
-                setBackgroundColor(Color.TRANSPARENT)
-                playCourseDetailEntrance(detailView, sourceView, sourceBounds)
-            }
-            dialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
-            dialog.behavior.skipCollapsed = true
         }
         dialog.show()
-    }
-
-    private fun playCourseDetailEntrance(
-        detailView: View,
-        sourceView: View,
-        sourceBounds: RectF
-    ) {
-        detailView.doOnPreDraw {
-            val sourceLocation = IntArray(2)
-            val detailLocation = IntArray(2)
-            sourceView.getLocationOnScreen(sourceLocation)
-            detailView.getLocationOnScreen(detailLocation)
-
-            val sourceCenterX = sourceLocation[0] + sourceBounds.centerX()
-            val sourceCenterY = sourceLocation[1] + sourceBounds.centerY()
-            val detailCenterX = detailLocation[0] + detailView.width / 2f
-            val detailCenterY = detailLocation[1] + detailView.height / 2f
-
-            detailView.pivotX = (sourceCenterX - detailLocation[0])
-                .coerceIn(0f, detailView.width.toFloat())
-            detailView.pivotY = (sourceCenterY - detailLocation[1])
-                .coerceIn(0f, detailView.height.toFloat())
-            detailView.alpha = 0.72f
-            detailView.scaleX = 0.9f
-            detailView.scaleY = 0.92f
-            detailView.translationX = ((sourceCenterX - detailCenterX) * 0.16f)
-                .coerceIn(-dp(44f), dp(44f))
-            detailView.translationY = ((sourceCenterY - detailCenterY) * 0.18f)
-                .coerceIn(-dp(72f), dp(104f))
-
-            (detailView as? ViewGroup)?.let { content ->
-                repeat(content.childCount) { index ->
-                    content.getChildAt(index).apply {
-                        alpha = 0f
-                        translationY = dp(10f + index.coerceAtMost(3) * 2f)
-                        animate()
-                            .alpha(1f)
-                            .translationY(0f)
-                            .setStartDelay(90L + index * 36L)
-                            .setDuration(330L)
-                            .setInterpolator(headerInterpolator)
-                            .start()
-                    }
-                }
-            }
-
-            detailView.animate()
-                .alpha(1f)
-                .scaleX(1f)
-                .scaleY(1f)
-                .translationX(0f)
-                .translationY(0f)
-                .setDuration(480L)
-                .setInterpolator(headerInterpolator)
-                .start()
-        }
-    }
-
-    private fun openCourseEditor(course: Course) {
-        val intent = Intent(this, AddCourseActivity::class.java).apply {
-            putExtra("course_id", course.id)
-            putExtra("is_edit", true)
-        }
-        startActivity(intent)
+        editor.start()
     }
 
     private fun openNewCourse(
@@ -835,7 +747,15 @@ class MainActivity : AppCompatActivity() {
         binding.courseContinuityOverlay.motionStyle = prefs.weekMotionStyle
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        courseFocusEditor?.let { outState.putBundle("courseFocusState", it.snapshot()) }
+            ?: pendingCourseFocusState?.let { outState.putBundle("courseFocusState", it) }
+        super.onSaveInstanceState(outState)
+    }
+
     override fun onDestroy() {
+        courseFocusDialog?.dismissImmediately()
+        courseFocusDialog = null
         binding.root.viewTreeObserver.removeOnPreDrawListener(continuityPreDraw)
         binding.courseContinuityOverlay.clear()
         binding.weekPager.unregisterOnPageChangeCallback(pageChangeCallback)

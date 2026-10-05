@@ -39,7 +39,7 @@
                 android:layout_marginTop="12dp"
                 android:clickable="true"
                 android:focusable="true"
-                app:cardBackgroundColor="@color/primary_container"
+                app:cardBackgroundColor="@color/project_notice_surface"
                 app:rippleColor="@color/surface" android:stateListAnimator="@animator/press_feedback">
 
                 <LinearLayout
@@ -70,7 +70,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:text="@string/project_repository_url"
-                        android:textColor="@color/primary"
+                        android:textColor="@color/project_notice_link"
                         android:textSize="12sp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -449,7 +449,7 @@
         app:itemIconSize="22dp"
         app:itemIconTint="@color/nav_item_color"
         app:itemRippleColor="@color/control_focus_overlay"
-        app:itemTextColor="@color/nav_item_color"
+        app:itemTextColor="@color/reference_nav_text"
         app:labelVisibilityMode="labeled"
         app:menu="@menu/menu_bottom_navigation"
         app:itemTextAppearanceActive="@style/CourseSchedule.NavigationLabel" app:itemTextAppearanceInactive="@style/CourseSchedule.NavigationLabel"

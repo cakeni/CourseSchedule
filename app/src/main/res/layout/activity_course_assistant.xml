@@ -27,10 +27,10 @@
             app:cardBackgroundColor="@color/assistant_hero_surface" app:cardCornerRadius="28dp" app:cardElevation="0dp">
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="24dp" android:background="@drawable/bg_assistant_hero">
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal">
-                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="YOUR DAILY ASSISTANT" android:letterSpacing="0.12" android:textSize="10sp" android:fontFamily="sans-serif-medium" android:textColor="@color/assistant_hero_secondary" />
-                    <ImageView android:layout_width="40dp" android:layout_height="40dp" android:src="@drawable/ic_assistant_hero" android:contentDescription="@null" />
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="今天，也从容一点" android:letterSpacing="0.02" android:textSize="10sp" android:fontFamily="sans-serif-medium" android:textColor="@color/assistant_hero_secondary" />
+                    <com.courseschedule.view.ReferenceCalendarView android:layout_width="72dp" android:layout_height="72dp" android:contentDescription="@null" />
                 </LinearLayout>
-                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="把日常，\n安排得刚刚好。" android:textSize="28sp" android:lineSpacingExtra="2dp" android:fontFamily="sans-serif-medium" android:textColor="@color/assistant_on_hero" />
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="把日常，\n安排得刚刚好。" android:textSize="26sp" android:lineSpacingExtra="2dp" android:fontFamily="sans-serif-medium" android:textColor="@color/assistant_on_hero" />
                 <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="@string/assistant_chat_welcome" android:textSize="13sp" android:lineSpacingExtra="3dp" android:textColor="@color/assistant_hero_secondary" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -41,7 +41,7 @@
             app:cardBackgroundColor="@color/assistant_prompt_query" app:cardCornerRadius="22dp" app:cardElevation="0dp"
             android:stateListAnimator="@animator/press_feedback" app:rippleColor="@color/control_focus_overlay">
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="108dp" android:padding="16dp" android:orientation="vertical">
-                <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_assistant_schedule" app:tint="@color/assistant_accent" android:contentDescription="@null" />
+                <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_assistant_schedule" app:tint="@color/reference_blue_accent" android:contentDescription="@null" />
                 <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="看课表" android:textSize="15sp" android:fontFamily="sans-serif-medium" android:textColor="@color/assistant_text" />
                 <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="今天有哪些安排" android:textSize="11sp" android:textColor="@color/assistant_text_secondary" />
             </LinearLayout>
@@ -51,7 +51,7 @@
             app:cardBackgroundColor="@color/assistant_prompt_change" app:cardCornerRadius="22dp" app:cardElevation="0dp"
             android:stateListAnimator="@animator/press_feedback" app:rippleColor="@color/control_focus_overlay">
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="108dp" android:padding="16dp" android:orientation="vertical">
-                <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_assistant_reminder" app:tint="@color/assistant_accent" android:contentDescription="@null" />
+                <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_assistant_reminder" app:tint="@color/reference_teal_accent" android:contentDescription="@null" />
                 <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="提醒我" android:textSize="15sp" android:fontFamily="sans-serif-medium" android:textColor="@color/assistant_text" />
                 <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="吃饭、喝水、别忘了" android:textSize="11sp" android:textColor="@color/assistant_text_secondary" />
             </LinearLayout>
@@ -62,7 +62,7 @@
             app:cardBackgroundColor="@color/assistant_prompt_add" app:cardCornerRadius="22dp" app:cardElevation="0dp"
             android:stateListAnimator="@animator/press_feedback" app:rippleColor="@color/control_focus_overlay">
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="108dp" android:padding="16dp" android:orientation="vertical">
-                <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_add" app:tint="@color/assistant_accent" android:contentDescription="@null" />
+                <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_add" app:tint="@color/reference_warm_accent" android:contentDescription="@null" />
                 <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="加一门课" android:textSize="15sp" android:fontFamily="sans-serif-medium" android:textColor="@color/assistant_text" />
                 <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="一句话整理课程" android:textSize="11sp" android:textColor="@color/assistant_text_secondary" />
             </LinearLayout>
@@ -72,7 +72,7 @@
             app:cardBackgroundColor="@color/assistant_prompt_delete" app:cardCornerRadius="22dp" app:cardElevation="0dp"
             android:stateListAnimator="@animator/press_feedback" app:rippleColor="@color/control_focus_overlay">
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="108dp" android:padding="16dp" android:orientation="vertical">
-                <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_assistant_edit" app:tint="@color/assistant_accent" android:contentDescription="@null" />
+                <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_assistant_edit" app:tint="@color/reference_rose_accent" android:contentDescription="@null" />
                 <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="调整课程" android:textSize="15sp" android:fontFamily="sans-serif-medium" android:textColor="@color/assistant_text" />
                 <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="修改时间和教室" android:textSize="11sp" android:textColor="@color/assistant_text_secondary" />
             </LinearLayout>
@@ -96,7 +96,7 @@
                 <com.google.android.material.card.MaterialCardView
                 android:id="@+id/targetChoiceCard" android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:visibility="gone" android:layout_marginBottom="12dp" app:cardBackgroundColor="@color/assistant_pending_surface" app:cardCornerRadius="24dp"
-                app:cardElevation="0dp" app:strokeWidth="1dp" app:strokeColor="@color/assistant_divider">
+                app:cardElevation="0dp" app:strokeWidth="0dp" app:strokeColor="@color/assistant_divider">
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                     android:orientation="vertical" android:padding="16dp">
                     <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
@@ -111,7 +111,7 @@
                             android:id="@+id/btnCancelTargetChoice" style="@style/CourseSchedule.TextButton"
                             android:layout_width="0dp" android:layout_weight="1" android:layout_height="48dp"
                             android:text="@string/cancel" android:textSize="14sp" app:cornerRadius="14dp"
-                            android:insetTop="0dp" android:insetBottom="0dp" app:strokeWidth="1dp" app:strokeColor="@color/assistant_divider" />
+                            android:insetTop="0dp" android:insetBottom="0dp" app:strokeWidth="0dp" app:strokeColor="@color/assistant_divider" />
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btnChooseTarget" android:layout_width="0dp" android:layout_weight="1" android:layout_height="48dp"
                             android:layout_marginStart="10dp" android:text="@string/assistant_choose_target" android:textSize="14sp"
@@ -123,7 +123,7 @@
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/pendingCard" android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:visibility="gone" android:layout_marginBottom="12dp" app:cardBackgroundColor="@color/assistant_pending_surface" app:cardCornerRadius="24dp"
-                app:cardElevation="0dp" app:strokeWidth="1dp" app:strokeColor="@color/assistant_divider">
+                app:cardElevation="0dp" app:strokeWidth="0dp" app:strokeColor="@color/assistant_divider">
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                     android:orientation="vertical" android:padding="16dp">
                     <TextView android:id="@+id/tvPendingTitle" android:layout_width="match_parent" android:layout_height="wrap_content"
@@ -143,7 +143,7 @@
                             android:layout_width="0dp" android:layout_weight="1" android:layout_height="48dp"
                             android:text="@string/cancel" android:textSize="14sp" android:textColor="@color/assistant_accent"
                             android:insetTop="0dp" android:insetBottom="0dp" app:cornerRadius="14dp"
-                            app:strokeWidth="1dp" app:strokeColor="@color/assistant_divider" />
+                            app:strokeWidth="0dp" app:strokeColor="@color/assistant_divider" />
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btnConfirmPending"
                             android:layout_width="0dp" android:layout_weight="1" android:layout_height="48dp" android:layout_marginStart="10dp"
@@ -163,7 +163,7 @@
             android:id="@+id/composerCard" android:layout_width="match_parent" android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp" android:layout_marginTop="4dp" android:layout_marginBottom="6dp"
             app:cardBackgroundColor="@color/assistant_soft_surface" app:cardCornerRadius="26dp" app:cardElevation="0dp"
-            app:strokeWidth="1dp" app:strokeColor="@color/assistant_divider">
+            app:strokeWidth="0dp" app:strokeColor="@color/assistant_divider">
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:orientation="vertical" android:padding="8dp">
                 <LinearLayout android:id="@+id/imagePreview" android:layout_width="match_parent" android:layout_height="wrap_content"
@@ -216,9 +216,9 @@
                         android:id="@+id/btnSend" android:layout_width="48dp" android:layout_height="48dp"
                         android:minWidth="0dp" android:padding="0dp" android:insetTop="0dp" android:insetBottom="0dp"
                         android:stateListAnimator="@animator/press_feedback" android:elevation="0dp"
-                        android:contentDescription="@string/assistant_send" app:cornerRadius="24dp" app:iconTint="@color/assistant_on_accent"
+                        android:contentDescription="@string/assistant_send" app:cornerRadius="24dp" app:iconTint="@color/reference_capsule_content"
                         app:icon="@drawable/ic_assistant_send" app:iconSize="24dp" app:iconPadding="0dp"
-                        app:backgroundTint="@color/assistant_accent" app:iconGravity="textStart" />
+                        app:backgroundTint="@color/reference_capsule" app:strokeColor="@color/reference_capsule_edge" app:strokeWidth="1dp" app:iconGravity="textStart" />
                 </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>

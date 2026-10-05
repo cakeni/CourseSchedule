@@ -76,11 +76,42 @@ internal object StudyMotion {
         })
     }
 
-    fun finishRow(view: View, done: () -> Unit) {
-        if (!ValueAnimator.areAnimatorsEnabled() || !view.isAttachedToWindow) { done(); return }
+    fun finishRow(view: View, completed: Boolean, done: () -> Unit): Animator? {
+        if (!ValueAnimator.areAnimatorsEnabled() || !view.isAttachedToWindow || view.height <= 0) { done(); return null }
         view.animate().cancel()
-        view.animate().alpha(0f).translationY(-3f * view.resources.displayMetrics.density)
-            .setStartDelay(60L).setDuration(160L).setInterpolator(ease)
-            .withEndAction(done).start()
+        val height = view.height
+        val feedback = TaskCompletionCapsule(view.context, completed, height).apply { setBounds(0, 0, view.width, height) }
+        view.overlay.add(feedback)
+        val group = view.parent as? ViewGroup
+        val list = group?.parent as? ViewGroup
+        val header = if (group?.childCount == 1 && list != null) list.getChildAt(list.indexOfChild(group) - 1) else null
+        val headerHeight = header?.height ?: 0
+        return ValueAnimator.ofFloat(0f, 1f).apply {
+            duration = 480L
+            interpolator = android.view.animation.LinearInterpolator()
+            addUpdateListener {
+                val p = it.animatedValue as Float
+                feedback.progress = p
+                val shrink = com.courseschedule.ui.SchedulePageMotion.phase(((p - .58f) / .42f).coerceIn(0f, 1f))
+                view.alpha = 1f - shrink
+                val nextHeight = (height * (1f - shrink)).toInt()
+                if (view.layoutParams.height != nextHeight) view.layoutParams = view.layoutParams.apply { this.height = nextHeight }
+                header?.apply {
+                    alpha = 1f - shrink
+                    val nextHeaderHeight = (headerHeight * (1f - shrink)).toInt()
+                    if (layoutParams.height != nextHeaderHeight) layoutParams = layoutParams.apply { this.height = nextHeaderHeight }
+                }
+            }
+            addListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    view.overlay.remove(feedback)
+                    view.alpha = 1f
+                    view.layoutParams = view.layoutParams.apply { this.height = ViewGroup.LayoutParams.WRAP_CONTENT }
+                    header?.apply { alpha = 1f; layoutParams = layoutParams.apply { this.height = ViewGroup.LayoutParams.WRAP_CONTENT } }
+                    done()
+                }
+            })
+            start()
+        }
     }
 }

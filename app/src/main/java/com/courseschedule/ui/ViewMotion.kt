@@ -11,6 +11,7 @@ import android.widget.ImageView
 import androidx.annotation.IdRes
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.transition.TransitionManager
+import androidx.core.view.doOnPreDraw
 import androidx.vectordrawable.graphics.drawable.Animatable2Compat
 import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat
 import android.graphics.drawable.Animatable
@@ -20,6 +21,19 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.R as MaterialR
 
 private val pressReleaseInterpolator = PathInterpolator(0.22f, 1f, 0.36f, 1f)
+
+internal fun ViewGroup.enterReferenceContent() {
+    val children = (0 until childCount).map(::getChildAt)
+    children.forEach { it.animate().cancel(); it.alpha = 1f; it.translationX = 0f; it.translationY = 0f; it.scaleX = 1f; it.scaleY = 1f }
+    if (!ValueAnimator.areAnimatorsEnabled()) return
+    children.filter { it.visibility == View.VISIBLE }.forEach { it.alpha = .88f; it.translationY = 6f * resources.displayMetrics.density }
+    doOnPreDraw {
+        children.forEachIndexed { index, child ->
+            child.animate().alpha(1f).translationY(0f).setStartDelay((index * 20L).coerceAtMost(80))
+                .setDuration(300L).setInterpolator(pressReleaseInterpolator).start()
+        }
+    }
+}
 
 fun View.installPressScale(pressedScale: Float = 0.98f) {
     fun scale(value: Float, duration: Long) = AnimatorSet().apply {
@@ -39,10 +53,12 @@ fun View.installPressScale(pressedScale: Float = 0.98f) {
 fun BottomNavigationView.selectItemWithoutAnimation(@IdRes itemId: Int) {
     selectedItemId = itemId
     (getChildAt(0) as? ViewGroup)?.let(TransitionManager::endTransitions)
+    ReferenceNavigation.select(this)
 }
 
 fun BottomNavigationView.stabilizeActiveIndicatorSize() {
     isItemActiveIndicatorEnabled = false
+    ReferenceNavigation.install(this)
     for (index in 0 until menu.size()) {
         val indicator = findViewById<View>(menu.getItem(index).itemId)
             ?.findViewById<View>(MaterialR.id.navigation_bar_item_active_indicator_view)
@@ -76,6 +92,7 @@ fun View?.playNavigationMotion() {
 
     var parent = item.parent
     while (parent is View && parent !is BottomNavigationView) parent = (parent as View).parent
+    (parent as? BottomNavigationView)?.let(ReferenceNavigation::select)
     icon.imageTintList = (parent as? BottomNavigationView)?.itemIconTintList
     val resting = AppCompatResources.getDrawable(item.context, assets.first)
     if (!ValueAnimator.areAnimatorsEnabled()) {

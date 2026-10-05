@@ -57,6 +57,14 @@
 
     <style name="Theme.CourseSchedule" parent="Theme.CourseSchedule.Base" />
 
+    <style name="Theme.CourseSchedule.CourseFocus" parent="Theme.CourseSchedule">
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:windowAnimationStyle">@null</item>
+    </style>
+
     <style name="Theme.CourseSchedule.Assistant" parent="Theme.CourseSchedule">
         <item name="android:windowDisablePreview">true</item>
         <item name="colorPrimary">@color/assistant_accent</item>
@@ -150,7 +158,7 @@
 
     <style name="CourseScheduleToolbarTitle" parent="TextAppearance.MaterialComponents.Headline5">
         <item name="android:textColor">@color/text_primary</item>
-        <item name="android:textSize">26sp</item>
+        <item name="android:textSize">23sp</item>
         <item name="android:textStyle">bold</item>
     </style>
 
@@ -195,7 +203,7 @@
         <item name="android:paddingTop">20dp</item>
         <item name="android:paddingBottom">7dp</item>
         <item name="android:paddingStart">4dp</item>
-        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:textColor">@color/primary_variant</item>
         <item name="android:textSize">12sp</item>
     </style>
 
@@ -203,7 +211,7 @@
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="cardBackgroundColor">@color/surface</item>
-        <item name="cardCornerRadius">20dp</item>
+        <item name="cardCornerRadius">24dp</item>
         <item name="cardElevation">0dp</item>
         <item name="strokeWidth">0dp</item>
     </style>
