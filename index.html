@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f8ff">
+  <title>晴课表 · Android 下载</title>
+  <meta name="description" content="晴课表是一款开源 Android 课表 App，支持教务导入、AI 识别课表、学习待办和提醒。下载 Android 安装包，查看实际界面和项目源码。">
+  <meta property="og:title" content="晴课表 · Android 下载">
+  <meta property="og:description" content="看课表、导入课程、记作业和考试。开源 Android App。">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%232970cf'/%3E%3Crect x='7' y='9' width='18' height='17' rx='3' fill='none' stroke='white' stroke-width='2'/%3E%3Cpath d='M7 15h18M12 6v6M20 6v6' stroke='white' stroke-width='2' stroke-linecap='round'/%3E%3Cpath d='M12 19h2m4 0h2m-8 4h2m4 0h2' stroke='white' stroke-width='2'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header wrap">
+    <a class="brand" href="#main" aria-label="晴课表首页"><img src="./assets/app-icon.png" width="40" height="40" alt=""><span>晴课表</span></a>
+    <nav aria-label="页面导航"><a href="#features">功能</a><a href="https://github.com/cakeni/CourseSchedule">GitHub</a></nav>
+  </header>
+
+  <main id="main">
+    <section class="hero wrap" aria-labelledby="app-name">
+      <div class="hero-copy">
+        <p class="eyebrow">Android 8.0 及以上 · MIT 开源</p>
+        <h1 id="app-name">晴课表</h1>
+        <p class="headline">课表、待办，<br>都放在一个 App 里。</p>
+        <p class="intro">看这周的课，记还没交的作业。课表可以从教务导入，也能把截图交给 AI 整理，核对后再保存。</p>
+        <div class="download-actions" id="download">
+          <a class="button primary" href="https://github.com/cakeni/CourseSchedule/releases/download/v1.0.68/qing-course-1.0.68.apk">下载 Android 安装包</a>
+          <a class="button secondary" href="https://github.com/cakeni/CourseSchedule/releases">全部版本</a>
+        </div>
+        <p class="download-meta">v1.0.68 测试版 · 约 24 MB · 2026.10.06 发布</p>
+        <p class="download-note">安装包通过 GitHub 下载。手机浏览器打不开时，可以换浏览器试试。</p>
+        <ul class="quick-facts" aria-label="课表功能"><li>周末显示</li><li>单双周课程</li><li>深浅色模式</li><li>本地备份</li></ul>
+      </div>
+      <figure class="hero-preview">
+        <img class="app-screen" src="./assets/schedule.png" width="1080" height="2400" alt="晴课表浅色模式，周一到周日显示课程、教室和老师" fetchpriority="high">
+        <figcaption>实际 App 界面 · 图中课程为演示数据</figcaption>
+      </figure>
+    </section>
+
+    <section class="features wrap" id="features" aria-label="导入与待办功能">
+      <article class="feature">
+        <div class="feature-copy">
+          <p class="eyebrow">导入课程</p>
+          <h2>不用一门一门填。</h2>
+          <p>在 App 里打开学校教务系统，登录后进入课表页，就能尝试读取课程。普通解析没识别出来的话，还可以试 AI 网页识别。</p>
+          <p>手上只有课表截图也可以：在助手里附上图片，说明要导入什么。识别结果会先给你看，确认以后再写进课表。也支持 Excel（.xlsx）、CSV、JSON 和文本导入。</p>
+          <p class="feature-note">教务导入效果取决于学校页面；图片识别需要支持图片的模型。</p>
+        </div>
+        <figure class="feature-preview blue">
+          <img class="app-screen" src="./assets/import.png" width="1080" height="2400" loading="lazy" alt="课程助手已选择课表截图，输入请求后可发送给配置的 AI 服务识别">
+          <figcaption>附上截图，说明需求，再核对识别结果</figcaption>
+        </figure>
+      </article>
+      <article class="feature todo-feature">
+        <div class="feature-copy">
+          <p class="eyebrow">待办与提醒</p>
+          <h2>作业和考试也能记。</h2>
+          <p>作业、实验报告、考试都可以放进待办，设置截止时间和提醒，做完就勾掉。按今天、7 天内或全部查看，也能搜索事项和课程。</p>
+          <p>待办也接了 AI。比如说一句“周五晚上 8 点交实验报告，提前一天提醒”，助手会整理成待确认的事项；已有事项也能查询、修改和删除。</p>
+          <p class="feature-note">AI 操作会先让你核对，确认后才执行。</p>
+        </div>
+        <figure class="feature-preview mint">
+          <img class="app-screen" src="./assets/todos.png" width="1080" height="2400" loading="lazy" alt="待办列表，按今天、明天和未来七天展示作业与实验报告的截止时间">
+          <figcaption>待办列表 · 图中事项为演示数据</figcaption>
+        </figure>
+      </article>
+    </section>
+
+    <section class="before-use wrap" aria-labelledby="before-use-title">
+      <div><h2 id="before-use-title">下载前说两句</h2><p>普通课表和待办保存在本机，不用注册 App 账号。AI 功能需要自行配置服务、模型和 API Key，调用费用由服务商收取；不用 AI 也可以手动排课、记待办。</p></div>
+      <a class="text-link" href="https://github.com/cakeni/CourseSchedule/releases/tag/v1.0.68">查看这个版本的说明</a>
+    </section>
+  </main>
+  <footer class="site-footer wrap"><span>晴课表</span><a href="https://github.com/cakeni/CourseSchedule">项目地址：github.com/cakeni/CourseSchedule</a></footer>
+</body>
+</html>
