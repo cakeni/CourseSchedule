@@ -67,7 +67,7 @@ dependencies {
     implementation 'com.airbnb.android:lottie:6.7.1'
 
     // Rive mascot runtime
-    implementation 'app.rive:rive-android:9.13.10'
+    implementation 'app.rive:rive-android:11.13.0'
 
     // Room Database
     implementation 'androidx.room:room-runtime:2.6.0'
