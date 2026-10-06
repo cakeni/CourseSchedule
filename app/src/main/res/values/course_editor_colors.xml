@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="editor_background">#F6F7F9</color>
-    <color name="editor_surface">#FFFFFF</color>
-    <color name="editor_text">#202A35</color>
-    <color name="editor_secondary">#646F7D</color>
-    <color name="editor_line">#EEF0F3</color>
-    <color name="editor_accent">#426C91</color>
-    <color name="editor_on_accent">#FFFFFF</color>
-    <color name="editor_error">#B34545</color>
+    <color name="editor_background">@color/background</color>
+    <color name="editor_surface">@color/surface</color>
+    <color name="editor_text">@color/text_primary</color>
+    <color name="editor_secondary">@color/text_secondary</color>
+    <color name="editor_line">@color/divider</color>
+    <color name="editor_accent">@color/primary</color>
+    <color name="editor_on_accent">@color/on_primary</color>
+    <color name="editor_error">@color/error</color>
 </resources>

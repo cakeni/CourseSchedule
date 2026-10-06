@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="course_focus_backdrop">#000000</color>
+    <color name="course_focus_background">#000000</color>
+    <color name="course_focus_paper">#171717</color>
+    <color name="course_focus_text">#F3F4F6</color>
+    <color name="course_focus_secondary">#BEC7D2</color>
+    <color name="course_focus_hint">#A7B2C0</color>
+    <color name="course_focus_divider">#14FFFFFF</color>
+    <color name="course_focus_edge">#262626</color>
+    <color name="course_focus_action">#F2F4F7</color>
+    <color name="course_focus_action_text">#15171A</color>
+    <color name="course_focus_action_edge">#00000000</color>
+    <color name="course_focus_disabled_action">#292D34</color>
+    <color name="course_focus_disabled_action_text">#BEC7D2</color>
+</resources>

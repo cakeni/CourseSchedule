@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- 主题颜色 -->
-    <color name="primary">#3E628C</color>
-    <color name="primary_variant">#294967</color>
-    <color name="primary_container">#DCE8F5</color>
-    <color name="secondary">#D69043</color>
-    <color name="secondary_variant">#A96928</color>
+    <color name="primary">#2874D0</color>
+    <color name="primary_variant">#1D5DAE</color>
+    <color name="primary_container">#E4EEFC</color>
+    <color name="secondary">#C5852B</color>
+    <color name="secondary_variant">#96621E</color>
 
     <!-- 背景颜色 -->
-    <color name="background">#EDF2FA</color>
-    <color name="surface">#FAFCFF</color>
-    <color name="surface_variant">#F3F6FB</color>
-    <color name="navigation_surface">#EBF4F7FC</color>
-    <color name="navigation_outline">#80FFFFFF</color>
+    <color name="background">#F6F8FC</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="surface_variant">#EDF2F8</color>
+    <color name="navigation_surface">#FFFFFF</color>
+    <color name="navigation_outline">#DCE5F0</color>
     <color name="schedule_background_start">#F3F3FB</color>
     <color name="schedule_background_end">#DFE9F7</color>
-    <color name="toolbar_divider">#5CFFFFFF</color>
-    <color name="progress_track">#42FFFFFF</color>
+    <color name="toolbar_divider">#00FFFFFF</color>
+    <color name="progress_track">#E9E9E9</color>
     <color name="error">#B3261E</color>
 
     <!-- 文字颜色 -->
@@ -25,8 +25,8 @@
     <color name="on_background">#1C2733</color>
     <color name="on_surface">#1C2733</color>
     <color name="text_primary">#1C2733</color>
-    <color name="text_secondary">#667487</color>
-    <color name="text_tertiary">#8A96A5</color>
+    <color name="text_secondary">#5A697A</color>
+    <color name="text_tertiary">#687788</color>
 
     <!-- 课程表颜色 -->
     <color name="course_red">#E78387</color>
@@ -67,15 +67,15 @@
     </array>
 
     <!-- 其他 -->
-    <color name="divider">#DCE4EF</color>
-    <color name="today_highlight">#DCE8F5</color>
-    <color name="current_week_indicator">#3E628C</color>
-    <color name="detail_week">#18A995</color>
-    <color name="detail_time">#E19A3D</color>
-    <color name="detail_teacher">#4F84C4</color>
-    <color name="detail_room">#D65D64</color>
-    <color name="switch_track_checked">#66176B5B</color>
-    <color name="switch_track_unchecked">#3D8C9693</color>
+    <color name="divider">#E1E8F0</color>
+    <color name="today_highlight">#DFECFF</color>
+    <color name="current_week_indicator">@color/primary</color>
+    <color name="detail_week">#247766</color>
+    <color name="detail_time">#96621E</color>
+    <color name="detail_teacher">#205FAE</color>
+    <color name="detail_room">#AA4259</color>
+    <color name="switch_track_checked">#802874D0</color>
+    <color name="switch_track_unchecked">#66778899</color>
     <color name="quick_add_fill">@color/primary</color>
     <color name="quick_add_outline">@color/on_primary</color>
     <color name="quick_add_grip">@color/on_primary</color>

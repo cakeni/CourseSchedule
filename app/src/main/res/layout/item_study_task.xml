@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:clickable="true" android:focusable="true" android:background="@drawable/control_focus" android:stateListAnimator="@animator/press_feedback_row">
-    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingHorizontal="12dp" android:paddingVertical="12dp" android:gravity="center_vertical">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingStart="10dp" android:paddingEnd="16dp" android:paddingVertical="15dp" android:gravity="center_vertical">
         <androidx.appcompat.widget.AppCompatCheckBox android:id="@+id/checkTaskDone" android:layout_width="44dp" android:layout_height="48dp" android:minWidth="44dp" android:padding="0dp"
-            app:buttonCompat="@drawable/study_task_checkbox" app:buttonTint="@null" />
+            app:buttonCompat="@drawable/task_checkbox" app:buttonTint="@null" />
         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical">
-                <TextView android:id="@+id/tvTaskTitle" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:textSize="16sp" android:fontFamily="sans-serif-medium"
-                    android:textColor="@color/study_text" android:lineSpacingExtra="2dp" />
-                <TextView android:id="@+id/tvTaskKind" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:background="@drawable/bg_study_group"
-                    android:paddingHorizontal="7dp" android:paddingVertical="3dp" android:textSize="10sp" android:textColor="@color/study_text_secondary" />
+            <TextView android:id="@+id/tvTaskTitle" android:layout_width="match_parent" android:layout_height="wrap_content" android:textSize="16sp" android:fontFamily="sans-serif-medium"
+                android:textColor="@color/task_text" android:lineSpacingExtra="3dp" />
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:gravity="center_vertical">
+                <TextView android:id="@+id/tvTaskKind" android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@drawable/bg_task_kind"
+                    android:paddingHorizontal="8dp" android:paddingVertical="3dp" android:textSize="12sp" android:textColor="@color/task_secondary" />
+                <TextView android:id="@+id/tvTaskDue" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:textSize="13sp"
+                    android:textColor="@color/task_secondary" android:maxLines="2" android:ellipsize="end" />
             </LinearLayout>
-            <TextView android:id="@+id/tvTaskDue" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="7dp" android:textSize="12sp"
-                android:textColor="@color/study_text_secondary" android:maxLines="2" android:ellipsize="end" />
         </LinearLayout>
     </LinearLayout>
-    <View android:id="@+id/taskDivider" android:layout_width="match_parent" android:layout_height="1dp" android:layout_marginStart="56dp" android:layout_marginEnd="12dp" android:background="@color/study_divider" />
+    <View android:id="@+id/taskDivider" android:layout_width="match_parent" android:layout_height="1dp" android:layout_marginStart="54dp" android:layout_marginEnd="16dp" android:background="@color/task_divider" />
 </LinearLayout>

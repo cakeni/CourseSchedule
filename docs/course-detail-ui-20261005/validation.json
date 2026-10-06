@@ -1,0 +1,120 @@
+{
+  "sourceFilesVerified": 370,
+  "extraSourceFiles": [],
+  "unitTests": {
+    "tests": 255,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1
+  },
+  "unitTestsPassed": 254,
+  "lint": {
+    "Warning": 256
+  },
+  "versionName": "1.0.55",
+  "versionCode": 56,
+  "apkSha256": "14eb689b997159785cf30c83ec68d13138320fdacb1658198e95965f30f5f151",
+  "sourceSecretPatternFindings": [],
+  "preservedTestDependency": "androidx.test.ext:junit:1.3.0",
+  "applicationId": "com.courseschedule",
+  "apk": "qing-course-1.0.55.apk",
+  "apkBytes": 25102404,
+  "nativeChecksPassed": 23,
+  "nativeBatches": {
+    "inline-light": 6,
+    "inline-dark": 5,
+    "dense-light": 1,
+    "dense-dark": 1,
+    "reference-light": 5,
+    "reference-dark": 5
+  },
+  "nativeDevice": {
+    "platform": "Android 15",
+    "apiLevel": 35
+  },
+  "screenshotsUseSyntheticCourses": true,
+  "nativeDetailMaterial": {
+    "light": {
+      "surfacePixels": [
+        "#FCB5C27D",
+        "#FCB5C27D",
+        "#FAC5CF99",
+        "#FAC5CF99"
+      ],
+      "surfaceAlpha": [
+        252,
+        252,
+        250,
+        250
+      ],
+      "gradientChannelSpan": 28,
+      "mode": "light",
+      "textRgb": "#202328",
+      "saveButtonArgb": "#FF202328",
+      "saveTextRgb": "#FFFFFF",
+      "contentCardAlpha": [
+        235,
+        235,
+        235,
+        235
+      ],
+      "contentCardStrokeDp": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "dark": {
+      "surfacePixels": [
+        "#FA0B0B0B",
+        "#FA0B0B0B",
+        "#FC020202",
+        "#FC020202"
+      ],
+      "surfaceAlpha": [
+        250,
+        250,
+        252,
+        252
+      ],
+      "gradientChannelSpan": 9,
+      "mode": "dark",
+      "textRgb": "#F3F4F6",
+      "saveButtonArgb": "#FFF2F4F7",
+      "saveTextRgb": "#15171A",
+      "contentCardAlpha": [
+        203,
+        203,
+        203,
+        203
+      ],
+      "contentCardStrokeDp": [
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "nativeInactiveCourseRendering": {
+    "light": {
+      "fillAlpha": 117,
+      "titleAlpha": 117,
+      "title": "[非本周]\n大学物理",
+      "titleRgb": "#FFFFFF"
+    },
+    "dark": {
+      "fillAlpha": 117,
+      "titleAlpha": 117,
+      "title": "[非本周]\n大学物理",
+      "titleRgb": "#FFFFFF"
+    }
+  },
+  "softwareBlur": {
+    "fineDetailBefore": 160080,
+    "fineDetailAfter": 4114,
+    "blueField": "#FF2882DD",
+    "amberField": "#FFF49F48"
+  }
+}

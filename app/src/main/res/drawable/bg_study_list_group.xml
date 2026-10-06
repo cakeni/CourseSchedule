@@ -1,3 +1,3 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="@color/study_background" /><stroke android:width="1dp" android:color="@color/study_divider" /><corners android:radius="18dp" />
+    <solid android:color="@color/task_paper" /><corners android:radius="22dp" />
 </shape>

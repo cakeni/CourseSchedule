@@ -16,8 +16,8 @@ class AssistantCourseClientTest {
             AssistantMessage("assistant", "准备删除，尚未执行", "confirmation"),
             AssistantMessage("user", "把它的教室改为A201"))
         val context = AssistantCourseClient.contextMessages(messages)
-        assertTrue(context.size <= 24)
-        assertTrue(context.sumOf { it.content.length } <= 12_000)
+        assertTrue(context.size <= 32)
+        assertTrue(context.sumOf { it.content.length } <= 16_000)
         assertEquals(messages.last(), context.last())
         assertEquals(messages.takeLast(4), context.takeLast(4))
         val request = JsonParser.parseString(AssistantCourseClient.createRequest("model", messages,
@@ -93,6 +93,19 @@ class AssistantCourseClientTest {
             AssistantCourseClient.parseResponse(response("""{"reply":"添加","courses":[$courseJson]}""", "length"), 20)
         }
         assertThrows(IllegalArgumentException::class.java) { AssistantCourseClient.parseResponse("{}", 20) }
+    }
+
+    @Test fun responseFailuresDistinguishTruncationFromInvalidReminderData() {
+        val truncated = assertThrows(IllegalArgumentException::class.java) {
+            AssistantCourseClient.parseResponse(response("{}", "length"), 20)
+        }
+        assertTrue(truncated.message!!.contains("截断"))
+        val invalid = assertThrows(IllegalArgumentException::class.java) {
+            AssistantCourseClient.parseResponse(response("""{"version":1,"action":"task_change","reply":"提醒","taskCreates":[{"title":"喝水","kind":"reminder","due":{"date":"2026-02-30","time":"14:05"}}]}"""), 20,
+                semester = Semester(id = 5, name = "学期", startDate = 0))
+        }
+        assertTrue(invalid.message!!.contains("提醒或事项"))
+        assertFalse(invalid.message!!.contains("课程不存在"))
     }
 
     @Test fun existingCoursesAreClassifiedAsDuplicateOrConflict() {
@@ -181,9 +194,12 @@ class AssistantCourseClientTest {
         val prompt = request.getAsJsonArray("messages")[0].asJsonObject.get("content").asString
         assertTrue(prompt.contains("\"id\":42"))
         assertFalse(prompt.contains("其他学期的私有课程"))
-        assertTrue(prompt.contains("确认后才执行"))
-        assertTrue(prompt.contains("未提及的字段必须省略"))
-        assertTrue(prompt.contains("当前是否可以撤销最近一次操作：true"))
+        assertTrue(prompt.contains("确认后保存"))
+        assertTrue(prompt.contains("updates只填用户要求改变的字段"))
+        val names = request.getAsJsonArray("tools").map { it.asJsonObject.getAsJsonObject("function").get("name").asString }
+        assertTrue("undo_course_changes" in names)
+        assertTrue("propose_course_changes" in names)
+        assertFalse(request.has("response_format"))
         assertFalse(request.toString().contains("apiKey"))
     }
 }

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.courseschedule.ui.ScheduleRootLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -19,13 +19,14 @@
         app:titleTextColor="@color/text_primary" />
 
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/importScroll"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:clipToPadding="false"
         android:fillViewport="true"
         android:overScrollMode="never"
         android:paddingBottom="24dp"
-        app:layout_constraintBottom_toTopOf="@id/bottomNavigation"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/toolbar">
@@ -58,12 +59,12 @@
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardImportSchool"
                 android:layout_width="match_parent"
-                android:layout_height="116dp"
+                android:layout_height="132dp"
                 android:layout_marginTop="20dp"
                 android:clickable="true"
                 android:focusable="true"
-                app:cardBackgroundColor="@color/primary_container"
-                app:cardCornerRadius="22dp"
+                app:cardBackgroundColor="@color/reference_hero_surface"
+                app:cardCornerRadius="26dp"
                 app:cardElevation="0dp"
                 app:rippleColor="@color/control_focus_overlay" android:stateListAnimator="@animator/press_feedback">
 
@@ -86,7 +87,7 @@
                             android:layout_gravity="center"
                             android:contentDescription="@null"
                             android:src="@drawable/ic_school"
-                            app:tint="@color/on_primary" />
+                            app:tint="@color/reference_hero_text" />
                     </FrameLayout>
 
                     <LinearLayout
@@ -97,33 +98,37 @@
                         android:orientation="vertical">
 
                         <TextView
+                            android:id="@+id/tvSchoolImportTitle"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/import_from_school"
-                            android:textColor="@color/text_primary"
+                            android:textColor="@color/reference_hero_text"
                             android:textSize="17sp"
                             android:textStyle="bold" />
 
                         <TextView
+                            android:id="@+id/tvSchoolImportDescription"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="5dp"
                             android:lineSpacingExtra="2dp"
                             android:text="@string/academic_import_description"
-                            android:textColor="@color/text_secondary"
+                            android:textColor="@color/reference_hero_secondary"
                             android:textSize="12sp" />
                     </LinearLayout>
 
                     <ImageView
+                        android:id="@+id/schoolImportArrow"
                         android:layout_width="22dp"
                         android:layout_height="22dp"
                         android:contentDescription="@null"
                         android:src="@drawable/ic_chevron_right_gray"
-                        app:tint="@color/primary_variant" />
+                        app:tint="@color/reference_hero_text" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
             <TextView
+                android:id="@+id/tvOtherImportMethods"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
@@ -139,12 +144,12 @@
                 android:layout_height="96dp"
                 android:clickable="true"
                 android:focusable="true"
-                app:cardBackgroundColor="@color/surface"
-                app:cardCornerRadius="18dp"
+                app:cardBackgroundColor="@color/reference_warm_surface"
+                app:cardCornerRadius="24dp"
                 app:cardElevation="0dp"
                 app:rippleColor="@color/control_focus_overlay"
                 app:strokeColor="@color/divider"
-                app:strokeWidth="1dp" android:stateListAnimator="@animator/press_feedback">
+                app:strokeWidth="0dp" android:stateListAnimator="@animator/press_feedback">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -164,7 +169,7 @@
                             android:layout_gravity="center"
                             android:contentDescription="@null"
                             android:src="@drawable/ic_assistant"
-                            app:tint="@color/primary" />
+                            app:tint="@color/reference_warm_accent" />
                     </FrameLayout>
 
                     <LinearLayout
@@ -196,7 +201,7 @@
                         android:layout_height="20dp"
                         android:contentDescription="@null"
                         android:src="@drawable/ic_chevron_right_gray"
-                        app:tint="@color/text_tertiary" />
+                        app:tint="@color/reference_warm_accent" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -207,12 +212,12 @@
                 android:layout_marginTop="12dp"
                 android:clickable="true"
                 android:focusable="true"
-                app:cardBackgroundColor="@color/surface"
-                app:cardCornerRadius="18dp"
+                app:cardBackgroundColor="@color/reference_teal_surface"
+                app:cardCornerRadius="24dp"
                 app:cardElevation="0dp"
                 app:rippleColor="@color/control_focus_overlay"
                 app:strokeColor="@color/divider"
-                app:strokeWidth="1dp" android:stateListAnimator="@animator/press_feedback">
+                app:strokeWidth="0dp" android:stateListAnimator="@animator/press_feedback">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -232,7 +237,7 @@
                             android:layout_gravity="center"
                             android:contentDescription="@null"
                             android:src="@drawable/ic_file_json"
-                            app:tint="@color/primary" />
+                            app:tint="@color/reference_teal_accent" />
                     </FrameLayout>
 
                     <LinearLayout
@@ -264,7 +269,7 @@
                         android:layout_height="20dp"
                         android:contentDescription="@null"
                         android:src="@drawable/ic_chevron_right_gray"
-                        app:tint="@color/text_tertiary" />
+                        app:tint="@color/reference_teal_accent" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -275,12 +280,12 @@
                 android:layout_marginTop="12dp"
                 android:clickable="true"
                 android:focusable="true"
-                app:cardBackgroundColor="@color/surface"
-                app:cardCornerRadius="18dp"
+                app:cardBackgroundColor="@color/reference_blue_surface"
+                app:cardCornerRadius="24dp"
                 app:cardElevation="0dp"
                 app:rippleColor="@color/control_focus_overlay"
                 app:strokeColor="@color/divider"
-                app:strokeWidth="1dp" android:stateListAnimator="@animator/press_feedback">
+                app:strokeWidth="0dp" android:stateListAnimator="@animator/press_feedback">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -300,7 +305,7 @@
                             android:layout_gravity="center"
                             android:contentDescription="@null"
                             android:src="@drawable/ic_text"
-                            app:tint="@color/primary" />
+                            app:tint="@color/reference_blue_accent" />
                     </FrameLayout>
 
                     <LinearLayout
@@ -332,11 +337,12 @@
                         android:layout_height="20dp"
                         android:contentDescription="@null"
                         android:src="@drawable/ic_chevron_right_gray"
-                        app:tint="@color/text_tertiary" />
+                        app:tint="@color/reference_blue_accent" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardImportTips"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="22dp"
@@ -371,17 +377,26 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
+    <com.courseschedule.ui.ScheduleNavigationGlass
+        android:id="@+id/navigationGlass"
+        android:layout_width="0dp"
+        android:layout_height="108dp"
+        android:importantForAccessibility="no"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigation"
         android:layout_width="0dp"
         android:layout_height="72dp"
-        android:background="@drawable/bg_bottom_navigation"
+        android:background="@android:color/transparent"
         android:elevation="0dp"
         app:itemActiveIndicatorStyle="@style/CourseScheduleBottomNavigationActiveIndicator"
         app:itemIconSize="22dp"
         app:itemIconTint="@color/nav_item_color"
         app:itemRippleColor="@color/control_focus_overlay"
-        app:itemTextColor="@color/nav_item_color"
+        app:itemTextColor="@color/reference_nav_text"
         app:labelVisibilityMode="labeled"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -403,4 +418,4 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:visibility="visible" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</com.courseschedule.ui.ScheduleRootLayout>

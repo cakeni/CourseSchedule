@@ -1,0 +1,13 @@
+<resources>
+    <color name="schedule_grid_background">#00000000</color>
+    <color name="schedule_card_name">#FFFFFF</color>
+    <color name="schedule_card_detail">#FFFFFF</color>
+    <color name="schedule_time_text">#788697</color>
+    <color name="schedule_time_column">#69F3F6FB</color>
+    <color name="schedule_inactive_base">#EDF2FA</color>
+    <color name="schedule_course_outline">#BEFFFFFF</color>
+    <color name="schedule_accent">#3E628C</color>
+    <color name="schedule_today_surface">#DCE8F5</color>
+    <color name="project_notice_surface">#E6EEF5</color>
+    <color name="project_notice_link">#2D5C92</color>
+</resources>

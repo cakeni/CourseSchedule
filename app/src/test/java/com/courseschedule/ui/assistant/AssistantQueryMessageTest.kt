@@ -9,7 +9,7 @@ class AssistantQueryMessageTest {
         val record = AssistantQueryMessage.decode(AssistantQueryMessage.encode(text, listOf(42L, 43L)), 123)
         assertEquals(text, record.content)
         assertEquals(listOf(42L, 43L), record.courseIds)
-        assertEquals("result", record.kind)
+        assertEquals("query", record.kind)
         assertEquals("assistant", record.role)
         assertEquals(123L, record.createdAt)
     }

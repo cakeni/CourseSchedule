@@ -4,4 +4,4 @@
     android:layout_width="48dp" android:layout_height="48dp"
     android:background="@drawable/control_focus" android:stateListAnimator="@animator/press_feedback_icon"
     android:contentDescription="@string/add_course" android:padding="12dp"
-    android:src="@drawable/ic_add" app:tint="@color/primary_variant" />
+    android:src="@drawable/ic_add" app:tint="@color/schedule_accent" />

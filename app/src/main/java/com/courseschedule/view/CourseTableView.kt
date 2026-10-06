@@ -101,6 +101,14 @@ class CourseTableView @JvmOverloads constructor(
     private val timeColumnWidth = dp(48f)
     private val courseInset = dp(3f)
     private val courseCornerRadius = dp(10f)
+    private val gridBackground = ContextCompat.getColor(context, R.color.schedule_grid_background)
+    private val inactiveBase = ContextCompat.getColor(context, R.color.schedule_inactive_base)
+    private val courseOutlineColor = ContextCompat.getColor(context, R.color.schedule_course_outline)
+    private val courseOutlinePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = courseOutlineColor
+        style = Paint.Style.STROKE
+        strokeWidth = dp(1.25f)
+    }
 
     private val courseColors = intArrayOf(
         R.color.course_red,
@@ -122,24 +130,13 @@ class CourseTableView @JvmOverloads constructor(
     ).map { ContextCompat.getColor(context, it) }.toIntArray()
 
     private val backgroundPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = ContextCompat.getColor(context, R.color.surface_variant)
-        alpha = 105
+        color = ContextCompat.getColor(context, R.color.schedule_time_column)
         style = Paint.Style.FILL
     }
 
     private val coursePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.FILL
     }
-
-    private val showCourseOutline = resources.getBoolean(R.bool.show_course_outline)
-
-    private val courseStrokePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = ContextCompat.getColor(context, R.color.on_primary)
-        alpha = 190
-        strokeWidth = dp(1.25f)
-        style = Paint.Style.STROKE
-    }
-
     private val quickAddPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = ContextCompat.getColor(context, R.color.quick_add_fill)
         style = Paint.Style.FILL
@@ -196,12 +193,12 @@ class CourseTableView @JvmOverloads constructor(
     }
 
     private val timePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = ContextCompat.getColor(context, R.color.text_tertiary)
+        color = ContextCompat.getColor(context, R.color.schedule_time_text)
         textSize = sp(9f)
         textAlign = Paint.Align.CENTER
     }
 
-    private val endTimePaint = Paint(timePaint).apply { alpha = 190 }
+    private val endTimePaint = Paint(timePaint)
 
     private val sectionPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = ContextCompat.getColor(context, R.color.text_secondary)
@@ -397,7 +394,7 @@ class CourseTableView @JvmOverloads constructor(
     }
 
     init {
-        setBackgroundColor(Color.TRANSPARENT)
+        setBackgroundColor(gridBackground)
         isClickable = true
         isLongClickable = true
         importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_YES
@@ -475,7 +472,7 @@ class CourseTableView @JvmOverloads constructor(
             val isCurrentWeek = ScheduleRules.isCourseInWeek(course, currentWeek)
             val saveCount = canvas.save()
             val pressProgress = if (course == pressedCourse) coursePressMotion.progress else 0f
-            val alpha = if (isCurrentWeek) 255 else (255 * 0.46f).roundToInt()
+            val alpha = 255
             val delay = returnDelays[course.id]
             val elapsed = if (delay == null) ScheduleReturnMotion.MOVE_MS else (returnElapsed - delay).coerceAtLeast(0f)
             val progress = ScheduleReturnMotion.progress(elapsed)
@@ -574,20 +571,24 @@ class CourseTableView @JvmOverloads constructor(
     ) {
         val bounds = boundsOverride ?: courseBounds(course)
         if (bounds.width() <= 0f || bounds.height() <= 0f) return
-        drawCourseBackground(canvas, bounds, alpha, pressProgress, courseColor(course))
+        val cardAlpha = if (isCurrentWeek) alpha else (alpha * 0.46f).roundToInt()
+        drawCourseBackground(canvas, bounds, cardAlpha, pressProgress, courseColor(course))
         drawCourseText(canvas, course, bounds, alpha, isCurrentWeek, pressProgress)
     }
 
     private fun courseColor(course: Course): Int = courseColors[Math.floorMod(course.colorIndex, courseColors.size)]
+    private fun courseSurface(course: Course, active: Boolean): Int = if (active) courseColor(course)
+        else ColorUtils.blendARGB(courseColor(course), inactiveBase, .54f)
 
-    private fun drawCourseBackground(canvas: Canvas, bounds: RectF, alpha: Int, pressProgress: Float, baseColor: Int) {
+    private fun drawCourseBackground(canvas: Canvas, bounds: RectF, alpha: Int, pressProgress: Float,
+        surface: Int) {
         val left = bounds.left
         val top = bounds.top
         val right = bounds.right
         val bottom = bounds.bottom
         if (right <= left || bottom <= top) return
 
-        coursePaint.color = ColorUtils.blendARGB(baseColor, Color.BLACK, 0.08f * pressProgress)
+        coursePaint.color = ColorUtils.blendARGB(surface, Color.BLACK, .08f * pressProgress)
         coursePaint.alpha = alpha
         val pressScaleX = 1f - (1f - PRESSED_SCALE_X) * pressProgress
         val pressScaleY = 1f - (1f - PRESSED_SCALE_Y) * pressProgress
@@ -606,18 +607,10 @@ class CourseTableView @JvmOverloads constructor(
             courseCornerRadius,
             coursePaint
         )
-        if (showCourseOutline) {
-            courseStrokePaint.alpha = ((190f + 40f * pressProgress) * alpha / 255f)
-                .roundToInt()
-            courseStrokePaint.strokeWidth = dp(1.25f + 0.4f * pressProgress)
-            canvas.drawRoundRect(
-                cardDrawBounds,
-                courseCornerRadius,
-                courseCornerRadius,
-                courseStrokePaint
-            )
+        if (Color.alpha(courseOutlineColor) > 0) {
+            courseOutlinePaint.alpha = Color.alpha(courseOutlineColor) * alpha / 255
+            canvas.drawRoundRect(cardDrawBounds, courseCornerRadius, courseCornerRadius, courseOutlinePaint)
         }
-
     }
 
     private fun drawCourseText(canvas: Canvas, course: Course, bounds: RectF, alpha: Int,
@@ -631,9 +624,10 @@ class CourseTableView @JvmOverloads constructor(
         ) {
             buildCourseTextLayout(course, isCurrentWeek, courseBounds(course))
         }
-        textLayout.name.paint.alpha = alpha
-        textLayout.room?.paint?.alpha = 220 * alpha / 255
-        textLayout.teacher?.paint?.alpha = 205 * alpha / 255
+        val cardAlpha = if (isCurrentWeek) alpha else (alpha * 0.46f).roundToInt()
+        textLayout.name.paint.alpha = cardAlpha
+        textLayout.room?.paint?.alpha = if (isCurrentWeek) alpha else 220 * cardAlpha / 255
+        textLayout.teacher?.paint?.alpha = if (isCurrentWeek) alpha else 205 * cardAlpha / 255
         val horizontalPadding = dp(6f)
         val verticalPadding = dp(5f)
         var textTop = top + ((bottom - top - textLayout.contentHeight) / 2f)
@@ -1094,10 +1088,14 @@ class CourseTableView @JvmOverloads constructor(
     }
 
     internal fun continuityBounds(course: Course): RectF = RectF(courseBounds(course))
+    internal fun detailSourceColor(course: Course): Int = courseSurface(course, ScheduleRules.isCourseInWeek(course, currentWeek))
+    internal fun drawDetailSourceText(canvas: Canvas, course: Course, bounds: RectF, alpha: Int) {
+        drawCourseText(canvas, course, bounds, alpha, ScheduleRules.isCourseInWeek(course, currentWeek))
+    }
 
     internal fun drawContinuityCourse(canvas: Canvas, course: Course, bounds: RectF, opacity: Float = 1f) {
         val active = ScheduleRules.isCourseInWeek(course, currentWeek)
-        val alpha = (255 * opacity * if (active) 1f else 0.46f).roundToInt().coerceIn(0, 255)
+        val alpha = (255 * opacity).roundToInt().coerceIn(0, 255)
         drawCourse(canvas, course, alpha, active, 0f, bounds)
     }
 
@@ -1106,9 +1104,7 @@ class CourseTableView @JvmOverloads constructor(
         val fromActive = ScheduleRules.isCourseInWeek(from, currentWeek)
         val toActive = ScheduleRules.isCourseInWeek(to, destination.currentWeek)
         val phase = SchedulePageMotion.phase(progress)
-        val fromOpacity = if (fromActive) 1f else 0.46f
-        val toOpacity = if (toActive) 1f else 0.46f
-        val alpha = (255 * (fromOpacity + (toOpacity - fromOpacity) * phase)).roundToInt()
+        val alpha = 255
         val fromColor = courseColor(from)
         val toColor = destination.courseColor(to)
         val sameText = from.courseName == to.courseName && from.teacher == to.teacher &&
@@ -1119,7 +1115,7 @@ class CourseTableView @JvmOverloads constructor(
             return
         }
         drawCourseBackground(canvas, bounds, alpha, 0f,
-            if (fromColor == toColor) fromColor else ColorUtils.blendARGB(fromColor, toColor, phase))
+            ColorUtils.blendARGB(courseSurface(from, fromActive), destination.courseSurface(to, toActive), phase))
 
         val save = canvas.save()
         transitionClip.reset()

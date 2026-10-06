@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.courseschedule.ui.ScheduleRootLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -10,7 +10,7 @@
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="0dp"
-        android:layout_height="92dp"
+        android:layout_height="96dp"
         android:background="@android:color/transparent"
         android:elevation="0dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -29,8 +29,8 @@
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/tvProjectLink"
         android:layout_width="0dp"
-        android:layout_height="40dp"
-        android:layout_marginEnd="92dp"
+        android:layout_height="24dp"
+        android:layout_marginEnd="96dp"
         android:background="@drawable/control_focus"
         android:clickable="true"
         android:contentDescription="@string/open_source_header_link"
@@ -40,7 +40,7 @@
         android:maxLines="1"
         android:paddingHorizontal="2dp"
         android:text="@string/project_repository_short"
-        android:textColor="@color/primary"
+        android:textColor="@color/schedule_accent"
         android:textSize="8sp"
         app:autoSizeMaxTextSize="8sp"
         app:autoSizeMinTextSize="6sp"
@@ -64,14 +64,15 @@
     <LinearLayout
         android:id="@+id/weekSelector"
         android:layout_width="0dp"
-        android:layout_height="48dp"
-        android:layout_marginHorizontal="8dp"
-        android:background="@drawable/bg_week_selector"
+        android:layout_height="58dp"
+        android:layout_marginHorizontal="18dp"
+        android:background="@drawable/bg_reference_week"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingHorizontal="4dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="4dp"
         app:layout_constraintTop_toBottomOf="@id/toolbarDivider">
 
         <ImageButton
@@ -133,9 +134,9 @@
         android:layout_width="0dp"
         android:layout_height="2dp"
         android:layout_marginHorizontal="20dp"
-        android:layout_marginTop="1dp"
+        android:layout_marginTop="12dp"
         android:indeterminate="false"
-        app:indicatorColor="@color/primary"
+        app:indicatorColor="@color/reference_blue_accent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/weekSelector"
@@ -152,7 +153,7 @@
         android:orientation="horizontal"
         android:paddingTop="0dp"
         android:overScrollMode="never"
-        app:layout_constraintBottom_toTopOf="@id/bottomNavigation"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/weekProgress" />
@@ -192,17 +193,26 @@
         app:layout_constraintStart_toStartOf="@id/weekProgress"
         app:layout_constraintTop_toTopOf="@id/weekProgress" />
 
+    <com.courseschedule.ui.ScheduleNavigationGlass
+        android:id="@+id/navigationGlass"
+        android:layout_width="0dp"
+        android:layout_height="108dp"
+        android:importantForAccessibility="no"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigation"
         android:layout_width="0dp"
         android:layout_height="72dp"
-        android:background="@drawable/bg_bottom_navigation"
+        android:background="@android:color/transparent"
         android:elevation="0dp"
         app:itemActiveIndicatorStyle="@style/CourseScheduleBottomNavigationActiveIndicator"
         app:itemIconSize="22dp"
         app:itemIconTint="@color/nav_item_color"
         app:itemRippleColor="@color/control_focus_overlay"
-        app:itemTextColor="@color/nav_item_color"
+        app:itemTextColor="@color/reference_nav_text"
         app:labelVisibilityMode="labeled"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -212,4 +222,4 @@
         app:itemPaddingTop="12dp" app:itemPaddingBottom="12dp"
         app:itemHorizontalTranslationEnabled="false" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</com.courseschedule.ui.ScheduleRootLayout>

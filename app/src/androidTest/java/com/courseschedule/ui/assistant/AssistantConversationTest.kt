@@ -52,7 +52,7 @@ class AssistantConversationTest {
                 awaitIdle(model)
                 val firstId = model.conversationId!!
                 onView(withId(R.id.btnSend)).check(matches(org.hamcrest.Matchers.not(isEnabled())))
-                onView(withId(R.id.btnExampleDelete)).perform(androidx.test.espresso.action.ViewActions.scrollTo()).check(matches(isDisplayed()))
+                onView(withId(R.id.btnQuickPrompts)).check(matches(isDisplayed()))
                 saveHistoryScreenshot("assistant-layout-empty")
                 onView(withId(R.id.btnQuickPrompts)).perform(click())
                 onView(withId(R.id.btnPromptQuery)).perform(click())
@@ -449,6 +449,7 @@ class AssistantConversationTest {
             val factory = { AssistantCourseClient { FakeConnection(envelope(when (round++) {
                 0 -> """{"version":1,"action":"change","reply":"模型猜第一门","updates":[{"id":${firstSaved.id},"classroom":"B302"}]}"""
                 1 -> """{"version":1,"action":"change","reply":"修改选中课程","updates":[{"id":${secondSaved.id},"classroom":"B302"}]}"""
+                2 -> "不客气，刚才那门课我还记得。"
                 else -> """{"version":1,"action":"change","reply":"继续修改这门课","updates":[{"id":${secondSaved.id},"note":"新备注"}]}"""
             }), capture = requests) } }
             var model = model(factory)
@@ -496,12 +497,16 @@ class AssistantConversationTest {
                     awaitIdle(model)
                     assertEquals(firstSaved, database.courseDao().getCourseById(firstSaved.id))
                     assertEquals(changed, database.courseDao().getCourseById(secondSaved.id))
+                    withContext(Dispatchers.Main) { model.send("谢谢你", 1) }
+                    awaitIdle(model)
+                    assertEquals("chat", model.messages.value!!.last().kind)
+                    assertNull(model.pendingChanges.value)
                     withContext(Dispatchers.Main) { model.send("把这门课的备注改成新备注", 1) }
                     awaitIdle(model)
                     assertEquals(secondSaved.id, model.pendingChanges.value!!.updates.single().original.id)
-                    assertEquals(3, round)
-                    assertTrue(requests[1].contains("用户明确选中的原目标"))
-                    assertTrue(requests[2].contains("用户明确选中的原目标"))
+                    assertEquals(4, round)
+                    assertTrue(requests[1].contains("用户明确选中的课程"))
+                    assertTrue(requests[3].contains("用户明确选中的课程"))
                     withContext(Dispatchers.Main) { model.cancelPending() }
                     awaitIdle(model)
                 }
@@ -518,7 +523,7 @@ class AssistantConversationTest {
             var attempt = 0
             val factory = { AssistantCourseClient { FakeConnection(envelope(when (attempt++) {
                 0 -> """{"version":1,"action":"change","reply":"改为B201","updates":[{"id":${original.id},"classroom":"B201"}]}"""
-                1 -> """{"version":1,"action":"change","reply":"错误地新增目标","deleteIds":[${original.id}]}"""
+                1, 2 -> """{"version":1,"action":"change","reply":"错误地新增目标","deleteIds":[${original.id}]}"""
                 else -> """{"version":1,"action":"revise","reply":"改为B302","revisions":[{"index":0,"classroom":"B302"}]}"""
             }), capture = requests) } }
             var model = model(factory)
@@ -536,8 +541,8 @@ class AssistantConversationTest {
             assertTrue(model.canRetry.value == true)
             withContext(Dispatchers.Main) { model.retry() }
             awaitIdle(model)
-            assertEquals(3, attempt)
-            assertTrue(requests.last().contains("拟保存的课程"))
+            assertEquals(4, attempt)
+            assertTrue(requests.last().contains("当前有待确认方案"))
             assertEquals("B302", model.pendingChanges.value!!.updates.single().replacements.single().classroom)
             assertEquals(original, database.courseDao().getCourseById(original.id))
             withContext(Dispatchers.Main) { stores.last().clear() }
@@ -546,7 +551,7 @@ class AssistantConversationTest {
             withContext(Dispatchers.Main) { model.confirmPending() }
             awaitIdle(model)
             assertEquals(original.copy(classroom = "B302"), database.courseDao().getCourseById(original.id))
-            assertEquals(3, attempt)
+            assertEquals(4, attempt)
         }
     }
 
@@ -865,10 +870,238 @@ class AssistantConversationTest {
         instrumentation.waitForIdleSync()
     }
 
-    private fun envelope(payload: String): String = com.google.gson.JsonObject().apply {
-        add("choices", JsonParser.parseString("""[{"finish_reason":"stop","message":{}}]"""))
-        getAsJsonArray("choices")[0].asJsonObject.getAsJsonObject("message").addProperty("content", payload)
-    }.toString()
+    @Test fun retryingUnrelatedRequestDoesNotBindPreviousConversationFocus(): Unit = runBlocking {
+        withFixture { database, semester ->
+            val base = com.courseschedule.data.entity.Course(semesterId = semester.id, courseName = "数学", classroom = "A101",
+                dayOfWeek = 3, startSection = 1, endSection = 2, startWeek = 1, endWeek = 16)
+            val math = base.copy(id = database.courseDao().insertCourse(base))
+            val englishBase = base.copy(courseName = "英语", dayOfWeek = 5)
+            val english = englishBase.copy(id = database.courseDao().insertCourse(englishBase))
+            var round = 0
+            val requests = mutableListOf<String>()
+            val factory = { AssistantCourseClient {
+                val index = round++
+                FakeConnection(envelope(if (index == 0) """{"action":"query","query":{"courseName":"数学"}}"""
+                    else """{"action":"change","targetQuery":{"courseName":"英语"},"updates":[{"id":${english.id},"classroom":"B202"}]}"""),
+                    status = if (index == 1) 429 else 200, capture = requests)
+            } }
+            var model = model(factory)
+            withContext(Dispatchers.Main) { model.send("查询数学", 1) }; awaitIdle(model)
+            withContext(Dispatchers.Main) { model.send("把英语教室改成B202", 1) }; awaitIdle(model)
+            assertTrue(model.canRetry.value == true)
+            val stored = AssistantConversationCodec.decode(database.assistantConversationDao().conversation(model.conversationId!!)!!.stateJson, semester.id)
+            assertEquals(math, stored.selectedTarget); assertNull(stored.retryRequest!!.boundTarget)
+            assertTrue(stored.retryRequest.bindingRecorded)
+            withContext(Dispatchers.Main) { stores.last().clear() }; model = model(factory)
+            withContext(Dispatchers.Main) { model.retry() }; awaitIdle(model)
+            assertEquals(3, round)
+            assertEquals(english, model.pendingChanges.value!!.updates.single().original)
+            assertTrue(requests.last().contains("当前没有已绑定课程目标"))
+            assertEquals(math, database.courseDao().getCourseById(math.id))
+            assertEquals(english, database.courseDao().getCourseById(english.id))
+            withContext(Dispatchers.Main) { model.confirmPending() }; awaitIdle(model)
+            assertEquals(english.copy(classroom = "B202"), database.courseDao().getCourseById(english.id))
+            assertEquals(math, database.courseDao().getCourseById(math.id))
+        }
+    }
+
+    @Test fun unresolvedChoiceSurvivesFailedChatRetryAndCanBeCancelledByTool(): Unit = runBlocking {
+        withFixture { database, semester ->
+            val base = com.courseschedule.data.entity.Course(semesterId = semester.id, courseName = "数学", dayOfWeek = 3,
+                startSection = 1, endSection = 2, startWeek = 1, endWeek = 16)
+            val first = base.copy(id = database.courseDao().insertCourse(base))
+            val other = base.copy(dayOfWeek = 5)
+            val second = other.copy(id = database.courseDao().insertCourse(other))
+            var round = 0
+            val factory = { AssistantCourseClient {
+                val index = round++
+                FakeConnection(envelope(when (index) {
+                    0 -> """{"action":"clarify","targetQuery":{"courseName":"数学"}}"""
+                    3 -> """{"action":"cancel","reply":"取消"}"""
+                    else -> "好的，我们先聊聊。课程目标仍等你选择。"
+                }), status = if (index == 1) 429 else 200)
+            } }
+            var model = model(factory)
+            withContext(Dispatchers.Main) { model.send("把数学教室改成B201", 1) }; awaitIdle(model)
+            val choice = model.targetChoice.value!!
+            withContext(Dispatchers.Main) { model.send("先聊聊，今天有点累", 1) }; awaitIdle(model)
+            assertEquals(choice, model.targetChoice.value); assertTrue(model.canRetry.value == true)
+            withContext(Dispatchers.Main) { stores.last().clear() }; model = model(factory)
+            assertEquals(choice, model.targetChoice.value)
+            withContext(Dispatchers.Main) { model.retry() }; awaitIdle(model)
+            assertEquals(choice, model.targetChoice.value); assertEquals("chat", model.messages.value!!.last().kind)
+            withContext(Dispatchers.Main) { model.send("取消刚才的课程目标选择", 1) }; awaitIdle(model)
+            assertNull(model.targetChoice.value); assertEquals("cancel", model.messages.value!!.last().kind)
+            assertEquals(4, round); assertNull(model.pendingChanges.value)
+            assertEquals(first, database.courseDao().getCourseById(first.id))
+            assertEquals(second, database.courseDao().getCourseById(second.id))
+        }
+    }
+
+    @Test fun readOnlyQueriesRetainPendingPlanAndNeverAppearAsSavedChanges(): Unit = runBlocking {
+        withFixture { database, semester ->
+            var round = 0
+            val model = model { AssistantCourseClient { FakeConnection(envelope(when (round++) {
+                0 -> """{"action":"change","courses":[{"courseName":"英语","teacher":"","classroom":"","dayOfWeek":3,"startSection":3,"endSection":4,"weeks":[1,2]}]}"""
+                1 -> """{"action":"query","query":{"courseName":"数学"}}"""
+                2 -> """{"action":"query","query":{"dayOfWeek":3,"whenTo":{"week":1},"freeSlots":true}}"""
+                else -> """{"action":"task_query","taskQuery":{}}"""
+            })) } }
+            withContext(Dispatchers.Main) { model.send("添加英语，周三第3到4节，1到2周", 1) }; awaitIdle(model)
+            val pending = model.pendingChanges.value!!
+            listOf("查询数学", "查询第一周周三的空闲节次", "查询学习事项").forEachIndexed { index, input ->
+                withContext(Dispatchers.Main) { model.send(input, 1) }; awaitIdle(model)
+                assertEquals(pending, model.pendingChanges.value)
+                assertEquals(if (index == 2) "task_query" else "query_text", model.messages.value!!.last().kind)
+                assertFalse(model.canRetry.value == true)
+                assertTrue(database.courseDao().getCoursesBySemesterSync(semester.id).isEmpty())
+            }
+            withContext(Dispatchers.Main) { stores.last().clear() }
+            val restored = model()
+            assertEquals(pending, restored.pendingChanges.value)
+            withContext(Dispatchers.Main) { restored.confirmPending() }; awaitIdle(restored)
+            assertEquals(1, database.courseDao().getCoursesBySemesterSync(semester.id).size)
+            assertEquals("result", restored.messages.value!!.last().kind)
+        }
+    }
+
+    @Test fun legacyRetryWithUnknownBindingRequiresReviewInsteadOfGuessingTarget(): Unit = runBlocking {
+        withFixture { database, semester ->
+            val base = com.courseschedule.data.entity.Course(semesterId = semester.id, courseName = "数学", dayOfWeek = 3,
+                startSection = 1, endSection = 2, startWeek = 1, endWeek = 16)
+            val math = base.copy(id = database.courseDao().insertCourse(base))
+            var calls = 0
+            val factory = { AssistantCourseClient { calls++; FakeConnection(envelope("不应调用")) } }
+            var model = model(factory)
+            val id = model.conversationId!!
+            val dao = database.assistantConversationDao()
+            val row = dao.conversation(id)!!
+            val text = "把英语教室改成B201"
+            val legacy = AssistantConversationState(retryRequest = AssistantRetryRequest(text, 1, LocalDate.now().toString()), selectedTarget = math)
+            dao.updateConversation(id, row.title, row.updatedAt, AssistantConversationCodec.encode(legacy), row.revision)
+            withContext(Dispatchers.Main) { stores.last().clear() }; model = model(factory)
+            withContext(Dispatchers.Main) { model.retry() }; awaitIdle(model)
+            assertEquals(0, calls); assertEquals(text, model.draft.value)
+            assertTrue(model.messages.value!!.last().content.contains("未保存本次绑定"))
+            assertFalse(model.canRetry.value == true); assertNull(model.pendingChanges.value)
+            assertEquals(math, database.courseDao().getCourseById(math.id))
+        }
+    }
+
+    // Fixtures use the same native function envelope as the production service.
+    private fun envelope(payload: String): String {
+        val root = runCatching { JsonParser.parseString(payload).asJsonObject }.getOrNull()
+        val action = root?.get("action")?.asString ?: if (root?.getAsJsonArray("courses")?.size()?.let { it > 0 } == true) "change" else "chat"
+        val names = mapOf("change" to "propose_course_changes", "query" to "query_courses", "clarify" to "choose_course_target",
+            "revise" to "revise_course_plan", "undo" to "undo_course_changes", "task_change" to "propose_study_changes",
+            "task_query" to "query_study_tasks", "task_revise" to "revise_study_plan", "cancel" to "cancel_pending_plan")
+        val toolName = names[action]?.takeIf { action != "clarify" || root!!.has("targetQuery") }
+        return com.google.gson.JsonObject().apply {
+            add("choices", JsonParser.parseString("""[{"finish_reason":"stop","message":{}}]"""))
+            val choice = getAsJsonArray("choices")[0].asJsonObject
+            val message = choice.getAsJsonObject("message")
+            if (toolName == null) message.addProperty("content", payload)
+            else {
+                val args = root!!.deepCopy().apply {
+                    listOf("version", "action", "reply", "undo").forEach { remove(it) }
+                    if (action == "change" && !has("targetQuery") && (has("updates") || has("deleteIds")))
+                        add("targetQuery", JsonParser.parseString("""{"courseName":"数学"}"""))
+                }
+                choice.addProperty("finish_reason", "tool_calls")
+                message.add("tool_calls", JsonParser.parseString("""[{"id":"synthetic_call","type":"function","function":{}}]"""))
+                message.getAsJsonArray("tool_calls")[0].asJsonObject.getAsJsonObject("function").apply {
+                    addProperty("name", toolName); addProperty("arguments", args.toString())
+                }
+            }
+        }.toString()
+    }
+
+    @Test fun roleConversationPersistsAsChatWithoutCourseOrTaskWrites(): Unit = runBlocking {
+        withFixture { database, semester ->
+            val inputs = listOf("你好", "我是项羽", "你是虞姬", "那陪我说两句")
+            val replies = listOf("你好！", "项王，今天想聊些什么？", "项王，妾身在。", "帐外风起，愿陪你说说心事。")
+            val requests = mutableListOf<String>()
+            var index = 0
+            var model = model { AssistantCourseClient { FakeConnection(envelope(replies[index++]), capture = requests) } }
+            inputs.forEach { input ->
+                withContext(Dispatchers.Main) { model.send(input, 1) }; awaitIdle(model)
+                assertFalse(model.canRetry.value == true); assertNull(model.pendingChanges.value)
+                assertEquals("chat", model.messages.value!!.last().kind)
+            }
+            assertEquals(4, index); assertEquals(8, model.messages.value!!.size)
+            assertTrue(requests.last().contains("我是项羽")); assertTrue(requests.last().contains("你是虞姬"))
+            assertTrue(database.courseDao().getCoursesBySemesterSync(semester.id).isEmpty())
+            assertTrue(database.studyTaskDao().forSemester(semester.id).isEmpty())
+            withContext(Dispatchers.Main) { stores.last().clear() }; model = model()
+            assertEquals(replies.last(), model.messages.value!!.last().content)
+            assertFalse(model.canRetry.value == true)
+            val application = context.applicationContext as Application
+            val callbacks = object : Application.ActivityLifecycleCallbacks {
+                override fun onActivityCreated(activity: Activity, bundle: Bundle?) {
+                    if (activity is CourseAssistantActivity) activity.viewModelStore.put(
+                        "androidx.lifecycle.ViewModelProvider.DefaultKey:${CourseAssistantViewModel::class.java.canonicalName}", model)
+                }
+                override fun onActivityStarted(activity: Activity) = Unit
+                override fun onActivityResumed(activity: Activity) = Unit
+                override fun onActivityPaused(activity: Activity) = Unit
+                override fun onActivityStopped(activity: Activity) = Unit
+                override fun onActivitySaveInstanceState(activity: Activity, bundle: Bundle) = Unit
+                override fun onActivityDestroyed(activity: Activity) = Unit
+            }
+            instrumentation.runOnMainSync { application.registerActivityLifecycleCallbacks(callbacks) }
+            try {
+                ActivityScenario.launch<CourseAssistantActivity>(Intent(context, CourseAssistantActivity::class.java)).use {
+                    awaitIdle(model)
+                    onView(withText(replies.last())).check(matches(isDisplayed()))
+                    val screenshot = instrumentation.uiAutomation.takeScreenshot()
+                    java.io.File(context.getExternalFilesDir(null), "assistant-role-chat-refactor.png").outputStream().use {
+                        screenshot.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, it)
+                    }
+                    screenshot.recycle()
+                }
+            } finally { instrumentation.runOnMainSync { application.unregisterActivityLifecycleCallbacks(callbacks) } }
+        }
+    }
+
+    @Test fun chatKeepsPendingPlanAcrossRestoreAndExplicitToolCancelClearsIt(): Unit = runBlocking {
+        withFixture { database, semester ->
+            var round = 0
+            val requests = mutableListOf<String>()
+            val factory = { AssistantCourseClient { FakeConnection(envelope(when (round++) {
+                0 -> """{"action":"change","courses":[{"courseName":"英语","teacher":"","classroom":"","dayOfWeek":3,"startSection":3,"endSection":4,"weeks":[1,2]}]}"""
+                1 -> "先陪你聊聊，刚才的安排还在等你确认。"
+                else -> """{"version":1,"action":"cancel","reply":"取消"}"""
+            }), capture = requests) } }
+            var model = model(factory)
+            withContext(Dispatchers.Main) { model.send("添加英语，周三第3到4节，1到2周", 1) }; awaitIdle(model)
+            val pending = model.pendingChanges.value!!
+            withContext(Dispatchers.Main) { model.send("先别安排，我有点累", 1) }; awaitIdle(model)
+            assertEquals(pending, model.pendingChanges.value)
+            assertEquals("chat", model.messages.value!!.last().kind)
+            withContext(Dispatchers.Main) { stores.last().clear() }; model = model(factory)
+            assertEquals(pending, model.pendingChanges.value)
+            withContext(Dispatchers.Main) { model.send("取消刚才待确认的方案", 1) }; awaitIdle(model)
+            assertNull(model.pendingChanges.value); assertEquals("cancel", model.messages.value!!.last().kind)
+            assertEquals(3, round)
+            val available = JsonParser.parseString(requests[1]).asJsonObject.getAsJsonArray("tools").map {
+                it.asJsonObject.getAsJsonObject("function").get("name").asString }.toSet()
+            assertEquals(setOf("revise_course_plan", "cancel_pending_plan", "query_courses", "query_study_tasks"), available)
+            assertTrue(database.courseDao().getCoursesBySemesterSync(semester.id).isEmpty())
+            assertTrue(database.studyTaskDao().forSemester(semester.id).isEmpty())
+        }
+    }
+
+    @Test fun malformedProviderReplyRepairsOnceWithoutRecordingAFailedOperation(): Unit = runBlocking {
+        withFixture { database, semester ->
+            var calls = 0
+            val model = model { AssistantCourseClient { FakeConnection(if (calls++ == 0) "{}" else envelope("项王，妾身在。")) } }
+            withContext(Dispatchers.Main) { model.send("你是虞姬", 1) }; awaitIdle(model)
+            assertEquals(2, calls); assertEquals(2, model.messages.value!!.size)
+            assertEquals("项王，妾身在。", model.messages.value!!.last().content)
+            assertFalse(model.canRetry.value == true)
+            assertTrue(database.courseDao().getCoursesBySemesterSync(semester.id).isEmpty())
+        }
+    }
 
     private class FakeConnection(private val body: String, private val status: Int = 200,
         private val capture: MutableList<String>? = null, private val started: CountDownLatch? = null,

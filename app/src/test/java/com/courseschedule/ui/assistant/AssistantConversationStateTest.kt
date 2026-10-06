@@ -32,6 +32,7 @@ class AssistantConversationStateTest {
         listOf("null", "{broken", "{\"requestRunning\":true}",
             valid.replace("\"deletions\":[", "\"deletions\":null,\"unknown\":["),
             valid.replace("\"teacher\":\"\"", "\"teacher\":null"),
+            valid.replace("\"cancelPending\":false", "\"cancelPending\":true"),
             valid.replace("\"dayOfWeek\":3", "\"dayOfWeek\":8")).forEach {
             assertThrows(Exception::class.java) { AssistantConversationCodec.decode(it, 7) }
         }

@@ -43,6 +43,7 @@ internal class CourseAssistantViewModel @JvmOverloads constructor(application: A
     private var state = AssistantConversationState()
     private var messageLimit = 60
     private var messageWindowEnd: Long? = null
+    private var latestReminderSource: String? = null
     private var activeClient: AssistantCourseClient? = null
     private var requestJob: Job? = null
     private lateinit var initialLoadJob: Job
@@ -56,6 +57,7 @@ internal class CourseAssistantViewModel @JvmOverloads constructor(application: A
     val canUndo = MutableLiveData(false)
     val canRetry = MutableLiveData(false)
     val canStop = MutableLiveData(false)
+    val requestProgress = MutableLiveData("")
     val hasOlderMessages = MutableLiveData(false)
     val hasNewerMessages = MutableLiveData(false)
     val historyLocation = MutableLiveData<AssistantHistoryLocation?>(null)
@@ -213,12 +215,7 @@ internal class CourseAssistantViewModel @JvmOverloads constructor(application: A
     private fun localReminderReply(text: String): AssistantCourseReply? {
         if (imageDraft.value != null || state.targetChoice != null) return null
         val semesterId = conversation?.semesterId ?: return null
-        val prior = messages.value.orEmpty()
-        val start = prior.indexOfLast { it.role == "user" && AssistantLocalReminder.recognizes(it.content) }
-        val source = if (prior.lastOrNull()?.kind == "reminder_question" && start >= 0) {
-            prior.drop(start + 1).filter { it.role == "user" }.asReversed().joinToString(" ") { it.content } + " " + prior[start].content
-        } else null
-        return AssistantLocalReminder.reply(text, semesterId, ZonedDateTime.now(), source, pendingChanges.value)
+        return AssistantLocalReminder.reply(text, semesterId, ZonedDateTime.now(), latestReminderSource, pendingChanges.value)
     }
 
     fun canSendLocally(text: String) = localReminderReply(text) != null
@@ -259,7 +256,7 @@ internal class CourseAssistantViewModel @JvmOverloads constructor(application: A
             request.imageRef?.let { require(it.substringBefore('/') == conversationId) { "图片不属于当前对话，请重新选择。" } }
             val pending = state.pending
             val requestDate = LocalDate.parse(requireNotNull(request.requestDate))
-            val retry = request.copy(displayedWeek = request.displayedWeek.coerceIn(1, semester.totalWeeks))
+            val retry = request.copy(displayedWeek = request.displayedWeek.coerceIn(1, semester.totalWeeks), boundTarget = bound, bindingRecorded = true)
             val existing = database.courseDao().getCoursesBySemesterSync(semester.id)
             val tasks = database.studyTaskDao().forSemester(semester.id)
             val semesterChanged = choiceSemester != null && (choiceSemester.id != semester.id ||
@@ -273,11 +270,11 @@ internal class CourseAssistantViewModel @JvmOverloads constructor(application: A
             }
             append("user", request.imageRef?.let { AssistantImageMessage.encode(request.text, it) } ?: request.text,
                 kind = if (request.imageRef != null) "image" else "chat", next = state.copy(retryRequest = retry, requestRunning = true,
-                targetChoice = null, selectedTarget = bound))
+                targetChoice = if (bound != null) null else state.targetChoice, selectedTarget = bound ?: state.selectedTarget))
             updateDraft("")
             removeImageForSentRequest()
             val schedule = SchedulePreferences(getApplication())
-            val context = conversations.messages(conversation!!.id, 24).asReversed().map { it.toMessage() }
+            val context = conversations.messages(conversation!!.id, 32).asReversed().map { it.toMessage() }
             val imageData = withContext(Dispatchers.IO) {
                 val refs = context.mapNotNull { it.imageRef }.filter { it.substringBefore('/') == conversationId }.distinct().takeLast(2)
                 refs.mapNotNull { ref ->
@@ -287,14 +284,14 @@ internal class CourseAssistantViewModel @JvmOverloads constructor(application: A
             }
             val apiRequest = withContext(Dispatchers.Default) { AssistantCourseClient.createRequest(requestConfig.model, context, semester,
                 retry.displayedWeek, schedule.sectionTimes, schedule.sectionEndTimes, existing,
-                state.lastUndo != null, schedule.defaultReminderMinutes, pending?.reply, requestDate, bound, imageData, tasks) }
+                state.lastUndo != null, schedule.defaultReminderMinutes, pending?.reply, requestDate, bound, imageData, tasks, state.targetChoice) }
             val client = clientFactory()
             activeClient = client
             canStop.value = true
             val reply = try {
                 withContext(Dispatchers.IO) { client.chat(requestConfig, apiRequest, semester.totalWeeks, existing,
-                    semester, retry.displayedWeek, pending?.reply, requestDate, bound, tasks) }
-            } finally { canStop.value = false; activeClient = null }
+                    semester, retry.displayedWeek, pending?.reply, requestDate, bound, tasks, state.targetChoice) { requestProgress.postValue(it) } }
+            } finally { canStop.value = false; activeClient = null; requestProgress.value = "" }
             currentCoroutineContext().ensureActive()
             receiveReply(reply, semester, pending, requestDate)
         }
@@ -312,7 +309,11 @@ internal class CourseAssistantViewModel @JvmOverloads constructor(application: A
                 updateDraft(it.text)
                 append("assistant", "旧请求未保存原日期，无法确定‘今天、明天、下周’的原含义。请核对日期后重新发送，本次未更改课表。",
                     "error", state.copy(retryRequest = null, requestRunning = false))
-            } else sendRequest(it, state.selectedTarget)
+            } else if (!it.bindingRecorded && state.selectedTarget != null) launchOperation {
+                updateDraft(it.text)
+                append("assistant", "旧请求未保存本次绑定的课程目标。请核对原请求并重新选择目标，本次未更改数据。", "error",
+                    state.copy(retryRequest = null, requestRunning = false))
+            } else sendRequest(it, it.boundTarget)
         }
     }
 
@@ -348,11 +349,18 @@ internal class CourseAssistantViewModel @JvmOverloads constructor(application: A
         ensureConversation(semester)
         require(state.pending == expectedPending) { "待确认方案已在其他页面变化，请重新补充。" }
         val completed = state.copy(retryRequest = null, requestRunning = false)
+        if (reply.cancelPending) {
+            require((state.pending != null || state.targetChoice != null) && !reply.requiresConfirmation && !reply.undo && reply.query == null && reply.studyQuery == null &&
+                reply.queriedCourses.isEmpty() && !reply.queryRequested && reply.targetCandidates == null)
+            append("assistant", "已取消${if (state.pending != null) "待确认方案" else "待选课程目标"}，没有更改已保存的课程或事项。", "cancel",
+                completed.copy(pending = null, targetChoice = null, selectedTarget = null))
+            return
+        }
         if (!reply.studyChanges.isNullOrEmpty() || reply.studyQuery != null) {
             require(reply.courses.isEmpty() && reply.updates.isEmpty() && reply.deletions.isEmpty() && !reply.undo &&
                 reply.query == null && reply.queriedCourses.isEmpty() && !reply.queryRequested && reply.targetCandidates == null)
             if (reply.studyQuery != null) {
-                require(state.pending == null && reply.studyChanges.isNullOrEmpty()) { "请先确认或取消原方案。" }
+                require(reply.studyChanges.isNullOrEmpty())
                 val found = AssistantStudyProtocol.query(reply.studyQuery, database.studyTaskDao().forSemester(semester.id), today)
                 val scope = when (reply.studyQuery.window) {
                     "week" -> {
@@ -368,7 +376,7 @@ internal class CourseAssistantViewModel @JvmOverloads constructor(application: A
                 append("assistant", "日期基准：$today\n学习事项：$scope · $status\n" +
                     if (found.isEmpty()) "没有符合条件的学习事项。" else "找到${found.size}项：\n\n" +
                         found.take(200).joinToString("\n\n") { "事项 #${it.id}\n${StudyTaskRules.describe(it)}" } +
-                        if (found.size > 200) "\n仅显示前200项，请缩小查询范围。" else "", "result", completed)
+                        if (found.size > 200) "\n仅显示前200项，请缩小查询范围。" else "", "task_query", completed)
                 return
             }
             val changes = reply.studyChanges!!
@@ -385,7 +393,9 @@ internal class CourseAssistantViewModel @JvmOverloads constructor(application: A
                 "confirmation", completed.copy(pending = AssistantPendingOperation(semester, pendingReply), targetChoice = null, selectedTarget = null))
             return
         }
-        if (state.pending != null) {
+        val courseQuery = reply.query != null || reply.queryRequested || reply.queriedCourses.isNotEmpty()
+        if (courseQuery) require(!reply.requiresConfirmation && !reply.undo && !reply.revisedPending && reply.targetCandidates == null)
+        if (state.pending != null && !courseQuery) {
             require(reply.revisedPending || (!reply.requiresConfirmation && !reply.undo && reply.query == null &&
                 !reply.queryRequested && reply.queriedCourses.isEmpty())) { "请先确认或取消原方案，补充消息只能修正原方案。" }
             if (reply.revisedPending) {
@@ -448,7 +458,7 @@ internal class CourseAssistantViewModel @JvmOverloads constructor(application: A
                         "指定范围内的空闲节次：\n" + free.joinToString("\n") { section ->
                             "第${section}节 ${schedule.sectionTimes.getOrNull(section - 1).orEmpty()}–${schedule.sectionEndTimes.getOrNull(section - 1).orEmpty()}"
                         }
-                    append("assistant", "日期基准：$today\n在「${semester.name}」查询：$scope\n$summary", "result", completed)
+                    append("assistant", "日期基准：$today\n在「${semester.name}」查询：$scope\n$summary", "query_text", completed)
                 } else {
                     val found = AssistantScheduleOperations.query(query, latest, semester, displayedWeek, today)
                     appendQuery("日期基准：$today\n查询范围：$scope\n" + querySummary(found, semester), found,
@@ -485,7 +495,7 @@ internal class CourseAssistantViewModel @JvmOverloads constructor(application: A
         if (busy.value == true || (state.pending == null && state.targetChoice == null)) return
         launchOperation {
             append("assistant", "已取消待执行操作，本次没有更改课表或学习事项。", "cancel",
-                state.copy(pending = null, retryRequest = null, requestRunning = false, targetChoice = null))
+                state.copy(pending = null, retryRequest = null, requestRunning = false, targetChoice = null, selectedTarget = null))
         }
     }
 
@@ -772,14 +782,17 @@ internal class CourseAssistantViewModel @JvmOverloads constructor(application: A
         val windowCount = if (end == null) count else conversations.messageCountEndingAt(id, end)
         hasOlderMessages.value = windowCount > messageLimit
         hasNewerMessages.value = windowCount < count
-        messages.value = (if (end == null) conversations.messages(id, messageLimit) else
+        val visible = (if (end == null) conversations.messages(id, messageLimit) else
             conversations.messagesEndingAt(id, end, messageLimit)).asReversed().map { it.toMessage() }
+        val latest = if (end == null) visible else conversations.messages(id, 60).asReversed().map { it.toMessage() }
+        latestReminderSource = AssistantLocalReminder.followUpSource(latest)
+        messages.value = visible
     }
 
     private fun AssistantChatMessage.toMessage() = AssistantHistorySearch.message(this)
 
     private suspend fun appendQuery(text: String, found: List<Course>, next: AssistantConversationState) {
-        if (found.isEmpty()) append("assistant", text, "result", next) else
+        if (found.isEmpty()) append("assistant", text, "query_text", next) else
             append("assistant", AssistantQueryMessage.encode(text, found.take(200).map { it.id }), "query", next)
     }
 
@@ -842,7 +855,7 @@ internal class CourseAssistantViewModel @JvmOverloads constructor(application: A
                         pending = if (clearPendingOnFailure) null else state.pending)
                     try {
                         append("assistant", if (error is IllegalArgumentException) error.message.orEmpty()
-                            else "本次操作未完成，请稍后重试。", "error", failed)
+                            else "本次操作未完成，请稍后重试。", if (retryable && error is AssistantAgentFailure) "reply_error" else "error", failed)
                     } catch (_: Exception) {
                         messages.value = messages.value.orEmpty() + AssistantMessage("assistant", "本地记录保存失败，请重新打开助手检查结果。")
                     }

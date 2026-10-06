@@ -1,6 +1,7 @@
 package com.courseschedule.ui.assistant
 
 import android.content.Intent
+import androidx.appcompat.app.AppCompatDelegate
 import android.graphics.Bitmap
 import android.widget.NumberPicker
 import androidx.lifecycle.Observer
@@ -42,12 +43,18 @@ class StudyUiRedesignTest {
         val semester = Semester(name = "2026 秋季学期", startDate = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli(), totalWeeks = 20)
             .let { it.copy(id = database.semesterDao().insertSemester(it)) }
         database.semesterDao().switchCurrentSemester(semester.id)
+        val previousTheme = AppCompatDelegate.getDefaultNightMode()
+        val proofTheme = InstrumentationRegistry.getArguments().getString("themeMode")
+        if (proofTheme != null) instrumentation.runOnMainSync {
+            AppCompatDelegate.setDefaultNightMode(if (proofTheme == "dark") AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO)
+        }
         try { block(semester) } finally {
             database.studyTaskDao().forSemester(semester.id).forEach { ReminderManager(context).cancelStudyReminder(it.id) }
             database.courseDao().deleteCoursesBySemester(semester.id)
             database.semesterDao().deleteSemester(semester)
             old?.let { database.semesterDao().switchCurrentSemester(it.id) }
             ReminderManager(context).restoreReminders()
+            if (proofTheme != null) instrumentation.runOnMainSync { AppCompatDelegate.setDefaultNightMode(previousTheme) }
         }
     }
 

@@ -1,7 +1,9 @@
 package com.courseschedule.ui.settings
 
 import android.app.DatePickerDialog
+import android.animation.ValueAnimator
 import android.graphics.Rect
+import android.graphics.Color
 import android.os.Build
 import android.provider.Settings
 import android.util.Log
@@ -15,9 +17,14 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
+import android.os.Parcelable
+import android.util.SparseArray
+import android.content.res.ColorStateList
 import android.text.InputType
 import android.view.View
 import android.view.ViewGroup
+import android.view.MotionEvent
+import android.view.KeyEvent
 import android.view.animation.PathInterpolator
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
@@ -28,6 +35,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.doOnPreDraw
+import androidx.core.graphics.ColorUtils
+import androidx.core.content.ContextCompat
+import androidx.core.view.WindowInsetsControllerCompat
+import android.graphics.drawable.ColorDrawable
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.courseschedule.ui.assistant.StudyTasksActivity
@@ -49,6 +60,7 @@ import com.courseschedule.ui.installPressScale
 import com.courseschedule.ui.playNavigationMotion
 import com.courseschedule.ui.selectItemWithoutAnimation
 import com.courseschedule.ui.stabilizeActiveIndicatorSize
+import com.courseschedule.ui.installPrimaryNavigationGlass
 import com.courseschedule.ui.importdata.ImportActivity
 import com.courseschedule.utils.ReminderManager
 import com.courseschedule.utils.SchedulePreferences
@@ -69,12 +81,17 @@ import java.util.Locale
 class SettingsActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivitySettingsBinding
+    private lateinit var settingsEntrance: SettingsEntranceMotion
     private lateinit var semesterViewModel: SemesterViewModel
     private lateinit var courseViewModel: CourseViewModel
     private lateinit var preferences: SchedulePreferences
     private var semesters: List<Semester> = emptyList()
     private var reminderStatusJob: Job? = null
     private var suppressBottomNavigationMotion = false
+    private val themeTransition = ThemeSwitchTransition()
+    private lateinit var themeIcon: ThemeSwitchIcon
+    private var pendingThemeChange: Runnable? = null
+    private var boundNightMode = false
     private val motionInterpolator = PathInterpolator(0.22f, 1f, 0.36f, 1f)
 
     private val sectionHeightValues = intArrayOf(56, 64, 72, 84)
@@ -87,15 +104,21 @@ class SettingsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         onBackPressedDispatcher.addCallback(this) {
+            settingsEntrance.settle()
             if (intent.getBooleanExtra(EXTRA_FOCUS_REMINDERS, false)) finish() else returnToSchedule(ScheduleReturnSource.SETTINGS)
         }
         binding = ActivitySettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        installNavigationGlass()
+        settingsEntrance = SettingsEntranceMotion(binding)
 
         setSupportActionBar(binding.toolbar)
         semesterViewModel = ViewModelProvider(this)[SemesterViewModel::class.java]
         courseViewModel = ViewModelProvider(this)[CourseViewModel::class.java]
         preferences = SchedulePreferences(this)
+        boundNightMode = isDarkTheme()
+        themeIcon = ThemeSwitchIcon(this, preferences.darkModeOverride ?: boundNightMode)
+        binding.switchDarkMode.thumbIconDrawable = themeIcon
 
         initSettingsControls()
         if (intent.getBooleanExtra(EXTRA_FOCUS_REMINDERS, false)) binding.rowReminder.doOnPreDraw {
@@ -104,14 +127,17 @@ class SettingsActivity : AppCompatActivity() {
         initActions()
         initBottomNavigation()
         observeData()
-        animateSettingsEntrance()
+        if (savedInstanceState == null && !intent.getBooleanExtra(EXTRA_FOCUS_REMINDERS, false)) {
+            settingsEntrance.enter()
+        }
     }
 
     private fun initSettingsControls() {
         binding.reminderDiagnostics.visibility = if (BuildConfig.DEBUG) View.VISIBLE else View.GONE
         val systemIsDark = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK ==
             Configuration.UI_MODE_NIGHT_YES
-        binding.switchDarkMode.isChecked = preferences.darkModeOverride ?: systemIsDark
+        val checked = preferences.darkModeOverride ?: systemIsDark
+        if (binding.switchDarkMode.isChecked != checked) binding.switchDarkMode.isChecked = checked
         binding.switchShowWeekend.isChecked = preferences.showWeekend
         binding.switchShowInactiveCourses.isChecked = preferences.showInactiveCourses
         binding.switchShowTime.isChecked = preferences.showTime
@@ -132,6 +158,7 @@ class SettingsActivity : AppCompatActivity() {
         updateSectionTimesSummary()
         updateWeekMotionSummary()
         binding.rowWeekMotion.setOnClickListener {
+            settingsEntrance.settle()
             val choices = WeekMotionStyle.entries
             MaterialAlertDialogBuilder(this)
                 .setTitle(R.string.week_motion_title)
@@ -162,21 +189,33 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         binding.switchDarkMode.setOnCheckedChangeListener { _, checked ->
+            settingsEntrance.settle()
+            themeTransition.capture(binding.root, binding.switchDarkMode, window)
             preferences.darkModeOverride = checked
-            AppCompatDelegate.setDefaultNightMode(
-                if (checked) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
-            )
+            themeIcon.animateTo(checked)
+            pendingThemeChange?.let(window.decorView::removeCallbacks)
+            pendingThemeChange = Runnable {
+                pendingThemeChange = null
+                // Keep background activities from rebuilding during the visible handoff.
+                val alreadyApplied = boundNightMode == checked
+                delegate.localNightMode = if (checked) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
+                if (alreadyApplied) { themeTransition.finish(); commitThemeToOtherPages() }
+            }.also { window.decorView.post(it) }
         }
         binding.switchShowWeekend.setOnCheckedChangeListener { _, checked ->
+            settingsEntrance.settle()
             preferences.showWeekend = checked
         }
         binding.switchShowInactiveCourses.setOnCheckedChangeListener { _, checked ->
+            settingsEntrance.settle()
             preferences.showInactiveCourses = checked
         }
         binding.switchShowTime.setOnCheckedChangeListener { _, checked ->
+            settingsEntrance.settle()
             preferences.showTime = checked
         }
         binding.switchReminder.setOnCheckedChangeListener { _, checked ->
+            settingsEntrance.settle()
             preferences.reminderEnabled = checked
             updateReminderControlState(checked, animate = true)
             refreshReminderStatus()
@@ -220,11 +259,13 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun updateReminderControlState(enabled: Boolean, animate: Boolean) {
+        binding.spinnerDefaultReminder.animate().cancel()
+        binding.cardSectionTimes.animate().cancel()
         binding.spinnerDefaultReminder.isEnabled = enabled
         binding.cardSectionTimes.isEnabled = enabled
         val spinnerAlpha = if (enabled) 1f else 0.45f
         val sectionTimesAlpha = if (enabled) 1f else 0.55f
-        if (animate) {
+        if (animate && ValueAnimator.areAnimatorsEnabled()) {
             binding.spinnerDefaultReminder.animate()
                 .alpha(spinnerAlpha)
                 .setDuration(220L)
@@ -327,19 +368,21 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun initActions() {
-        binding.cardOpenSource.setOnClickListener { openProjectRepository() }
+        binding.cardOpenSource.setOnClickListener { settingsEntrance.settle(); openProjectRepository() }
         binding.cardOpenSource.setOnLongClickListener {
+            settingsEntrance.settle()
             copyProjectAddress()
             true
         }
-        binding.cardSemester.setOnClickListener { showSemesterManager() }
-        binding.cardSectionTimes.setOnClickListener { showSectionTimesDialog() }
-        binding.cardExport.setOnClickListener { exportData() }
+        binding.cardSemester.setOnClickListener { settingsEntrance.settle(); showSemesterManager() }
+        binding.cardSectionTimes.setOnClickListener { settingsEntrance.settle(); showSectionTimesDialog() }
+        binding.cardExport.setOnClickListener { settingsEntrance.settle(); exportData() }
         binding.cardBackup.setOnClickListener {
+            settingsEntrance.settle()
             startActivity(Intent(this, ImportActivity::class.java))
             overridePendingTransition(0, 0)
         }
-        binding.cardAbout.setOnClickListener { showAboutDialog() }
+        binding.cardAbout.setOnClickListener { settingsEntrance.settle(); showAboutDialog() }
 
         listOf(
             binding.cardOpenSource,
@@ -357,11 +400,12 @@ class SettingsActivity : AppCompatActivity() {
         ).forEach { it.installPressScale() }
     }
 
-    private fun initBottomNavigation() {
+    private fun initBottomNavigation(animate: Boolean = true) {
         binding.bottomNavigation.stabilizeActiveIndicatorSize()
         binding.bottomNavigation.selectItemWithoutAnimation(R.id.nav_settings)
         binding.bottomNavigation.setOnItemSelectedListener { item ->
             if (suppressBottomNavigationMotion) return@setOnItemSelectedListener true
+            settingsEntrance.settle()
             val itemView = binding.bottomNavigation.findViewById<View>(item.itemId)
             when (item.itemId) {
                 R.id.nav_home -> {
@@ -390,40 +434,88 @@ class SettingsActivity : AppCompatActivity() {
             }
         }
         binding.bottomNavigation.setOnItemReselectedListener { item ->
+            settingsEntrance.settle()
             binding.bottomNavigation.findViewById<View>(item.itemId)?.playNavigationMotion()
         }
-        binding.bottomNavigation.post {
+        if (animate) binding.bottomNavigation.post {
             binding.bottomNavigation.findViewById<View>(R.id.nav_settings)?.playNavigationMotion()
-        }
-    }
-
-    private fun animateSettingsEntrance() {
-        val container = binding.settingsContent
-        val children = List(container.childCount, container::getChildAt)
-        children.forEach { child ->
-            child.alpha = 0.18f
-            child.translationX = dp(32).toFloat()
-        }
-        container.doOnPreDraw {
-            children.forEachIndexed { index, child ->
-                child.animate()
-                    .alpha(1f)
-                    .translationX(0f)
-                    .setStartDelay(index * 56L)
-                    .setDuration(620L)
-                    .setInterpolator(motionInterpolator)
-                    .withLayer()
-                    .start()
-            }
         }
     }
 
     private fun observeData() {
         semesterViewModel.currentSemester.observe(this) { semester ->
-            binding.tvCurrentSemester.text = semester?.name ?: getString(R.string.no_current_semester)
-            binding.tvSemesterStatus.text = semester?.let { semesterStatusText(it) }.orEmpty()
+            showCurrentSemester(semester)
         }
         semesterViewModel.allSemesters.observe(this) { semesters = it }
+    }
+
+    private fun showCurrentSemester(semester: Semester?) {
+        binding.tvCurrentSemester.text = semester?.name ?: getString(R.string.no_current_semester)
+        binding.tvSemesterStatus.text = semester?.let(::semesterStatusText).orEmpty()
+    }
+
+    private fun isDarkTheme() = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
+
+    private fun installNavigationGlass() = installPrimaryNavigationGlass(binding.root,
+        binding.navigationGlass, binding.bottomNavigation, binding.settingsScroll, binding.settingsScroll)
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        if (!::binding.isInitialized || boundNightMode == isDarkTheme()) return
+        boundNightMode = isDarkTheme()
+        settingsEntrance.settle()
+        val state = SparseArray<Parcelable>()
+        binding.root.saveHierarchyState(state)
+        val control = binding.switchDarkMode
+        val oldTints = listOf(control.thumbTintList, control.trackTintList, control.thumbIconTintList)
+        control.setOnCheckedChangeListener(null)
+        (control.parent as ViewGroup).removeView(control)
+        val next = ActivitySettingsBinding.inflate(layoutInflater)
+        val placeholder = next.switchDarkMode
+        val newTints = listOf(placeholder.thumbTintList, placeholder.trackTintList, placeholder.thumbIconTintList)
+        val parent = placeholder.parent as ViewGroup
+        val index = parent.indexOfChild(placeholder)
+        val params = placeholder.layoutParams
+        parent.removeView(placeholder)
+        parent.addView(control, index, params)
+        binding = ActivitySettingsBinding.bind(next.root)
+        setContentView(binding.root)
+        installNavigationGlass()
+        setSupportActionBar(binding.toolbar)
+        settingsEntrance = SettingsEntranceMotion(binding)
+        initSettingsControls()
+        initActions()
+        initBottomNavigation(animate = false)
+        showCurrentSemester(semesterViewModel.currentSemester.value)
+        binding.root.restoreHierarchyState(state)
+        refreshReminderStatus()
+        themeIcon.animateTo(control.isChecked)
+        window.setBackgroundDrawable(ColorDrawable(ContextCompat.getColor(this, R.color.background)))
+        window.statusBarColor = ContextCompat.getColor(this, R.color.background)
+        window.navigationBarColor = Color.TRANSPARENT
+        WindowInsetsControllerCompat(window, window.decorView).apply {
+            isAppearanceLightStatusBars = resources.getBoolean(R.bool.window_light_system_bars)
+            isAppearanceLightNavigationBars = isAppearanceLightStatusBars
+        }
+        val states = arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf(-android.R.attr.state_checked))
+        themeTransition.reveal(binding.root, control, window, ::commitThemeToOtherPages) { progress ->
+            fun tint(index: Int): ColorStateList? {
+                val target = newTints[index] ?: return null
+                val from = oldTints[index] ?: target
+                return ColorStateList(states, states.map { value ->
+                    ColorUtils.blendARGB(from.getColorForState(value, from.defaultColor),
+                        target.getColorForState(value, target.defaultColor), progress)
+                }.toIntArray())
+            }
+            control.thumbTintList = tint(0)
+            control.trackTintList = tint(1)
+            control.thumbIconTintList = tint(2)
+        }
+    }
+
+    private fun commitThemeToOtherPages() {
+        val dark = preferences.darkModeOverride ?: return
+        AppCompatDelegate.setDefaultNightMode(if (dark) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO)
     }
 
     private fun semesterStatusText(semester: Semester): String {
@@ -766,5 +858,34 @@ class SettingsActivity : AppCompatActivity() {
             binding.bottomNavigation.selectItemWithoutAnimation(R.id.nav_settings)
             suppressBottomNavigationMotion = false
         }
+    }
+
+    override fun dispatchTouchEvent(event: MotionEvent): Boolean {
+        if (event.actionMasked == MotionEvent.ACTION_DOWN && ::settingsEntrance.isInitialized) settingsEntrance.settle()
+        return super.dispatchTouchEvent(event)
+    }
+
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        if (event.action == KeyEvent.ACTION_DOWN && ::settingsEntrance.isInitialized) settingsEntrance.settle()
+        return super.dispatchKeyEvent(event)
+    }
+
+    override fun onPause() {
+        pendingThemeChange?.let { window.decorView.removeCallbacks(it); it.run() }
+        themeTransition.finish()
+        themeIcon.settle(binding.switchDarkMode.isChecked)
+        commitThemeToOtherPages()
+        settingsEntrance.settle()
+        updateReminderControlState(preferences.reminderEnabled, animate = false)
+        super.onPause()
+    }
+
+    override fun onDestroy() {
+        pendingThemeChange?.let(window.decorView::removeCallbacks)
+        pendingThemeChange = null
+        themeTransition.finish()
+        themeIcon.settle(binding.switchDarkMode.isChecked)
+        settingsEntrance.settle()
+        super.onDestroy()
     }
 }

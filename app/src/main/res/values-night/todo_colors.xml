@@ -1,0 +1,16 @@
+<resources>
+    <color name="task_page_background">#000000</color>
+    <color name="task_fade_clear">#00000000</color>
+    <color name="task_paper">#151515</color>
+    <color name="task_text">#F3F4F6</color>
+    <color name="task_secondary">#A7AFBB</color>
+    <color name="task_divider">#26282B</color>
+    <color name="task_filter_track">#1D2026</color>
+    <color name="task_filter_selected">#87B7FF</color>
+    <color name="task_filter_ink">#10223B</color>
+    <color name="task_search_surface">#15181E</color>
+    <color name="task_action">#F2F4F7</color>
+    <color name="task_on_action">#15171A</color>
+    <color name="task_success">#72D9C3</color>
+    <color name="task_success_surface">#15362D</color>
+</resources>

@@ -31,6 +31,7 @@ import com.courseschedule.ui.installPressScale
 import com.courseschedule.ui.playNavigationMotion
 import com.courseschedule.ui.selectItemWithoutAnimation
 import com.courseschedule.ui.stabilizeActiveIndicatorSize
+import com.courseschedule.ui.installPrimaryNavigationGlass
 import com.courseschedule.ui.settings.SettingsActivity
 import com.courseschedule.utils.ReminderManager
 import com.courseschedule.utils.SchedulePreferences
@@ -50,6 +51,7 @@ import com.courseschedule.data.entity.StudyTask
 class ImportActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityImportBinding
+    private lateinit var importEntrance: ImportEntranceMotion
     private lateinit var courseViewModel: CourseViewModel
     private lateinit var semesterViewModel: SemesterViewModel
     private val motionInterpolator = PathInterpolator(0.2f, 0.85f, 0.25f, 1f)
@@ -106,12 +108,20 @@ class ImportActivity : AppCompatActivity() {
         onBackPressedDispatcher.addCallback(this) { returnToSchedule(ScheduleReturnSource.IMPORT) }
         binding = ActivityImportBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        installPrimaryNavigationGlass(binding.root, binding.navigationGlass, binding.bottomNavigation,
+            binding.importScroll, binding.importScroll)
+        importEntrance = ImportEntranceMotion(binding)
 
         setSupportActionBar(binding.toolbar)
         courseViewModel = ViewModelProvider(this)[CourseViewModel::class.java]
         semesterViewModel = ViewModelProvider(this)[SemesterViewModel::class.java]
+        binding.tvImportTarget.text = getString(
+            R.string.import_target_format,
+            courseViewModel.currentSemester.value?.name ?: getString(R.string.current_semester)
+        )
 
         binding.cardImportSchool.setOnClickListener {
+            importEntrance.settle()
             val totalWeeks = courseViewModel.currentSemester.value?.totalWeeks
             if (totalWeeks == null) {
                 Toast.makeText(this, R.string.semester_loading, Toast.LENGTH_SHORT).show()
@@ -119,9 +129,10 @@ class ImportActivity : AppCompatActivity() {
             }
             schoolPickerLauncher.launch(Intent(this, SchoolPickerActivity::class.java))
         }
-        binding.cardImportJson.setOnClickListener { openFilePicker() }
-        binding.cardImportText.setOnClickListener { showTextImportDialog() }
+        binding.cardImportJson.setOnClickListener { importEntrance.settle(); openFilePicker() }
+        binding.cardImportText.setOnClickListener { importEntrance.settle(); showTextImportDialog() }
         binding.cardImportAssistant.setOnClickListener {
+            importEntrance.settle()
             startActivity(Intent(this, CourseAssistantActivity::class.java)
                 .putExtra(CourseAssistantActivity.EXTRA_DISPLAYED_WEEK, courseViewModel.currentWeek.value ?: 1))
         }
@@ -143,6 +154,7 @@ class ImportActivity : AppCompatActivity() {
         binding.bottomNavigation.stabilizeActiveIndicatorSize()
         binding.bottomNavigation.selectItemWithoutAnimation(R.id.nav_import)
         binding.bottomNavigation.setOnItemSelectedListener { item ->
+            importEntrance.settle()
             val itemView = binding.bottomNavigation.findViewById<View>(item.itemId)
             when (item.itemId) {
                 R.id.nav_home -> {
@@ -171,6 +183,7 @@ class ImportActivity : AppCompatActivity() {
             }
         }
         binding.bottomNavigation.setOnItemReselectedListener { item ->
+            importEntrance.settle()
             binding.bottomNavigation.findViewById<View>(item.itemId)?.playNavigationMotion()
         }
         binding.bottomNavigation.post {
@@ -179,44 +192,17 @@ class ImportActivity : AppCompatActivity() {
     }
 
     private fun animateImportEntrance() {
-        val container = binding.importContent
-        val children = List(container.childCount, container::getChildAt)
-        children.forEach { child ->
-            child.alpha = 0.16f
-            child.translationY = dp(30f)
-            if (child === binding.cardImportSchool) {
-                child.scaleX = 0.9f
-                child.scaleY = 0.9f
-            }
-        }
-        binding.schoolIconContainer.apply {
-            scaleX = 0.2f
-            scaleY = 0.2f
-            rotation = -24f
-        }
-        container.doOnPreDraw {
-            children.forEachIndexed { index, child ->
-                child.animate()
-                    .alpha(1f)
-                    .translationY(0f)
-                    .scaleX(1f)
-                    .scaleY(1f)
-                    .setStartDelay(index * 50L)
-                    .setDuration(540L)
-                    .setInterpolator(motionInterpolator)
-                    .withLayer()
-                    .start()
-            }
-            binding.schoolIconContainer.animate()
-                .scaleX(1f)
-                .scaleY(1f)
-                .rotation(0f)
-                .setStartDelay(150L)
-                .setDuration(720L)
-                .setInterpolator(OvershootInterpolator(1.55f))
-                .withLayer()
-                .start()
-        }
+        importEntrance.enter()
+    }
+
+    override fun onPause() {
+        importEntrance.settle()
+        super.onPause()
+    }
+
+    override fun onDestroy() {
+        importEntrance.settle()
+        super.onDestroy()
     }
 
     private fun dp(value: Float): Float = value * resources.displayMetrics.density

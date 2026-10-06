@@ -2,6 +2,7 @@ package com.courseschedule.ui
 
 import android.animation.ValueAnimator
 import android.content.Intent
+import androidx.appcompat.app.AppCompatDelegate
 import android.graphics.Rect
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -59,11 +60,17 @@ class TodoNavigationMotionTest {
         val draft = Semester(name = "2026 秋季学期", startDate = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli(), totalWeeks = 20)
         val semester = draft.copy(id = database.semesterDao().insertSemester(draft))
         database.semesterDao().switchCurrentSemester(semester.id)
+        val previousTheme = AppCompatDelegate.getDefaultNightMode()
+        val proofTheme = InstrumentationRegistry.getArguments().getString("themeMode")
+        if (proofTheme != null) instrumentation.runOnMainSync {
+            AppCompatDelegate.setDefaultNightMode(if (proofTheme == "dark") AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO)
+        }
         try { block(semester) } finally {
             database.studyTaskDao().forSemester(semester.id).forEach { ReminderManager(context).cancelStudyReminder(it.id) }
             database.semesterDao().deleteSemester(semester)
             old?.let { database.semesterDao().switchCurrentSemester(it.id) }
             ReminderManager(context).restoreReminders()
+            if (proofTheme != null) instrumentation.runOnMainSync { AppCompatDelegate.setDefaultNightMode(previousTheme) }
         }
     }
 
@@ -120,8 +127,7 @@ class TodoNavigationMotionTest {
                     val empty = activity.findViewById<View>(R.id.taskEmpty)
                     val count = activity.findViewById<TextView>(R.id.btnTasksPending)
                     val completed = activity.findViewById<TextView>(R.id.btnTasksCompleted)
-                    val layers = listOf(R.id.taskHeader, R.id.btnTasksToday, R.id.btnTasksUpcoming,
-                        R.id.btnTasksPending, R.id.taskSearch, R.id.taskListHeader).map { activity.findViewById<View>(it) } +
+                    val layers = listOf(R.id.taskHeader, R.id.taskFilters, R.id.taskSearch, R.id.taskListHeader).map { activity.findViewById<View>(it) } +
                         if (expectEmpty) empty else rows
                     val nav = activity.findViewById<BottomNavigationView>(R.id.bottomNavigation)
                     var navigationGeometry = emptyList<Int>()
@@ -209,19 +215,19 @@ class TodoNavigationMotionTest {
                     assertEquals(5, frames.size)
                     assertTrue("Every destination must have actual drawn frames", frames.all { it > 0 })
                     motionFrames.forEachIndexed { page, samples ->
-                        assertEquals("Every layer must settle on page $page", List(7) { listOf(1f, 0f) }.flatten(), samples.last())
+                        assertEquals("Every layer must settle on page $page", List(5) { listOf(1f, 0f) }.flatten(), samples.last())
+                        assertTrue("The title must stay readable throughout entry", samples.all { it[0] == 1f && it[1] == 0f })
                         if (ValueAnimator.areAnimatorsEnabled()) {
-                            for (index in 0 until 7) {
+                            for (index in 1 until 5) {
                                 assertTrue("Layer $index must visibly move on page $page", samples.maxOf { it[index * 2 + 1] } - samples.minOf { it[index * 2 + 1] } > 1f)
                                 assertTrue("Layer $index must visibly appear on page $page", samples.maxOf { it[index * 2] } - samples.minOf { it[index * 2] } > 0.03f)
                             }
-                            val cardStarts = (1..3).map { index -> samples.indexOfFirst { it[index * 2 + 1] < samples.first()[index * 2 + 1] - 0.1f } }
-                            assertTrue("Overview cards must enter in reading order", cardStarts.zipWithNext().all { (left, right) -> left <= right })
+                            assertTrue("Grouped entry must remain subtle", samples.all { sample -> (1 until 5).all { sample[it * 2 + 1] <= 8.01f } })
                         } else {
-                            assertTrue("Reduced motion must show the settled state immediately", samples.all { it == List(7) { listOf(1f, 0f) }.flatten() })
+                            assertTrue("Reduced motion must show the settled state immediately", samples.all { it == List(5) { listOf(1f, 0f) }.flatten() })
                         }
                     }
-                    proof("todo-first-draw", mapOf("drawnFramesPerPage" to frames, "layers" to listOf("header", "today", "upcoming", "all", "search", "list header", "results"),
+                    proof("todo-first-draw", mapOf("drawnFramesPerPage" to frames, "layers" to listOf("header", "filters", "search", "list header", "results"),
                         "opacityAndOffsetDp" to motionFrames, "failures" to failures))
                     assertTrue(failures.take(6).joinToString(), failures.isEmpty())
                 }
@@ -242,8 +248,7 @@ class TodoNavigationMotionTest {
                 val finished = CountDownLatch(1)
                 val failures = mutableListOf<String>()
                 scenario.onActivity { activity ->
-                    val layers = listOf(R.id.taskHeader, R.id.tvTaskReminderStatus, R.id.btnTasksToday, R.id.btnTasksUpcoming,
-                        R.id.btnTasksPending, R.id.taskSearch, R.id.taskListHeader).map { activity.findViewById<View>(it) }
+                    val layers = listOf(R.id.taskHeader, R.id.tvTaskReminderStatus, R.id.taskFilters, R.id.taskSearch, R.id.taskListHeader).map { activity.findViewById<View>(it) }
                     fun checkSettled(reason: String) {
                         if (layers.any { it.alpha != 1f || it.translationY != 0f }) failures += reason
                     }

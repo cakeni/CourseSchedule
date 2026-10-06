@@ -27,6 +27,6 @@ internal object AssistantQueryMessage {
             it.asBigDecimal.longValueExact()
         }
         require(ids.size in 1..200 && ids.all { it > 0 } && ids.distinct() == ids)
-        return AssistantMessage("assistant", text.asString, "result", createdAt, ids)
+        return AssistantMessage("assistant", text.asString, "query", createdAt, ids)
     }
 }
