@@ -36,6 +36,7 @@ import com.courseschedule.ui.returnToSchedule
 import com.courseschedule.ui.ScheduleReturnSource
 import com.courseschedule.ui.selectItemWithoutAnimation
 import com.courseschedule.ui.stabilizeActiveIndicatorSize
+import com.courseschedule.ui.installPrimaryNavigationGlass
 import com.courseschedule.ui.settings.SettingsActivity
 import com.courseschedule.utils.AlarmReceiver
 import com.courseschedule.utils.ReminderManager
@@ -55,17 +56,19 @@ class StudyTasksActivity : AppCompatActivity() {
     private var pageEntrance: AnimatorSet? = null
     private var rowCompletion: Animator? = null
     private var selectedFilter = R.id.btnTasksPending
+    private lateinit var filterIndicator: TaskFilterIndicator
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityStudyTasksBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        window.statusBarColor = ContextCompat.getColor(this, R.color.study_background)
-        window.navigationBarColor = ContextCompat.getColor(this, R.color.study_background)
+        window.statusBarColor = ContextCompat.getColor(this, R.color.task_page_background)
         WindowInsetsControllerCompat(window, binding.root).apply {
             isAppearanceLightStatusBars = resources.getBoolean(R.bool.window_light_system_bars)
             isAppearanceLightNavigationBars = resources.getBoolean(R.bool.window_light_system_bars)
         }
+        installPrimaryNavigationGlass(binding.root, binding.navigationGlass, binding.bottomNavigation,
+            binding.taskViewport, binding.taskScroll, binding.btnAddTask)
         val primaryPage = intent.getBooleanExtra(EXTRA_PRIMARY_PAGE, false)
         binding.btnStudyBack.visibility = if (primaryPage) View.GONE else View.VISIBLE
         binding.btnStudyBack.setOnClickListener { finish() }
@@ -74,12 +77,13 @@ class StudyTasksActivity : AppCompatActivity() {
         initNavigation()
         binding.btnAddTask.setOnClickListener { edit(null) }
         selectedFilter = savedInstanceState?.getInt("filter", R.id.btnTasksPending) ?: R.id.btnTasksPending
+        filterIndicator = TaskFilterIndicator(binding.taskFilters, listOf(binding.btnTasksToday, binding.btnTasksUpcoming, binding.btnTasksPending))
         listOf(binding.btnTasksToday, binding.btnTasksPending, binding.btnTasksUpcoming, binding.btnTasksCompleted).forEach { button ->
             button.installPressScale(0.985f)
             button.setOnClickListener {
                 val next = if (button.id == R.id.btnTasksCompleted && selectedFilter == button.id) R.id.btnTasksPending else button.id
                 val changed = next != selectedFilter
-                selectedFilter = next; render()
+                selectedFilter = next; render(animateFilter = changed)
                 if (changed) StudyMotion.appear(if (binding.taskEmpty.visibility == View.VISIBLE) binding.taskEmpty else binding.taskRows)
             }
         }
@@ -132,6 +136,7 @@ class StudyTasksActivity : AppCompatActivity() {
 
     override fun onPause() {
         finishEntrance()
+        filterIndicator.settle()
         rowCompletion?.end()
         rowCompletion = null
         super.onPause()
@@ -142,7 +147,7 @@ class StudyTasksActivity : AppCompatActivity() {
         pageEntrance = null
     }
 
-    private fun render() {
+    private fun render(animateFilter: Boolean = false) {
         if (!::binding.isInitialized) return
         finishEntrance()
         val now = System.currentTimeMillis()
@@ -153,14 +158,15 @@ class StudyTasksActivity : AppCompatActivity() {
         val todayCount = pending.count { it.dueAt < tomorrow }
         val upcomingCount = pending.count { it.dueAt >= now && it.dueAt < end }
         val completedCount = tasks.count { it.completedAt != null }
+        binding.tvTaskCount.text = "${pending.size} 项待完成"
         tile(binding.btnTasksToday, todayCount, getString(R.string.study_today))
         tile(binding.btnTasksUpcoming, upcomingCount, getString(R.string.study_upcoming))
         tile(binding.btnTasksPending, pending.size, getString(R.string.study_all))
         binding.btnTasksCompleted.text = getString(R.string.study_completed_count, completedCount)
         listOf(binding.btnTasksToday, binding.btnTasksPending, binding.btnTasksUpcoming, binding.btnTasksCompleted).forEach { it.isChecked = it.id == selectedFilter }
-        styleTile(binding.btnTasksToday, R.color.study_today, R.color.study_today_surface, R.color.study_today_selected)
-        styleTile(binding.btnTasksUpcoming, R.color.study_upcoming, R.color.study_upcoming_surface, R.color.study_upcoming_selected)
-        styleTile(binding.btnTasksPending, R.color.reference_blue_accent, R.color.study_all_surface, R.color.study_all_selected)
+        binding.btnTasksCompleted.setTextColor(ContextCompat.getColor(this,
+            if (selectedFilter == R.id.btnTasksCompleted) R.color.reference_blue_accent else R.color.task_secondary))
+        filterIndicator.select(listOf(binding.btnTasksToday, binding.btnTasksUpcoming, binding.btnTasksPending).find { it.id == selectedFilter }, animateFilter)
         binding.tvTaskListTitle.text = when (selectedFilter) {
             R.id.btnTasksToday -> "今天与逾期"
             R.id.btnTasksUpcoming -> "未来7天"
@@ -220,7 +226,7 @@ class StudyTasksActivity : AppCompatActivity() {
                 binding.taskRows.addView(TextView(this).apply {
                     text = "$label  ·  ${counts[label]}"
                     textSize = 13f
-                    setTextColor(ContextCompat.getColor(this@StudyTasksActivity, R.color.study_text_secondary))
+                    setTextColor(ContextCompat.getColor(this@StudyTasksActivity, R.color.task_secondary))
                     setPadding(dp(4), dp(16), 0, dp(8))
                 })
                 lastRow?.taskDivider?.visibility = View.GONE
@@ -243,7 +249,7 @@ class StudyTasksActivity : AppCompatActivity() {
                 else -> "M月d日 HH:mm"
             }))
             row.tvTaskDue.text = listOfNotNull(task.courseName.takeIf { it.isNotBlank() }, if (task.kind == "reminder") "$due 提醒" else "$due 截止").joinToString(" · ")
-            row.tvTaskDue.setTextColor(ContextCompat.getColor(this, if (task.completedAt == null && task.dueAt < now) R.color.study_today else R.color.study_text_secondary))
+            row.tvTaskDue.setTextColor(ContextCompat.getColor(this, if (task.completedAt == null && task.dueAt < now) R.color.study_danger else R.color.task_secondary))
             row.root.contentDescription = StudyTaskRules.describe(task)
             row.tvTaskTitle.alpha = if (task.completedAt == null) 1f else 0.55f
             val (kindSurface, kindInk) = when (task.kind) {
@@ -307,13 +313,6 @@ class StudyTasksActivity : AppCompatActivity() {
     private fun tile(button: com.google.android.material.button.MaterialButton, count: Int, label: String) {
         button.text = "$label  $count"
         button.contentDescription = "$label，$count 项"
-    }
-
-    private fun styleTile(button: com.google.android.material.button.MaterialButton, text: Int, surface: Int, selected: Int) {
-        button.setTextColor(ContextCompat.getColor(this, if (button.isChecked) R.color.study_on_accent else text))
-        button.backgroundTintList = android.content.res.ColorStateList.valueOf(ContextCompat.getColor(this,
-            if (button.isChecked) selected else surface))
-        button.strokeWidth = 0
     }
 
     private fun openReminderSettings() {

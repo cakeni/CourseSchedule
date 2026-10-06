@@ -1,15 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="course_focus_backdrop">#F3F4F5</color>
-    <color name="course_focus_background">#F5F5F5</color>
-    <color name="course_focus_paper">#EBFFFFFF</color>
+    <color name="course_focus_background">#F5F6F8</color>
+    <color name="course_focus_paper">#FFFFFF</color>
     <color name="course_focus_text">#202328</color>
-    <color name="course_focus_secondary">#4B5868</color>
+    <color name="course_focus_secondary">#536171</color>
+    <color name="course_focus_hint">#5B6878</color>
     <color name="course_focus_divider">#183C4654</color>
     <color name="course_focus_edge">#E1E4E8</color>
     <color name="course_focus_action">#202328</color>
     <color name="course_focus_action_text">#FFFFFF</color>
     <color name="course_focus_action_edge">#00000000</color>
+    <color name="course_focus_disabled_action">#E3E7ED</color>
+    <color name="course_focus_disabled_action_text">#536171</color>
 
     <string name="course_focus_heading">课程详情</string>
     <string name="course_focus_arrangement">课程安排</string>
@@ -24,8 +27,8 @@
     <string name="course_focus_teacher_hint">添加教师</string>
     <string name="course_focus_note_hint">添加备注</string>
     <string name="course_focus_weeks">上课周次</string>
-    <string name="course_focus_more">颜色与提醒</string>
-    <string name="course_focus_missing_teacher">课表中没有教师姓名，可直接在这里补充。</string>
+    <string name="course_focus_more">备注、颜色与提醒</string>
+    <string name="course_focus_missing_teacher">暂未填写，可点按补充</string>
     <string name="course_focus_unsaved">有未保存的修改</string>
     <string name="course_focus_keep">继续编辑</string>
     <string name="course_focus_discard">放弃修改</string>
@@ -43,7 +46,7 @@
         <item name="android:fontFamily">sans-serif-medium</item>
         <item name="android:includeFontPadding">false</item>
         <item name="android:textColor">@color/course_focus_text</item>
-        <item name="android:textColorHint">@color/course_focus_secondary</item>
+        <item name="android:textColorHint">@color/course_focus_hint</item>
         <item name="android:textSize">18sp</item>
         <item name="android:selectAllOnFocus">false</item>
     </style>

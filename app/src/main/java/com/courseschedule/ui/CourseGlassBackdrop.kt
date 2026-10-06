@@ -21,9 +21,9 @@ internal fun courseGlassBackdrop(activity: Activity): ImageView? {
     return ImageView(activity).apply {
         scaleType = ImageView.ScaleType.CENTER_CROP
         setImageBitmap(bitmap)
-        colorFilter = ColorMatrixColorFilter(ColorMatrix().apply { setSaturation(0f) })
+        colorFilter = ColorMatrixColorFilter(ColorMatrix().apply { setSaturation(.7f) })
         if (Build.VERSION.SDK_INT >= 31) {
-            val radius = 30f * resources.displayMetrics.density
+            val radius = 14f * resources.displayMetrics.density
             setRenderEffect(RenderEffect.createBlurEffect(radius, radius, Shader.TileMode.CLAMP))
         }
         importantForAccessibility = android.view.View.IMPORTANT_FOR_ACCESSIBILITY_NO

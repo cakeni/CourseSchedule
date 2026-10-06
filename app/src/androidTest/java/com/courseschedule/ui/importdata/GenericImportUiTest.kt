@@ -112,6 +112,31 @@ class GenericImportUiTest {
     }
 
     @Test fun schoolImportOpensSearchableDirectoryInsteadOfAskingForAWebsite() {
+        fun awaitSchoolResult() {
+            val instrumentation = InstrumentationRegistry.getInstrumentation()
+            val ready = CountDownLatch(1)
+            // The full directory also computes romanized aliases on first load.
+            val deadline = SystemClock.uptimeMillis() + 30000L
+            val observed = AtomicReference("no school page")
+            instrumentation.runOnMainSync {
+                fun check() {
+                    val activity = androidx.test.runner.lifecycle.ActivityLifecycleMonitorRegistry.getInstance()
+                        .getActivitiesInStage(androidx.test.runner.lifecycle.Stage.RESUMED)
+                        .filterIsInstance<SchoolPickerActivity>().firstOrNull()
+                    val list = activity?.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.schoolList)
+                    val countMatches = activity != null && list != null && activity.findViewById<TextView>(R.id.tvSchoolCount).text.toString() ==
+                        activity.getString(R.string.academic_school_search_count, list.adapter?.itemCount ?: 0)
+                    observed.set("activity=${activity?.javaClass?.simpleName}, count=${list?.adapter?.itemCount}, label=${activity?.findViewById<TextView>(R.id.tvSchoolCount)?.text}, pending=${list?.hasPendingAdapterUpdates()}, rows=" +
+                        (list?.let { (0 until it.childCount).map { index -> it.getChildAt(index).findViewById<TextView>(R.id.tvSchoolName)?.text?.toString() } }))
+                    if (list != null && countMatches && !list.hasPendingAdapterUpdates() && (0 until list.childCount).any {
+                            list.getChildAt(it).findViewById<TextView>(R.id.tvSchoolName)?.text?.toString() == "西南石油大学"
+                        }) ready.countDown()
+                    else if (SystemClock.uptimeMillis() < deadline) android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({ check() }, 16L)
+                }
+                check()
+            }
+            assertTrue("School search result did not finish updating: ${observed.get()}", ready.await(31, TimeUnit.SECONDS))
+        }
         ActivityScenario.launch(ImportActivity::class.java).use { scenario ->
             val ready = CountDownLatch(1)
             scenario.onActivity { activity ->
@@ -123,8 +148,10 @@ class GenericImportUiTest {
             onView(withId(R.id.cardImportSchool)).perform(click())
             onView(withId(R.id.etSchoolSearch)).check(matches(isDisplayed()))
                 .perform(replaceText("西南石油"), closeSoftKeyboard())
+            awaitSchoolResult()
             onView(withText("西南石油大学")).check(matches(isDisplayed()))
             onView(withId(R.id.etSchoolSearch)).perform(replaceText("xinan"), closeSoftKeyboard())
+            awaitSchoolResult()
             onView(withText("西南石油大学")).check(matches(isDisplayed()))
             onView(withId(R.id.btnRequestSchool)).check(matches(withText(R.string.academic_request_school)))
             onView(withText(R.string.academic_generic_url_hint)).check(doesNotExist())

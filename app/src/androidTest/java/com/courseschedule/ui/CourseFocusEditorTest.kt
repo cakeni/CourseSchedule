@@ -7,6 +7,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Rect
+import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
@@ -14,12 +15,15 @@ import android.os.SystemClock
 import android.view.View
 import android.view.MotionEvent
 import android.view.ViewGroup
+import android.view.WindowManager
+import android.view.InputDevice
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.NumberPicker
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.ViewCompat
+import androidx.core.graphics.ColorUtils
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.widget.NestedScrollView
 import androidx.lifecycle.ViewModelProvider
@@ -36,7 +40,6 @@ import com.courseschedule.utils.ReminderManager
 import com.courseschedule.utils.SchedulePreferences
 import com.courseschedule.view.CourseTableView
 import com.courseschedule.viewmodel.CourseViewModel
-import com.google.android.material.card.MaterialCardView
 import com.google.android.material.button.MaterialButton
 import kotlinx.coroutines.runBlocking
 import org.json.JSONArray
@@ -221,6 +224,8 @@ class CourseFocusEditorTest {
                 val sheet = dialog(activity)!!
                 text(sheet, R.id.tvDetailClassroom, "尚未保存的教室")
                 sheet.cancel()
+                assertEquals("A rejected close must keep its confirmation interactive", 0,
+                    sheet.window!!.attributes.flags and WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
                 assertEquals(View.VISIBLE, sheet.findViewById<View>(R.id.focusConfirmation)!!.visibility)
                 sheet.findViewById<View>(R.id.btnFocusKeep)!!.performClick()
                 assertEquals("尚未保存的教室", sheet.findViewById<EditText>(R.id.tvDetailClassroom)!!.text.toString())
@@ -281,8 +286,11 @@ class CourseFocusEditorTest {
                 val sheet = dialog(activity)!!
                 sheet.findViewById<RecyclerView>(R.id.focusColorChoices)!!.findViewHolderForAdapterPosition(2)!!.itemView.performClick()
                 val purple = surfacePixel(sheet)
+                val palette = activity.resources.obtainTypedArray(R.array.course_colors)
+                assertEquals(palette.getColor(2, 0), (sheet.findViewById<View>(R.id.detailCourseColor)!!.background as GradientDrawable).color!!.defaultColor)
+                palette.recycle()
                 if (!suffix.contains("dark")) {
-                    assertTrue("Day background must follow the purple course color", Color.blue(purple) - Color.red(purple) > 30 && Color.red(purple) > Color.green(purple))
+                    assertTrue("Changing course color must keep a bright readable surface", ColorUtils.calculateLuminance(purple) > .8)
                 }
                 sheet.findViewById<View>(R.id.btnFocusMore)!!.performClick()
                 sheet.findViewById<NestedScrollView>(R.id.courseDetailScroll)!!.scrollTo(0, 0)
@@ -298,11 +306,10 @@ class CourseFocusEditorTest {
                     .first { it.text.toString() == "提前10分钟" }.performClick()
                 val changedSurface = surfacePixel(sheet)
                 if (suffix.contains("dark")) {
-                    assertEquals("Night background must remain neutral after changing course color", initialSurface, changedSurface)
-                    assertTrue(maxOf(Color.red(changedSurface), Color.green(changedSurface), Color.blue(changedSurface)) <= 20)
+                    assertTrue("Night tint must retain the dark base", ColorUtils.calculateLuminance(changedSurface) < .025)
                 } else {
-                    assertNotEquals("Day details must follow the selected course color", initialSurface, changedSurface)
-                    assertTrue("Day background must follow the blue course color", Color.green(changedSurface) - Color.red(changedSurface) > 35 && Color.blue(changedSurface) - Color.green(changedSurface) > 25)
+                    assertNotEquals("Day details must retain a subtle connection to the selected color", initialSurface, changedSurface)
+                    assertTrue("Changing course color must preserve surface brightness", ColorUtils.calculateLuminance(changedSurface) > .74)
                 }
                 sheet.findViewById<View>(R.id.btnFocusMore)!!.performClick()
                 sheet.findViewById<NestedScrollView>(R.id.courseDetailScroll)!!.scrollTo(0, 0)
@@ -415,10 +422,9 @@ class CourseFocusEditorTest {
         }
     }
 
-    @Test fun h_detailsHaveASoftGradientAndClearBorderlessInformationCards() = fixture { _, original ->
+    @Test fun h_detailsUseClearAlignedInformationAndReadableActions() = fixture { _, original ->
         ActivityScenario.launch(MainActivity::class.java).use { scenario ->
-            open(scenario, original)
-            scenario.onActivity { activity ->
+            fun checkReadability(activity: MainActivity, empty: Boolean) {
                 val sheet = dialog(activity)!!
                 val content = sheet.findViewById<View>(R.id.courseDetailContent)!!
                 val stage = content.parent as ViewGroup
@@ -433,42 +439,208 @@ class CourseFocusEditorTest {
                     }
                 } finally { bitmap.recycle() }
                 val night = (activity.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
-                assertTrue("The tinted surface must retain subtle transparency", samples.all { Color.alpha(it) in 240..254 })
+                assertTrue("The information surface must remain visually stable", samples.all { Color.alpha(it) >= 240 })
                 val span = listOf(samples.maxOf(Color::red) - samples.minOf(Color::red),
                     samples.maxOf(Color::green) - samples.minOf(Color::green),
                     samples.maxOf(Color::blue) - samples.minOf(Color::blue)).maxOrNull()!!
-                assertTrue("The gradient must stay soft", span in if (night) 5..24 else 10..55)
+                assertTrue("The gradient must stay soft", span in 1..36)
                 if (night) {
-                    assertTrue("Night background must retain a neutral black base", samples.all { maxOf(Color.red(it), Color.green(it), Color.blue(it)) <= 20 && Color.red(it) == Color.green(it) && Color.green(it) == Color.blue(it) })
+                    assertTrue("Night tint must retain a dark base", samples.all { ColorUtils.calculateLuminance(it) < .025 })
                 } else {
-                    assertTrue("Day background must keep the original lime course hue", samples.all { Color.green(it) > Color.red(it) && Color.red(it) - Color.blue(it) > 40 })
+                    assertTrue("Course tint must not compete with the information", samples.all { ColorUtils.calculateLuminance(it) > .74 })
                 }
-                val expectedText = if (night) Color.rgb(243, 244, 246) else Color.rgb(32, 35, 40)
-                val titleColor = sheet.findViewById<TextView>(R.id.tvDetailTitle)!!.currentTextColor
-                assertEquals(expectedText, titleColor)
-                val cards = descendants(content).filterIsInstance<MaterialCardView>()
-                assertTrue(cards.size >= 3)
-                assertTrue("Information cards must remain clear and softly translucent",
-                    cards.all { it.cardBackgroundColor.defaultColor == if (night) Color.argb(203, 23, 23, 23) else Color.argb(235, 255, 255, 255) })
-                assertTrue("Information cards should not have heavy outlines", cards.all { it.strokeWidth == 0 })
+                val title = sheet.findViewById<TextView>(R.id.tvDetailTitle)!!
+                val titleContrast = samples.minOf { ColorUtils.calculateContrast(title.currentTextColor,
+                    ColorUtils.compositeColors(it, if (night) Color.BLACK else Color.WHITE)) }
+                assertTrue("The title must be easy to identify", title.typeface.isBold)
+                assertTrue("The title must have strong contrast", titleContrast >= 7)
+                assertEquals("Details must return to an edge-to-edge bottom sheet", stage.paddingLeft, content.left)
+                assertEquals("Details must stay above the navigation area", stage.height - stage.paddingBottom, content.bottom)
+                assertTrue("The clean detail should leave the timetable visible", content.height < (stage.height - stage.paddingTop - stage.paddingBottom) * .75f)
+                val values = listOf(R.id.tvDetailWeeks, R.id.tvDetailTime, R.id.tvDetailTeacher, R.id.tvDetailClassroom)
+                    .map { sheet.findViewById<TextView>(it)!! }
+                val leftEdges = values.map { value -> IntArray(2).also(value::getLocationOnScreen)[0] }
+                assertTrue("The four main values must form one reading column", leftEdges.maxOrNull()!! - leftEdges.minOrNull()!! <= 1)
+                val tops = values.map { value -> IntArray(2).also(value::getLocationOnScreen)[1] }
+                assertTrue("Information must follow the original week, time, teacher, classroom order", tops.zipWithNext().all { (a, b) -> b > a })
+                val valueContrasts = values.map { value -> samples.minOf { background -> ColorUtils.calculateContrast(
+                    if (empty && value is EditText) value.currentHintTextColor else value.currentTextColor,
+                    ColorUtils.compositeColors(background, if (night) Color.BLACK else Color.WHITE)) } }
+                assertTrue("Main values and empty-field prompts must be readable", valueContrasts.all { it >= if (empty) 4.5 else 7.0 })
+                assertTrue("Time must remain prominent", values.first().textSize >= values[1].textSize)
+                if (activity.resources.configuration.fontScale <= 1.05f) {
+                    values.forEach { value ->
+                        val visible = Rect()
+                        assertTrue("All four main values must fit on the first screen", value.getGlobalVisibleRect(visible) && visible.height() == value.height)
+                    }
+                }
                 val save = sheet.findViewById<MaterialButton>(R.id.btnEditCourse)!!
-                assertEquals(if (night) Color.rgb(242, 244, 247) else Color.rgb(32, 35, 40), save.backgroundTintList!!.defaultColor)
-                assertEquals(if (night) Color.rgb(21, 23, 26) else Color.WHITE, save.currentTextColor)
-                File(folder, "refined-material-$suffix.json").writeText(JSONObject()
+                assertFalse("Unchanged data must not enable saving", save.isEnabled)
+                assertEquals("Reading must not show an inactive edit toolbar", View.GONE, sheet.findViewById<View>(R.id.focusActions)!!.visibility)
+                assertEquals("The disabled action must not fade its text", 1f, save.alpha, 0f)
+                val saveColor = save.backgroundTintList!!.getColorForState(save.drawableState, save.backgroundTintList!!.defaultColor)
+                val saveContrast = ColorUtils.calculateContrast(save.currentTextColor, saveColor)
+                assertTrue("The disabled action must remain legible", saveContrast >= 4.5)
+                File(folder, "readability-${if (empty) "empty" else "filled"}-$suffix.json").writeText(JSONObject()
                     .put("surfacePixels", JSONArray(samples.map { String.format("#%08X", it) }))
-                    .put("surfaceAlpha", JSONArray(samples.map(Color::alpha)))
                     .put("gradientChannelSpan", span)
                     .put("mode", if (night) "dark" else "light")
-                    .put("textRgb", String.format("#%06X", titleColor and 0xFFFFFF))
-                    .put("saveButtonArgb", String.format("#%08X", save.backgroundTintList!!.defaultColor))
-                    .put("saveTextRgb", String.format("#%06X", save.currentTextColor and 0xFFFFFF))
-                    .put("contentCardAlpha", JSONArray(cards.map { Color.alpha(it.cardBackgroundColor.defaultColor) }))
-                    .put("contentCardStrokeDp", JSONArray(cards.map { it.strokeWidth })).toString(2))
+                    .put("titleContrast", titleContrast)
+                    .put("valueContrasts", JSONArray(valueContrasts))
+                    .put("valueLeftEdges", JSONArray(leftEdges))
+                    .put("disabledSaveContrast", saveContrast)
+                    .put("fontScale", activity.resources.configuration.fontScale).toString(2))
             }
-            shot("refined-material")
+            open(scenario, original)
+            scenario.onActivity { checkReadability(it, false) }
+            shot("readability-filled")
+            scenario.onActivity { activity ->
+                val sheet = dialog(activity)!!
+                text(sheet, R.id.tvDetailClassroom, "明理楼B408")
+                assertTrue(sheet.findViewById<View>(R.id.btnEditCourse)!!.isEnabled)
+                assertEquals(View.VISIBLE, sheet.findViewById<View>(R.id.focusActions)!!.visibility)
+            }
+            settle()
+            scenario.onActivity { activity ->
+                val sheet = dialog(activity)!!
+                val save = sheet.findViewById<MaterialButton>(R.id.btnEditCourse)!!
+                val visible = Rect()
+                assertTrue("Editing must reveal an accessible save action", save.getGlobalVisibleRect(visible) && visible.height() == save.height)
+                assertTrue(ColorUtils.calculateContrast(save.currentTextColor,
+                    save.backgroundTintList!!.getColorForState(save.drawableState, save.backgroundTintList!!.defaultColor)) >= 4.5)
+            }
+            shot("classic-editing")
             scenario.onActivity { dialog(it)!!.cancel() }
+            scenario.onActivity { dialog(it)!!.findViewById<View>(R.id.btnFocusDiscard)!!.performClick() }
             await(scenario) { dialog(it) == null }
             assertEquals(original, runBlocking { database.courseDao().getCourseById(original.id) })
+            val empty = original.copy(courseName = "大学英语", classroom = "", teacher = "", dayOfWeek = 2,
+                startSection = 3, endSection = 4, startWeek = 1, endWeek = 20, colorIndex = 1, note = "")
+            runBlocking { database.courseDao().updateCourse(empty) }
+            open(scenario, empty)
+            scenario.onActivity { checkReadability(it, true) }
+            shot("readability-empty")
+            scenario.onActivity { activity ->
+                val sheet = dialog(activity)!!
+                assertEquals(View.GONE, sheet.findViewById<View>(R.id.rowDetailNote)!!.visibility)
+                sheet.findViewById<View>(R.id.btnFocusMore)!!.performClick()
+                assertEquals("An empty note must remain editable from More", View.VISIBLE, sheet.findViewById<View>(R.id.rowDetailNote)!!.visibility)
+            }
+            scenario.onActivity { dialog(it)!!.cancel() }
+            await(scenario) { dialog(it) == null }
+            assertEquals(empty, runBlocking { database.courseDao().getCourseById(original.id) })
+        }
+    }
+
+    @Test fun j_sheetSurfaceContinuesBehindTheNavigationArea() = fixture { _, original ->
+        ActivityScenario.launch(MainActivity::class.java).use { scenario ->
+            open(scenario, original)
+            var seamY = 0
+            var sampleX = 0
+            var inset = 0
+            scenario.onActivity { activity ->
+                val sheet = dialog(activity)!!
+                val content = sheet.findViewById<View>(R.id.courseDetailContent)!!
+                val stage = content.parent as ViewGroup
+                val layer = (0 until stage.childCount).map(stage::getChildAt).first { it.javaClass.simpleName == "CardLayer" }
+                assertFalse("System insets must not clip the background", stage.clipToPadding)
+                assertEquals("The glass background must cover the full window", stage.height, layer.height)
+                assertEquals(stage.width, layer.width)
+                assertEquals(0, layer.top)
+                assertEquals("Controls must remain clear of system navigation", stage.height - stage.paddingBottom, content.bottom)
+                inset = stage.paddingBottom
+                assertEquals("A fixed navigation fill would recreate the gray strip", Color.TRANSPARENT, sheet.window!!.navigationBarColor)
+                if (Build.VERSION.SDK_INT >= 29) assertFalse(sheet.window!!.isNavigationBarContrastEnforced)
+                val bitmap = Bitmap.createBitmap(layer.width, layer.height, Bitmap.Config.ARGB_8888)
+                try {
+                    layer.draw(Canvas(bitmap))
+                    val x = (stage.width * .06f).roundToInt()
+                    val above = bitmap.getPixel(x, (content.bottom - 2).coerceIn(0, bitmap.height - 1))
+                    val below = bitmap.getPixel(x, (content.bottom + 2).coerceIn(0, bitmap.height - 1))
+                    val foot = bitmap.getPixel(x, bitmap.height - 3)
+                    fun difference(a: Int, b: Int) = maxOf(kotlin.math.abs(Color.red(a) - Color.red(b)),
+                        kotlin.math.abs(Color.green(a) - Color.green(b)), kotlin.math.abs(Color.blue(a) - Color.blue(b)))
+                    assertTrue("The paper must reach the screen edge", Color.alpha(foot) >= 240)
+                    assertTrue("Navigation must not introduce a horizontal color boundary", difference(above, below) <= 3)
+                } finally { bitmap.recycle() }
+                val origin = IntArray(2).also(stage::getLocationOnScreen)
+                seamY = origin[1] + content.bottom
+                sampleX = origin[0] + (stage.width * .06f).roundToInt()
+            }
+            val screen = instrumentation.uiAutomation.takeScreenshot()
+            try {
+                val above = screen.getPixel(sampleX, (seamY - 3).coerceIn(0, screen.height - 1))
+                val below = screen.getPixel(sampleX, (seamY + 3).coerceIn(0, screen.height - 1))
+                val difference = maxOf(kotlin.math.abs(Color.red(above) - Color.red(below)),
+                    kotlin.math.abs(Color.green(above) - Color.green(below)), kotlin.math.abs(Color.blue(above) - Color.blue(below)))
+                File(folder, "navigation-seam-$suffix.json").writeText(JSONObject().put("navigationInset", inset)
+                    .put("screenChannelDifference", difference).put("above", String.format("#%08X", above))
+                    .put("below", String.format("#%08X", below)).toString(2))
+                File(folder, "navigation-seam-$suffix.png").outputStream().use { screen.compress(Bitmap.CompressFormat.PNG, 100, it) }
+                assertTrue("System composition must not add a navigation strip: $difference", difference <= 4)
+            } finally { screen.recycle() }
+            scenario.onActivity { dialog(it)!!.cancel() }
+            await(scenario) { dialog(it) == null }
+        }
+    }
+
+    @Test fun k_acceptedCloseAllowsRealTouchesDuringTheRemainingAnimation() = fixture { _, original ->
+        ActivityScenario.launch(MainActivity::class.java).use { scenario ->
+            open(scenario, original)
+            val checks = JSONArray()
+            repeat(3) { pass ->
+                lateinit var closingSheet: CourseFocusDialog
+                var x = 0f
+                var y = 0f
+                var heldAnimation = false
+                scenario.onActivity { activity ->
+                    closingSheet = dialog(activity)!!
+                    if (pass == 1) {
+                        text(closingSheet, R.id.tvDetailClassroom, "未保存的变更")
+                        closingSheet.cancel()
+                        assertEquals(View.VISIBLE, closingSheet.findViewById<View>(R.id.focusConfirmation)!!.visibility)
+                        assertEquals(0, closingSheet.window!!.attributes.flags and WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
+                        closingSheet.findViewById<View>(R.id.btnFocusDiscard)!!.performClick()
+                    } else closingSheet.cancel()
+                    val animation = CourseFocusDialog::class.java.getDeclaredField("animation").apply { isAccessible = true }
+                        .get(closingSheet) as? ValueAnimator
+                    if (ValueAnimator.areAnimatorsEnabled()) {
+                        assertNotNull("The close must still have its visual animation", animation)
+                        animation!!.pause()
+                        heldAnimation = true
+                        assertTrue("The visual window is deliberately held to test input routing", closingSheet.isShowing)
+                        val flags = closingSheet.window!!.attributes.flags
+                        assertTrue(flags and WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE != 0)
+                        assertTrue(flags and WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE != 0)
+                    }
+                    val source = table(activity)!!
+                    val cell = source.continuityBounds(original)
+                    val origin = IntArray(2).also(source::getLocationOnScreen)
+                    x = cell.centerX() + origin[0]
+                    y = cell.centerY() + origin[1]
+                }
+                instrumentation.waitForIdleSync()
+                val downTime = SystemClock.uptimeMillis()
+                for (action in listOf(MotionEvent.ACTION_DOWN, MotionEvent.ACTION_UP)) {
+                    val event = MotionEvent.obtain(downTime, SystemClock.uptimeMillis(), action, x, y, 0).apply {
+                        source = InputDevice.SOURCE_TOUCHSCREEN
+                    }
+                    try { assertTrue("Touch injection failed", instrumentation.uiAutomation.injectInputEvent(event, true)) }
+                    finally { event.recycle() }
+                }
+                await(scenario) { dialog(it) != null && dialog(it) !== closingSheet && dialog(it)!!.isShowing }
+                scenario.onActivity { activity ->
+                    assertFalse("Opening another course must remove the old closing window", closingSheet.isShowing)
+                    assertEquals(original.courseName, dialog(activity)!!.findViewById<EditText>(R.id.tvDetailTitle)!!.text.toString())
+                }
+                assertEquals(original, runBlocking { database.courseDao().getCourseById(original.id) })
+                checks.put(JSONObject().put("pass", pass).put("heldClosingAnimation", heldAnimation)
+                    .put("realTouchOpenedNextSheet", true).put("originalCoursePreserved", true))
+                settle(550)
+            }
+            File(folder, "close-input-$suffix.json").writeText(JSONObject().put("passes", checks).toString(2))
+            scenario.onActivity { dialog(it)!!.cancel() }
+            await(scenario) { dialog(it) == null }
         }
     }
 

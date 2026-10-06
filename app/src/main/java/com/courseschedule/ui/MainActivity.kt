@@ -27,6 +27,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.doOnLayout
 import androidx.core.view.doOnPreDraw
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
@@ -164,6 +167,7 @@ class MainActivity : AppCompatActivity() {
         pendingCourseFocusState = savedInstanceState?.getBundle("courseFocusState")
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        initNavigationGlass()
 
         // 设置工具栏
         setSupportActionBar(binding.toolbar)
@@ -184,6 +188,38 @@ class MainActivity : AppCompatActivity() {
         observeData()
         // 请求通知权限（Android 13+）
         requestNotificationPermissionIfNeeded()
+    }
+
+    private fun initNavigationGlass() {
+        // Material's transparent shape still casts its compatibility shadow.
+        binding.bottomNavigation.setBackgroundColor(Color.TRANSPARENT)
+        binding.bottomNavigation.elevation = 0f
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        window.statusBarColor = Color.TRANSPARENT
+        window.navigationBarColor = Color.TRANSPARENT
+        if (Build.VERSION.SDK_INT >= 28) window.navigationBarDividerColor = Color.TRANSPARENT
+        if (Build.VERSION.SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
+        WindowCompat.getInsetsController(window, binding.root).apply {
+            isAppearanceLightStatusBars = resources.getBoolean(R.bool.window_light_system_bars)
+            isAppearanceLightNavigationBars = resources.getBoolean(R.bool.window_light_system_bars)
+        }
+        val density = resources.displayMetrics.density
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { root, insets ->
+            val safe = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout())
+            root.setPadding(safe.left, safe.top, safe.right, 0)
+            binding.bottomNavigation.layoutParams = binding.bottomNavigation.layoutParams.apply {
+                (this as ViewGroup.MarginLayoutParams).bottomMargin = safe.bottom
+            }
+            binding.bottomNavigation.setPadding(0, 0, 0, 0)
+            binding.navigationGlass.layoutParams = binding.navigationGlass.layoutParams.apply {
+                height = (108f * density).roundToInt() + safe.bottom
+            }
+            if (::weekPagerAdapter.isInitialized) weekPagerAdapter.setNavigationInset(binding.weekPager, safe.bottom)
+            // This root positions both system-safe controls and the glass behind the bars.
+            WindowInsetsCompat.CONSUMED
+        }
+        binding.navigationGlass.bind(binding.weekPager, binding.courseContinuityOverlay)
+        ViewCompat.requestApplyInsets(binding.root)
     }
 
     private fun initViews() {

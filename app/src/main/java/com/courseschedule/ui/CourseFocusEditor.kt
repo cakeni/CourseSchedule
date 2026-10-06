@@ -119,7 +119,10 @@ internal class CourseFocusEditor(
                     refreshSaveButton()
                 }
             }
-            field.setOnFocusChangeListener { _, focused -> if (focused) showPanel("", false) }
+            field.setOnFocusChangeListener { _, focused ->
+                if (focused) showPanel("", false)
+                refreshSaveButton()
+            }
         }
         binding.btnEditCourse.installPressScale(.97f)
         binding.btnEditCourse.setOnClickListener { save() }
@@ -275,7 +278,10 @@ internal class CourseFocusEditor(
 
     private fun refreshSaveButton() {
         binding.btnEditCourse.isEnabled = initialized && model.writing.value != true && draft() != original
-        binding.btnEditCourse.alpha = if (binding.btnEditCourse.isEnabled || model.writing.value == true) 1f else .5f
+        binding.btnEditCourse.alpha = 1f
+        binding.focusActions.visibility = if (binding.focusConfirmation.visibility != View.VISIBLE &&
+            (binding.btnEditCourse.isEnabled || model.writing.value == true || fields.any { it.hasFocus() }))
+            View.VISIBLE else View.GONE
     }
 
     private fun togglePanel(value: String) {
@@ -289,6 +295,8 @@ internal class CourseFocusEditor(
         scrollRequest?.let { binding.detailForm.removeCallbacks(it) }
         if (animate && panel != value) CourseEditorMotion.expand(binding.detailForm)
         panel = value
+        binding.rowDetailNote.visibility = if (!binding.tvDetailNote.text.isNullOrBlank() ||
+            value == "more" || binding.tvDetailNote.hasFocus()) View.VISIBLE else View.GONE
         listOf(binding.focusTimePanel to "time", binding.focusWeeksPanel to "weeks", binding.focusMorePanel to "more")
             .forEach { (view, name) -> view.visibility = if (value == name) View.VISIBLE else View.GONE }
         CourseEditorMotion.chevron(binding.focusTimeChevron, value == "time", animate)
@@ -317,7 +325,7 @@ internal class CourseFocusEditor(
 
     private fun hideConfirmation() {
         binding.focusConfirmation.visibility = View.GONE
-        binding.focusActions.visibility = View.VISIBLE
+        refreshSaveButton()
     }
 
     private fun buildReminderChoices() {

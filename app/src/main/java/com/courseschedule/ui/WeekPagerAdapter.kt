@@ -48,6 +48,7 @@ class WeekPagerAdapter(
     private var settings = WeekPageSettings()
     private val scrollPositions = mutableMapOf<Int, Int>()
     private var selectedPosition = RecyclerView.NO_POSITION
+    private var navigationInset = 0
     private val dayHeaderInterpolator = PathInterpolator(0.22f, 0f, 0.2f, 1f)
 
     init {
@@ -117,6 +118,16 @@ class WeekPagerAdapter(
     override fun onViewAttachedToWindow(holder: WeekViewHolder) {
         super.onViewAttachedToWindow(holder)
         holder.syncIllustrationSelection()
+        holder.updateNavigationPadding()
+    }
+
+    internal fun setNavigationInset(pager: ViewPager2, bottom: Int) {
+        if (navigationInset == bottom) return
+        navigationInset = bottom
+        val recycler = pager.getChildAt(0) as? RecyclerView ?: return
+        recycler.children.forEach { page ->
+            (recycler.getChildViewHolder(page) as? WeekViewHolder)?.updateNavigationPadding()
+        }
     }
 
     fun selectPage(pager: ViewPager2, position: Int) {
@@ -157,6 +168,14 @@ class WeekPagerAdapter(
         private var boundSemesterId: Long? = null
         private var emptySchedule = false
 
+        fun updateNavigationPadding() {
+            val scroll = binding.scheduleScroll
+            val bottom = (88f * scroll.resources.displayMetrics.density).toInt() + navigationInset
+            if (scroll.paddingBottom != bottom) {
+                scroll.setPadding(scroll.paddingLeft, scroll.paddingTop, scroll.paddingRight, bottom)
+            }
+        }
+
         fun bind(
             week: Int,
             semester: Semester,
@@ -175,6 +194,7 @@ class WeekPagerAdapter(
                 binding.weekDayHeader.visibility = View.VISIBLE
             }
             boundWeek = week
+            updateNavigationPadding()
             val displayCourses = ScheduleRules.selectCoursesForWeek(
                 courses,
                 week,

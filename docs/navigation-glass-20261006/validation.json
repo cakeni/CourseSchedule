@@ -1,0 +1,153 @@
+{
+  "versionName": "1.0.65",
+  "versionCode": 66,
+  "applicationId": "com.courseschedule",
+  "apk": "qing-course-1.0.65.apk",
+  "apkBytes": 25145080,
+  "apkSha256": "cc310e51072aa7f98a93e170dca0a185356dd28044189b0d5c51315033cd3e94",
+  "sourceFilesVerified": 393,
+  "productionSourcesMatchLocalValidatedVersion": true,
+  "publishedApkNativeTested": true,
+  "testDependencyPreserved": "androidx.test.ext:junit:1.3.0",
+  "unitTests": {
+    "tests": 255,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1
+  },
+  "unitTestsPassed": 254,
+  "lint": {
+    "Warning": 271
+  },
+  "nativeTestsPassed": 28,
+  "nativeDevice": {
+    "apiLevel": 35,
+    "platform": "Android 15"
+  },
+  "nativeSuites": [
+    {
+      "suite": "gesture-light",
+      "passed": 11
+    },
+    {
+      "suite": "gesture-dark",
+      "passed": 7
+    },
+    {
+      "suite": "large-gesture-light",
+      "passed": 4
+    },
+    {
+      "suite": "buttons-light",
+      "passed": 3
+    },
+    {
+      "suite": "buttons-dark",
+      "passed": 3
+    }
+  ],
+  "liveGlassEvidence": {
+    "gesture-light": [
+      {
+        "page": "StudyTasksActivity",
+        "topSeam": 5,
+        "liveColorChange": 21,
+        "navigationInset": 63
+      },
+      {
+        "page": "ImportActivity",
+        "topSeam": 4,
+        "liveColorChange": 41,
+        "navigationInset": 63
+      },
+      {
+        "page": "SettingsActivity",
+        "topSeam": 4,
+        "liveColorChange": 41,
+        "navigationInset": 63
+      }
+    ],
+    "gesture-dark": [
+      {
+        "page": "StudyTasksActivity",
+        "topSeam": 5,
+        "liveColorChange": 22,
+        "navigationInset": 63
+      },
+      {
+        "page": "ImportActivity",
+        "topSeam": 4,
+        "liveColorChange": 40,
+        "navigationInset": 63
+      },
+      {
+        "page": "SettingsActivity",
+        "topSeam": 4,
+        "liveColorChange": 40,
+        "navigationInset": 63
+      }
+    ],
+    "large-gesture-light": [
+      {
+        "page": "StudyTasksActivity",
+        "topSeam": 5,
+        "liveColorChange": 21,
+        "navigationInset": 63
+      },
+      {
+        "page": "ImportActivity",
+        "topSeam": 4,
+        "liveColorChange": 41,
+        "navigationInset": 63
+      },
+      {
+        "page": "SettingsActivity",
+        "topSeam": 4,
+        "liveColorChange": 41,
+        "navigationInset": 63
+      }
+    ],
+    "buttons-light": [
+      {
+        "page": "StudyTasksActivity",
+        "topSeam": 5,
+        "liveColorChange": 23,
+        "navigationInset": 126
+      },
+      {
+        "page": "ImportActivity",
+        "topSeam": 4,
+        "liveColorChange": 44,
+        "navigationInset": 126
+      },
+      {
+        "page": "SettingsActivity",
+        "topSeam": 4,
+        "liveColorChange": 44,
+        "navigationInset": 126
+      }
+    ],
+    "buttons-dark": [
+      {
+        "page": "StudyTasksActivity",
+        "topSeam": 5,
+        "liveColorChange": 22,
+        "navigationInset": 126
+      },
+      {
+        "page": "ImportActivity",
+        "topSeam": 4,
+        "liveColorChange": 45,
+        "navigationInset": 126
+      },
+      {
+        "page": "SettingsActivity",
+        "topSeam": 4,
+        "liveColorChange": 45,
+        "navigationInset": 126
+      }
+    ]
+  },
+  "screenshotsUseSyntheticTasks": true,
+  "environmentRestored": true
+}

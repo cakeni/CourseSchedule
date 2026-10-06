@@ -67,6 +67,7 @@
 
         <activity
             android:name=".ui.settings.SettingsActivity"
+            android:configChanges="uiMode"
             android:label="@string/settings"
             android:theme="@style/Theme.CourseSchedule" />
 

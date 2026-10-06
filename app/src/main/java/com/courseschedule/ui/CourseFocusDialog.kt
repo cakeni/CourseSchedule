@@ -9,6 +9,7 @@ import android.content.res.Configuration
 import android.graphics.*
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.GradientDrawable
+import android.os.Build
 import android.view.*
 import android.view.animation.PathInterpolator
 import android.widget.FrameLayout
@@ -34,7 +35,7 @@ internal class CourseFocusDialog(context: Context, private val content: View, pr
     private var detailColor = context.resources.obtainTypedArray(R.array.course_colors).let { colors ->
         colors.getColor(Math.floorMod(course.colorIndex, colors.length()), Color.BLACK).also { colors.recycle() }
     }
-    private val stage = FrameLayout(context)
+    private val stage = FrameLayout(context).apply { clipToPadding = false }
     private val backdrop = (context as? android.app.Activity)?.let(::courseGlassBackdrop)
     private val layer = CardLayer(context)
     private val ease = PathInterpolator(.18f, 1f, .3f, 1f)
@@ -56,8 +57,8 @@ internal class CourseFocusDialog(context: Context, private val content: View, pr
         }
         backdrop?.let { stage.addView(it, FrameLayout.LayoutParams(-1, -1)) }
         stage.addView(layer, FrameLayout.LayoutParams(-1, -1))
-        stage.addView(content, FrameLayout.LayoutParams(-1, -1).apply {
-            setMargins((16 * density).roundToInt(), (12 * density).roundToInt(), (16 * density).roundToInt(), (16 * density).roundToInt())
+        stage.addView(content, FrameLayout.LayoutParams(-1, -2, Gravity.BOTTOM).apply {
+            topMargin = (56 * density).roundToInt()
         })
         content.alpha = 0f
         content.findViewById<View>(R.id.detailCourseColor).background = GradientDrawable().apply {
@@ -73,6 +74,16 @@ internal class CourseFocusDialog(context: Context, private val content: View, pr
                 if (stage.paddingBottom != bottom || stage.paddingTop != bars.top ||
                     stage.paddingLeft != bars.left || stage.paddingRight != bars.right) {
                     stage.setPadding(bars.left, bars.top, bars.right, bottom)
+                    // Insets protect the controls; the glass and paper still fill the window.
+                    for (background in listOfNotNull(backdrop, layer)) {
+                        (background.layoutParams as FrameLayout.LayoutParams).apply {
+                            leftMargin = -bars.left
+                            topMargin = -bars.top
+                            rightMargin = -bars.right
+                            bottomMargin = -bottom
+                            background.layoutParams = this
+                        }
+                    }
                 }
             }
             ViewCompat.setOnApplyWindowInsetsListener(stage) { _, insets ->
@@ -130,7 +141,9 @@ internal class CourseFocusDialog(context: Context, private val content: View, pr
                 setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE or WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
                 ViewCompat.requestApplyInsets(stage)
                 statusBarColor = ContextCompat.getColor(context, R.color.course_focus_backdrop)
-                navigationBarColor = statusBarColor
+                navigationBarColor = Color.TRANSPARENT
+                if (Build.VERSION.SDK_INT >= 28) navigationBarDividerColor = Color.TRANSPARENT
+                if (Build.VERSION.SDK_INT >= 29) isNavigationBarContrastEnforced = false
                 WindowInsetsControllerCompat(this, decorView).apply {
                     isAppearanceLightStatusBars = context.resources.getBoolean(R.bool.window_light_system_bars)
                     isAppearanceLightNavigationBars = isAppearanceLightStatusBars
@@ -195,6 +208,9 @@ internal class CourseFocusDialog(context: Context, private val content: View, pr
             return
         }
         closing = true
+        // Once a close is accepted, this window only renders the remaining animation.
+        // Same-application touches and focus return to the timetable immediately.
+        window?.addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
         if (!isShowing || start == null || !ValueAnimator.areAnimatorsEnabled()) finish(cancel)
         else animateTo(0f, (320 * progress.coerceAtLeast(.25f)).toLong()) { finish(cancel) }
     }
@@ -207,21 +223,59 @@ internal class CourseFocusDialog(context: Context, private val content: View, pr
     }
     private inner class CardLayer(context: Context) : View(context) {
         private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+        private val shape = Path()
+        private val corners = FloatArray(8)
         private val matte = ContextCompat.getColor(context, R.color.course_focus_backdrop)
+        private val shaderMatrix = Matrix()
+        private var paletteColor: Int? = null
+        private lateinit var paper: Shader
+        private lateinit var upperGlow: Shader
+        private lateinit var lowerGlow: Shader
+        private var paperShaders = emptyList<Shader>()
+
+        private fun updatePalette() {
+            if (paletteColor == detailColor) return
+            paletteColor = detailColor
+            val top = if (night) Color.argb(250, 28, 28, 28) else
+                ColorUtils.setAlphaComponent(ColorUtils.blendARGB(detailColor, Color.WHITE, .98f), 248)
+            val bottom = if (night) Color.argb(252, 20, 20, 20) else Color.argb(252, 255, 255, 255)
+            paper = LinearGradient(0f, 0f, 0f, 1f, top, bottom, Shader.TileMode.CLAMP)
+            fun glow(x: Float, y: Float, radius: Float, strength: Int) = RadialGradient(x, y, radius,
+                intArrayOf(ColorUtils.setAlphaComponent(detailColor, strength),
+                    ColorUtils.setAlphaComponent(detailColor, strength / 3),
+                    ColorUtils.setAlphaComponent(detailColor, 0)), floatArrayOf(0f, .45f, 1f), Shader.TileMode.CLAMP)
+            upperGlow = glow(.96f, .06f, .94f, if (night) 16 else 48)
+            lowerGlow = glow(.06f, .95f, .84f, if (night) 8 else 22)
+            paperShaders = listOf(paper, upperGlow, lowerGlow)
+        }
+
         override fun onDraw(canvas: Canvas) {
-            canvas.drawColor(ColorUtils.setAlphaComponent(matte, ((if (night) 200 else 210) * progress).roundToInt()))
-            val card = bounds(progress).apply { offset(-this@CardLayer.left.toFloat(), -this@CardLayer.top.toFloat()) }
+            canvas.drawColor(ColorUtils.setAlphaComponent(matte, ((if (night) 150 else 110) * progress).roundToInt()))
+            val card = bounds(progress).apply {
+                bottom += (stage.height - target.bottom) * progress
+                offset(-this@CardLayer.left.toFloat(), -this@CardLayer.top.toFloat())
+            }
             if (card.isEmpty) return
-            val top = if (night) Color.argb(232, 14, 14, 14) else ColorUtils.setAlphaComponent(detailColor, 240)
-            val bottom = if (night) Color.argb(240, 0, 0, 0) else
-                ColorUtils.setAlphaComponent(ColorUtils.blendARGB(detailColor, Color.WHITE, .24f), 224)
-            paint.color = Color.WHITE
-            paint.shader = LinearGradient(card.left, card.top, card.left, card.bottom,
-                ColorUtils.blendARGB(courseColor, top, progress),
-                ColorUtils.blendARGB(courseColor, bottom, progress), Shader.TileMode.CLAMP)
-            val radius = (10f + 22f * progress) * density
-            canvas.drawRoundRect(card, radius, radius, paint)
+            updatePalette()
+            for (index in corners.indices) corners[index] =
+                (if (index < 4) 10f + 18f * progress else 10f * (1f - progress)) * density
+            shape.reset()
+            shape.addRoundRect(card, corners, Path.Direction.CW)
             paint.shader = null
+            paint.color = courseColor
+            paint.alpha = (255 * (1f - progress)).roundToInt()
+            canvas.drawPath(shape, paint)
+            shaderMatrix.setScale(card.width(), card.height())
+            shaderMatrix.postTranslate(card.left, card.top)
+            paint.color = Color.WHITE
+            paint.alpha = (255 * progress).roundToInt()
+            for (shader in paperShaders) {
+                shader.setLocalMatrix(shaderMatrix)
+                paint.shader = shader
+                canvas.drawPath(shape, paint)
+            }
+            paint.shader = null
+            paint.alpha = 255
             val opacity = (1f - progress / .32f).coerceIn(0f, 1f)
             if (opacity > 0f) {
                 canvas.save(); canvas.clipRect(card)
