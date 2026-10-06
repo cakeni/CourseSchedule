@@ -329,6 +329,36 @@
                             android:gravity="end|center_vertical" />
                     </LinearLayout>
 
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/buttonReminderPermissions"
+                        style="@style/CourseSchedule.Button"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="16dp"
+                        android:layout_marginTop="12dp"
+                        android:minHeight="48dp"
+                        android:text="@string/reminder_permissions_action"
+                        android:textSize="14sp"
+                        android:textColor="@color/reference_blue_accent"
+                        app:backgroundTint="@color/reference_blue_surface"
+                        app:cornerRadius="18dp"
+                        app:icon="@drawable/ic_chevron_right"
+                        app:iconGravity="textEnd"
+                        app:iconTint="@color/reference_blue_accent"
+                        app:iconSize="20dp" />
+
+                    <TextView
+                        android:id="@+id/tvReminderPermissionStatus"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingHorizontal="16dp"
+                        android:paddingTop="4dp"
+                        android:paddingBottom="8dp"
+                        android:text="@string/reminder_status_loading"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="13sp"
+                        android:lineSpacingExtra="3dp" />
+
                     <LinearLayout
                         android:id="@+id/reminderDiagnostics"
                         android:layout_width="match_parent"
@@ -340,13 +370,12 @@
                         android:id="@+id/tvReminderStatus"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:padding="16dp"
+                        android:paddingHorizontal="16dp"
+                        android:paddingBottom="16dp"
                         android:textSize="14sp"
                         android:textColor="?android:attr/textColorSecondary"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:foreground="@drawable/control_focus"
-                        android:text="@string/reminder_status_loading"  android:stateListAnimator="@animator/press_feedback_row" />
+                        android:lineSpacingExtra="3dp"
+                        android:text="@string/reminder_status_loading" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/buttonReminderTest"

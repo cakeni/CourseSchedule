@@ -37,6 +37,13 @@ import androidx.lifecycle.lifecycleScope
 import com.courseschedule.R
 import com.courseschedule.ui.settings.SettingsActivity
 import com.courseschedule.ui.MainActivity
+import com.courseschedule.ui.ScheduleReturnSource
+import com.courseschedule.ui.returnToSchedule
+import com.courseschedule.ui.installPrimaryNavigationGlass
+import com.courseschedule.ui.selectItemWithoutAnimation
+import com.courseschedule.ui.stabilizeActiveIndicatorSize
+import com.courseschedule.ui.playNavigationMotion
+import com.courseschedule.ui.importdata.ImportActivity
 import com.courseschedule.ui.addcourse.AddCourseActivity
 import com.courseschedule.data.entity.Course
 import com.courseschedule.databinding.ActivityCourseAssistantBinding
@@ -75,7 +82,15 @@ class CourseAssistantActivity : AppCompatActivity() {
         supportActionBar?.setTitle(R.string.assistant_title)
         viewModel = ViewModelProvider(this)[CourseAssistantViewModel::class.java]
         window.statusBarColor = ContextCompat.getColor(this, R.color.assistant_background)
-        window.navigationBarColor = ContextCompat.getColor(this, R.color.assistant_background)
+        installPrimaryNavigationGlass(binding.mainContent, binding.navigationGlass, binding.bottomNavigation,
+            binding.conversationScroll, binding.conversationScroll, binding.chatFooter)
+        initNavigation()
+        onBackPressedDispatcher.addCallback(this) {
+            if (imeVisible) {
+                binding.etMessage.clearFocus()
+                WindowInsetsControllerCompat(window, binding.root).hide(WindowInsetsCompat.Type.ime())
+            } else returnToSchedule(ScheduleReturnSource.ASSISTANT)
+        }
         WindowInsetsControllerCompat(window, binding.root).apply {
             isAppearanceLightStatusBars = resources.getBoolean(R.bool.window_light_system_bars)
             isAppearanceLightNavigationBars = resources.getBoolean(R.bool.window_light_system_bars)
@@ -498,6 +513,38 @@ class CourseAssistantActivity : AppCompatActivity() {
         binding.root.openDrawer(GravityCompat.START)
     }
 
+    private fun initNavigation() {
+        binding.bottomNavigation.stabilizeActiveIndicatorSize()
+        binding.bottomNavigation.selectItemWithoutAnimation(R.id.nav_assistant)
+        binding.bottomNavigation.setOnItemSelectedListener { item ->
+            if (item.itemId == R.id.nav_assistant) return@setOnItemSelectedListener true
+            if (item.itemId == R.id.nav_home) {
+                returnToSchedule(ScheduleReturnSource.ASSISTANT)
+                return@setOnItemSelectedListener true
+            }
+            val destination = when (item.itemId) {
+                R.id.nav_study -> StudyTasksActivity::class.java
+                R.id.nav_import -> ImportActivity::class.java
+                R.id.nav_settings -> SettingsActivity::class.java
+                else -> return@setOnItemSelectedListener false
+            }
+            startActivity(Intent(this, destination).apply {
+                putExtra(CourseAssistantActivity.EXTRA_DISPLAYED_WEEK, intent.getIntExtra(CourseAssistantActivity.EXTRA_DISPLAYED_WEEK, 1))
+                if (item.itemId == R.id.nav_study) putExtra(StudyTasksActivity.EXTRA_PRIMARY_PAGE, true)
+            })
+            overridePendingTransition(0, 0)
+            finish()
+            overridePendingTransition(0, 0)
+            true
+        }
+        binding.bottomNavigation.setOnItemReselectedListener {
+            binding.bottomNavigation.findViewById<View>(R.id.nav_assistant)?.playNavigationMotion()
+        }
+        binding.bottomNavigation.doOnPreDraw {
+            binding.bottomNavigation.findViewById<View>(R.id.nav_assistant)?.playNavigationMotion()
+        }
+    }
+
     private fun closeHistory() {
         historySearchGeneration++
         historySearchJob?.cancel()
@@ -543,6 +590,10 @@ class CourseAssistantActivity : AppCompatActivity() {
             finish()
         }
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
+            val safe = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout())
+            val bottom = maxOf(safe.bottom, insets.getInsets(WindowInsetsCompat.Type.ime()).bottom)
+            val horizontal = (16 * resources.displayMetrics.density).toInt()
+            form.root.setPadding(horizontal + safe.left, safe.top, horizontal + safe.right, bottom)
             updateKeyboardLayout(insets.isVisible(WindowInsetsCompat.Type.ime()))
             insets
         }

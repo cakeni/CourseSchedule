@@ -39,9 +39,13 @@ import androidx.core.graphics.ColorUtils
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.Animatable
+import android.widget.ImageView
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.courseschedule.ui.assistant.StudyTasksActivity
+import com.courseschedule.ui.assistant.CourseAssistantActivity
 import com.courseschedule.R
 import com.courseschedule.BuildConfig
 import com.courseschedule.data.backup.ScheduleBackup
@@ -77,6 +81,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import com.google.android.material.R as MaterialR
 
 class SettingsActivity : AppCompatActivity() {
 
@@ -190,6 +195,7 @@ class SettingsActivity : AppCompatActivity() {
 
         binding.switchDarkMode.setOnCheckedChangeListener { _, checked ->
             settingsEntrance.settle()
+            settleSettingsNavigation()
             themeTransition.capture(binding.root, binding.switchDarkMode, window)
             preferences.darkModeOverride = checked
             themeIcon.animateTo(checked)
@@ -226,7 +232,7 @@ class SettingsActivity : AppCompatActivity() {
         binding.spinnerDefaultReminder.onItemSelectedListener = onItemSelected { position ->
             preferences.defaultReminderMinutes = reminderValues[position]
         }
-        binding.tvReminderStatus.setOnClickListener { showReminderPermissions() }
+        binding.buttonReminderPermissions.setOnClickListener { showReminderPermissions() }
         binding.buttonReminderTest.setOnClickListener {
             if (!AlarmReceiver.notificationsAvailable(this)) {
                 showReminderPermissions()
@@ -288,6 +294,13 @@ class SettingsActivity : AppCompatActivity() {
             try {
                 val manager = ReminderManager(applicationContext)
                 manager.restoreReminders()
+                val status = when {
+                    !preferences.reminderEnabled -> R.string.reminder_status_off
+                    !AlarmReceiver.notificationsAvailable(this@SettingsActivity) -> R.string.reminder_status_notification_blocked
+                    !manager.canScheduleExactAlarms() -> R.string.reminder_status_inexact
+                    else -> R.string.reminder_status_ready
+                }
+                binding.tvReminderPermissionStatus.setText(status)
                 if (!BuildConfig.DEBUG) return@launch
                 val database = AppDatabase.getDatabase(applicationContext)
                 val semester = database.semesterDao().getCurrentSemesterSync()
@@ -296,14 +309,7 @@ class SettingsActivity : AppCompatActivity() {
                     ReminderTimeCalculator.nextOccurrence(it, semester, preferences.sectionTimes,
                         lastDeliveredClassStart = manager.lastDelivered(it.id))?.reminderTime
                 }.minOrNull() else null
-                val status = when {
-                    !preferences.reminderEnabled -> R.string.reminder_status_off
-                    !AlarmReceiver.notificationsAvailable(this@SettingsActivity) -> R.string.reminder_status_notification_blocked
-                    !manager.canScheduleExactAlarms() -> R.string.reminder_status_inexact
-                    else -> R.string.reminder_status_ready
-                }
                 binding.tvReminderStatus.text = listOf(
-                    getString(status),
                     getString(R.string.reminder_course_count, courses.size, courses.count { it.reminderMinutes > 0 }),
                     next?.let { getString(R.string.reminder_next_time,
                         SimpleDateFormat("MM-dd E HH:mm", Locale.CHINA).format(Date(it))) }
@@ -314,6 +320,7 @@ class SettingsActivity : AppCompatActivity() {
                 throw error
             } catch (error: Exception) {
                 Log.e("SettingsActivity", "Unable to update reminders", error)
+                binding.tvReminderPermissionStatus.setText(R.string.reminder_operation_failed)
                 binding.tvReminderStatus.setText(R.string.reminder_operation_failed)
             }
         }
@@ -379,7 +386,8 @@ class SettingsActivity : AppCompatActivity() {
         binding.cardExport.setOnClickListener { settingsEntrance.settle(); exportData() }
         binding.cardBackup.setOnClickListener {
             settingsEntrance.settle()
-            startActivity(Intent(this, ImportActivity::class.java))
+            startActivity(Intent(this, ImportActivity::class.java)
+                        .putExtra(CourseAssistantActivity.EXTRA_DISPLAYED_WEEK, intent.getIntExtra(CourseAssistantActivity.EXTRA_DISPLAYED_WEEK, 1)))
             overridePendingTransition(0, 0)
         }
         binding.cardAbout.setOnClickListener { settingsEntrance.settle(); showAboutDialog() }
@@ -400,9 +408,20 @@ class SettingsActivity : AppCompatActivity() {
         ).forEach { it.installPressScale() }
     }
 
+    private fun settleSettingsNavigation() {
+        suppressBottomNavigationMotion = true
+        try {
+            binding.bottomNavigation.selectItemWithoutAnimation(R.id.nav_settings, animateCapsule = false)
+        } finally { suppressBottomNavigationMotion = false }
+        val icon = binding.bottomNavigation.findViewById<View>(R.id.nav_settings)
+            ?.findViewById<ImageView>(MaterialR.id.navigation_bar_item_icon_view) ?: return
+        (icon.drawable as? Animatable)?.stop()
+        icon.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_settings))
+    }
+
     private fun initBottomNavigation(animate: Boolean = true) {
         binding.bottomNavigation.stabilizeActiveIndicatorSize()
-        binding.bottomNavigation.selectItemWithoutAnimation(R.id.nav_settings)
+        binding.bottomNavigation.selectItemWithoutAnimation(R.id.nav_settings, animateCapsule = animate)
         binding.bottomNavigation.setOnItemSelectedListener { item ->
             if (suppressBottomNavigationMotion) return@setOnItemSelectedListener true
             settingsEntrance.settle()
@@ -413,14 +432,24 @@ class SettingsActivity : AppCompatActivity() {
                     true
                 }
                 R.id.nav_study -> {
-                    startActivity(Intent(this, StudyTasksActivity::class.java).putExtra(StudyTasksActivity.EXTRA_PRIMARY_PAGE, true))
+                    startActivity(Intent(this, StudyTasksActivity::class.java)
+                        .putExtra(CourseAssistantActivity.EXTRA_DISPLAYED_WEEK, intent.getIntExtra(CourseAssistantActivity.EXTRA_DISPLAYED_WEEK, 1)).putExtra(StudyTasksActivity.EXTRA_PRIMARY_PAGE, true))
                     overridePendingTransition(0, 0)
                     finish()
                     overridePendingTransition(0, 0)
                     true
                 }
                 R.id.nav_import -> {
-                    startActivity(Intent(this, ImportActivity::class.java))
+                    startActivity(Intent(this, ImportActivity::class.java)
+                        .putExtra(CourseAssistantActivity.EXTRA_DISPLAYED_WEEK, intent.getIntExtra(CourseAssistantActivity.EXTRA_DISPLAYED_WEEK, 1)))
+                    overridePendingTransition(0, 0)
+                    finish()
+                    overridePendingTransition(0, 0)
+                    true
+                }
+                R.id.nav_assistant -> {
+                    startActivity(Intent(this, CourseAssistantActivity::class.java)
+                        .putExtra(CourseAssistantActivity.EXTRA_DISPLAYED_WEEK, intent.getIntExtra(CourseAssistantActivity.EXTRA_DISPLAYED_WEEK, 1)))
                     overridePendingTransition(0, 0)
                     finish()
                     overridePendingTransition(0, 0)
@@ -434,6 +463,7 @@ class SettingsActivity : AppCompatActivity() {
             }
         }
         binding.bottomNavigation.setOnItemReselectedListener { item ->
+            if (suppressBottomNavigationMotion) return@setOnItemReselectedListener
             settingsEntrance.settle()
             binding.bottomNavigation.findViewById<View>(item.itemId)?.playNavigationMotion()
         }
@@ -487,7 +517,11 @@ class SettingsActivity : AppCompatActivity() {
         initActions()
         initBottomNavigation(animate = false)
         showCurrentSemester(semesterViewModel.currentSemester.value)
-        binding.root.restoreHierarchyState(state)
+        suppressBottomNavigationMotion = true
+        try {
+            binding.root.restoreHierarchyState(state)
+            binding.bottomNavigation.selectItemWithoutAnimation(R.id.nav_settings, animateCapsule = false)
+        } finally { suppressBottomNavigationMotion = false }
         refreshReminderStatus()
         themeIcon.animateTo(control.isChecked)
         window.setBackgroundDrawable(ColorDrawable(ContextCompat.getColor(this, R.color.background)))
@@ -855,7 +889,7 @@ class SettingsActivity : AppCompatActivity() {
         refreshReminderStatus()
         if (binding.bottomNavigation.selectedItemId != R.id.nav_settings) {
             suppressBottomNavigationMotion = true
-            binding.bottomNavigation.selectItemWithoutAnimation(R.id.nav_settings)
+            binding.bottomNavigation.selectItemWithoutAnimation(R.id.nav_settings, animateCapsule = false)
             suppressBottomNavigationMotion = false
         }
     }

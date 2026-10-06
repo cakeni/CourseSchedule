@@ -333,10 +333,12 @@ class StudyTasksActivity : AppCompatActivity() {
             val destination = when (item.itemId) {
                 R.id.nav_home -> MainActivity::class.java
                 R.id.nav_import -> ImportActivity::class.java
+                R.id.nav_assistant -> CourseAssistantActivity::class.java
                 R.id.nav_settings -> SettingsActivity::class.java
                 else -> return@setOnItemSelectedListener false
             }
             startActivity(Intent(this, destination).apply {
+                putExtra(CourseAssistantActivity.EXTRA_DISPLAYED_WEEK, intent.getIntExtra(CourseAssistantActivity.EXTRA_DISPLAYED_WEEK, 1))
                 if (item.itemId == R.id.nav_home) addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
             })
             overridePendingTransition(0, 0)

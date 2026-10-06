@@ -3,10 +3,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/drawerLayout" android:layout_width="match_parent" android:layout_height="match_parent"
     android:background="@color/assistant_background">
-    <LinearLayout android:id="@+id/mainContent" android:layout_width="match_parent" android:layout_height="match_parent"
-        android:background="@color/assistant_background" android:orientation="vertical">
+    <com.courseschedule.ui.ScheduleRootLayout android:id="@+id/mainContent" android:layout_width="match_parent" android:layout_height="match_parent"
+        android:background="@color/assistant_background">
         <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar" android:layout_width="match_parent" android:layout_height="60dp"
+            android:id="@+id/toolbar" android:layout_width="0dp" android:layout_height="60dp"
+            app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent"
             android:background="@color/assistant_background" app:navigationIcon="@drawable/ic_assistant_menu"
             app:navigationIconTint="@color/assistant_text" app:title="@string/assistant_title"
             app:titleTextColor="@color/assistant_text" app:subtitleTextColor="@color/assistant_text_secondary"
@@ -14,11 +15,14 @@
             app:titleCentered="true" app:subtitleCentered="true" />
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnLatestMessages" style="@style/CourseSchedule.TextButton"
-            android:layout_width="match_parent" android:layout_height="40dp" android:minHeight="40dp" android:visibility="gone"
+            android:layout_width="0dp" android:layout_height="40dp" android:minHeight="40dp" android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/toolbar" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent"
             android:text="@string/assistant_latest_messages" android:textColor="@color/assistant_accent" />
         <androidx.core.widget.NestedScrollView
-            android:id="@+id/conversationScroll" android:layout_width="match_parent" android:layout_height="0dp"
-            android:layout_weight="1" android:fillViewport="true" android:clipToPadding="false"
+            android:id="@+id/conversationScroll" android:layout_width="0dp" android:layout_height="0dp"
+            app:layout_constraintTop_toBottomOf="@id/btnLatestMessages" app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent"
+            android:fillViewport="true" android:clipToPadding="false"
             android:overScrollMode="never" android:paddingHorizontal="16dp" android:paddingVertical="8dp">
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
                 <LinearLayout android:id="@+id/starterContent" android:layout_width="match_parent" android:layout_height="wrap_content"
@@ -155,6 +159,11 @@
 
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>
+        <com.courseschedule.ui.ScheduleNavigationGlass android:id="@+id/navigationGlass"
+            android:layout_width="0dp" android:layout_height="108dp" android:importantForAccessibility="no"
+            app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent" />
+        <LinearLayout android:id="@+id/chatFooter" android:layout_width="0dp" android:layout_height="wrap_content" android:orientation="vertical"
+            app:layout_constraintBottom_toTopOf="@id/bottomNavigation" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent">
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnRetryRequest" style="@style/CourseSchedule.TextButton"
             android:layout_width="match_parent" android:layout_height="48dp" android:visibility="gone"
@@ -222,10 +231,19 @@
                 </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
-        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+        <TextView android:id="@+id/composerNotice" android:layout_width="match_parent" android:layout_height="wrap_content"
             android:layout_marginHorizontal="20dp" android:layout_marginBottom="6dp" android:gravity="center"
             android:text="@string/assistant_composer_notice" android:textColor="@color/assistant_text_secondary" android:textSize="11sp" />
-    </LinearLayout>
+        </LinearLayout>
+        <com.google.android.material.bottomnavigation.BottomNavigationView android:id="@+id/bottomNavigation"
+            android:layout_width="0dp" android:layout_height="72dp" android:background="@android:color/transparent" android:elevation="0dp"
+            app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent"
+            app:itemActiveIndicatorStyle="@style/CourseScheduleBottomNavigationActiveIndicator" app:itemIconSize="22dp"
+            app:itemIconTint="@color/nav_item_color" app:itemTextColor="@color/reference_nav_text" app:itemRippleColor="@color/control_focus_overlay"
+            app:itemHorizontalTranslationEnabled="false" app:labelVisibilityMode="labeled" app:menu="@menu/menu_bottom_navigation"
+            app:itemTextAppearanceActive="@style/CourseSchedule.NavigationLabel" app:itemTextAppearanceInactive="@style/CourseSchedule.NavigationLabel"
+            app:itemPaddingTop="12dp" app:itemPaddingBottom="12dp" />
+    </com.courseschedule.ui.ScheduleRootLayout>
     <include android:id="@+id/historyPanel" layout="@layout/drawer_assistant_history"
         android:layout_width="320dp" android:layout_height="match_parent" android:layout_gravity="start" />
 </androidx.drawerlayout.widget.DrawerLayout>

@@ -53,7 +53,7 @@ class TodoNavigationMotionTest {
     private val instrumentation = InstrumentationRegistry.getInstrumentation()
     private val context = instrumentation.targetContext
     private val database by lazy { AppDatabase.getDatabase(context) }
-    private val ids = listOf(R.id.nav_home, R.id.nav_study, R.id.nav_import, R.id.nav_settings)
+    private val ids = listOf(R.id.nav_home, R.id.nav_study, R.id.nav_assistant, R.id.nav_import, R.id.nav_settings)
 
     private suspend fun fixture(block: suspend (Semester) -> Unit) {
         val old = database.semesterDao().getCurrentSemesterSync()
@@ -279,14 +279,14 @@ class TodoNavigationMotionTest {
         }
     }
 
-    @Test fun allFourPagesKeepIdenticalNavigationGeometryAfterRepeatedSwitches(): Unit = runBlocking {
+    @Test fun allFivePagesKeepIdenticalNavigationGeometryAfterRepeatedSwitches(): Unit = runBlocking {
         fixture { semester ->
             ActivityScenario.launch(MainActivity::class.java).use {
                 settle()
                 var baseline = emptyList<Int>()
                 val observations = mutableListOf<List<Int>>()
                 onView(withId(R.id.bottomNavigation)).check { view, _ -> baseline = geometry(view as BottomNavigationView) }
-                for (destination in listOf(R.id.nav_study, R.id.nav_import, R.id.nav_study, R.id.nav_settings, R.id.nav_study, R.id.nav_home)) {
+                for (destination in listOf(R.id.nav_study, R.id.nav_assistant, R.id.nav_import, R.id.nav_assistant, R.id.nav_settings, R.id.nav_study, R.id.nav_home)) {
                     onView(withId(destination)).perform(click())
                     settle()
                     onView(withId(R.id.bottomNavigation)).check { view, _ ->
@@ -357,7 +357,7 @@ class TodoNavigationMotionTest {
                     scenario.onActivity {
                         checking = false
                         assertTrue("Actual display frames must be sampled", samples.size > 6)
-                        if (ValueAnimator.areAnimatorsEnabled()) assertTrue("All four vector animations must actually run", animated.all { it })
+                        if (ValueAnimator.areAnimatorsEnabled()) assertTrue("All five vector animations must actually run", animated.all { it })
                         assertTrue("The icon container must stay fixed while vector parts animate", samples.all { row -> row.chunked(4).all { it == listOf(0f, 1f, 0f, 0f) } })
                         assertTrue(failures.take(4).joinToString(), failures.isEmpty())
                         icons().forEachIndexed { index, icon ->
@@ -365,7 +365,7 @@ class TodoNavigationMotionTest {
                             assertEquals("Each final icon must match its original silhouette and tint", restingPixels[index], pixels(icon))
                         }
                         proof("icon-frames", mapOf("frames" to samples.size, "navigationDrift" to failures.size, "containerTransforms" to samples,
-                            "motions" to listOf("calendar page fold", "check and line stroke reveal", "arrow upload with static tray", "gear step with settle")))
+                            "motions" to listOf("calendar page fold", "check and line stroke reveal", "chat sparkle", "arrow upload with static tray", "gear step with settle")))
                     }
                 } finally {
                     scenario.onActivity { checking = false; Choreographer.getInstance().removeFrameCallback(observer) }

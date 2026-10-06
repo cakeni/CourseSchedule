@@ -50,10 +50,10 @@ fun View.installPressScale(pressedScale: Float = 0.98f) {
     }
 }
 
-fun BottomNavigationView.selectItemWithoutAnimation(@IdRes itemId: Int) {
+fun BottomNavigationView.selectItemWithoutAnimation(@IdRes itemId: Int, animateCapsule: Boolean = true) {
     selectedItemId = itemId
     (getChildAt(0) as? ViewGroup)?.let(TransitionManager::endTransitions)
-    ReferenceNavigation.select(this)
+    ReferenceNavigation.select(this, animate = animateCapsule)
 }
 
 fun BottomNavigationView.stabilizeActiveIndicatorSize() {
@@ -76,6 +76,7 @@ fun View?.playNavigationMotion() {
     val assets = when (item.id) {
         R.id.nav_home -> R.drawable.ic_schedule to R.drawable.avd_nav_schedule
         R.id.nav_study -> R.drawable.ic_study_navigation to R.drawable.avd_nav_todo
+        R.id.nav_assistant -> R.drawable.ic_assistant_navigation to R.drawable.avd_nav_assistant
         R.id.nav_import -> R.drawable.ic_import to R.drawable.avd_nav_import
         R.id.nav_settings -> R.drawable.ic_settings to R.drawable.avd_nav_settings
         else -> return

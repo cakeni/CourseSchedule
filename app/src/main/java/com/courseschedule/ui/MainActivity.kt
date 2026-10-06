@@ -268,6 +268,11 @@ class MainActivity : AppCompatActivity() {
                     openTab(Intent(this, StudyTasksActivity::class.java).putExtra(StudyTasksActivity.EXTRA_PRIMARY_PAGE, true))
                     true
                 }
+                R.id.nav_assistant -> {
+                    openTab(Intent(this, CourseAssistantActivity::class.java)
+                        .putExtra(CourseAssistantActivity.EXTRA_DISPLAYED_WEEK, currentWeek))
+                    true
+                }
                 R.id.nav_import -> {
                     openTab(Intent(this, ImportActivity::class.java))
                     true
@@ -437,6 +442,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun openTab(intent: Intent) {
+        intent.putExtra(CourseAssistantActivity.EXTRA_DISPLAYED_WEEK, currentWeek)
         startActivity(intent)
         overridePendingTransition(0, 0)
     }
