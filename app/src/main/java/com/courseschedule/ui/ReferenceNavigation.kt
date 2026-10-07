@@ -29,7 +29,9 @@ internal class ReferenceNavigation(private val bar: BottomNavigationView) : Draw
                 override fun onViewDetachedFromWindow(v: View) { capsule.animation?.cancel() }
             })
         }
-        fun select(bar: BottomNavigationView) { bar.doOnLayout { (bar.getTag(R.id.reference_navigation) as? ReferenceNavigation)?.move() } }
+        fun select(bar: BottomNavigationView, animate: Boolean = true) {
+            bar.doOnLayout { (bar.getTag(R.id.reference_navigation) as? ReferenceNavigation)?.move(animate) }
+        }
     }
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val rect = RectF()
@@ -44,13 +46,13 @@ internal class ReferenceNavigation(private val bar: BottomNavigationView) : Draw
     private var animation: ValueAnimator? = null
     private var gradient: Shader? = null
 
-    private fun move() {
+    private fun move(animate: Boolean = true) {
         val icon = bar.findViewById<View>(bar.selectedItemId)?.findViewById<View>(MaterialR.id.navigation_bar_item_icon_view) ?: return
         val bounds = Rect(0, 0, icon.width, icon.height)
         bar.offsetDescendantRectToMyCoords(icon, bounds)
         centerY = bounds.exactCenterY()
         val next = bounds.exactCenterX() / bar.width
-        if (target == next && animation?.isRunning == true && owner == generation) return
+        if (animate && target == next && animation?.isRunning == true && owner == generation) return
         animation?.cancel()
         target = next
         position = lastPosition ?: next
@@ -59,7 +61,7 @@ internal class ReferenceNavigation(private val bar: BottomNavigationView) : Draw
         val density = bar.resources.displayMetrics.density
         gradient = LinearGradient(0f, centerY - 17 * density, 0f, centerY + 17 * density,
             intArrayOf(top, color, color), floatArrayOf(0f, .35f, 1f), Shader.TileMode.CLAMP)
-        if (!ValueAnimator.areAnimatorsEnabled() || kotlin.math.abs(position - next) < .001f) {
+        if (!animate || !ValueAnimator.areAnimatorsEnabled() || kotlin.math.abs(position - next) < .001f) {
             position = next; lastPosition = next; stretch = 0f; invalidateSelf(); return
         }
         val start = position

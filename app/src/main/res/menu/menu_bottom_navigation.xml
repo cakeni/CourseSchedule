@@ -8,10 +8,12 @@
 
     <item android:id="@+id/nav_study" android:icon="@drawable/ic_study_navigation" android:title="@string/study_tab" />
 
+    <item android:id="@+id/nav_assistant" android:icon="@drawable/ic_assistant_navigation" android:title="@string/assistant_tab" />
+
     <item
         android:id="@+id/nav_import"
         android:icon="@drawable/ic_import"
-        android:title="@string/import_course" />
+        android:title="@string/import_tab" />
 
     <item
         android:id="@+id/nav_settings"

@@ -21,5 +21,6 @@ internal object ScheduleReturnMotion {
     }
 
     fun accepts(source: String?): Boolean =
-        source == ScheduleReturnSource.SETTINGS.name || source == ScheduleReturnSource.IMPORT.name || source == ScheduleReturnSource.TODO.name
+        source == ScheduleReturnSource.SETTINGS.name || source == ScheduleReturnSource.IMPORT.name ||
+            source == ScheduleReturnSource.TODO.name || source == ScheduleReturnSource.ASSISTANT.name
 }

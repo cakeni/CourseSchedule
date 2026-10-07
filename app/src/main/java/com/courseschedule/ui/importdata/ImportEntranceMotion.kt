@@ -85,7 +85,7 @@ internal class ImportEntranceMotion(private val binding: ActivityImportBinding) 
 
             frame(0f)
             animation = ValueAnimator.ofFloat(0f, entryDuration).apply {
-                duration = entryDuration.toLong()
+                duration = (entryDuration * .85f).toLong()
                 interpolator = LinearInterpolator()
                 addUpdateListener { frame(it.animatedValue as Float) }
                 addListener(object : AnimatorListenerAdapter() {

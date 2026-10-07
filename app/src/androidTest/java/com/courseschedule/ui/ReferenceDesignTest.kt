@@ -267,7 +267,7 @@ class ReferenceDesignTest {
             ActivityScenario.launch(MainActivity::class.java).use {
                 awaitNavigation(R.id.nav_home)
                 settle(650)
-                for ((id, name) in listOf(R.id.nav_study to "todo-navigation", R.id.nav_import to "import",
+                for ((id, name) in listOf(R.id.nav_study to "todo-navigation", R.id.nav_assistant to "assistant-navigation", R.id.nav_import to "import",
                     R.id.nav_settings to "settings", R.id.nav_home to "navigation-return")) {
                     onView(withId(id)).perform(click())
                     awaitNavigation(id)

@@ -134,7 +134,7 @@ class ImportActivity : AppCompatActivity() {
         binding.cardImportAssistant.setOnClickListener {
             importEntrance.settle()
             startActivity(Intent(this, CourseAssistantActivity::class.java)
-                .putExtra(CourseAssistantActivity.EXTRA_DISPLAYED_WEEK, courseViewModel.currentWeek.value ?: 1))
+                .putExtra(CourseAssistantActivity.EXTRA_DISPLAYED_WEEK, intent.getIntExtra(CourseAssistantActivity.EXTRA_DISPLAYED_WEEK, courseViewModel.currentWeek.value ?: 1)))
         }
         binding.cardImportSchool.installPressScale()
         binding.cardImportJson.installPressScale()
@@ -162,7 +162,8 @@ class ImportActivity : AppCompatActivity() {
                     true
                 }
                 R.id.nav_study -> {
-                    startActivity(Intent(this, StudyTasksActivity::class.java).putExtra(StudyTasksActivity.EXTRA_PRIMARY_PAGE, true))
+                    startActivity(Intent(this, StudyTasksActivity::class.java)
+                        .putExtra(CourseAssistantActivity.EXTRA_DISPLAYED_WEEK, intent.getIntExtra(CourseAssistantActivity.EXTRA_DISPLAYED_WEEK, 1)).putExtra(StudyTasksActivity.EXTRA_PRIMARY_PAGE, true))
                     overridePendingTransition(0, 0)
                     finish()
                     overridePendingTransition(0, 0)
@@ -172,8 +173,17 @@ class ImportActivity : AppCompatActivity() {
                     itemView.playNavigationMotion()
                     true
                 }
+                R.id.nav_assistant -> {
+                    startActivity(Intent(this, CourseAssistantActivity::class.java)
+                        .putExtra(CourseAssistantActivity.EXTRA_DISPLAYED_WEEK, intent.getIntExtra(CourseAssistantActivity.EXTRA_DISPLAYED_WEEK, courseViewModel.currentWeek.value ?: 1)))
+                    overridePendingTransition(0, 0)
+                    finish()
+                    overridePendingTransition(0, 0)
+                    true
+                }
                 R.id.nav_settings -> {
-                    startActivity(Intent(this, SettingsActivity::class.java))
+                    startActivity(Intent(this, SettingsActivity::class.java)
+                        .putExtra(CourseAssistantActivity.EXTRA_DISPLAYED_WEEK, intent.getIntExtra(CourseAssistantActivity.EXTRA_DISPLAYED_WEEK, 1)))
                     overridePendingTransition(0, 0)
                     finish()
                     overridePendingTransition(0, 0)

@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="assistant_tab">助手</string>
+    <string name="import_tab">导入</string>
     <string name="assistant_view_queried_courses">查看课程详情</string>
     <string name="assistant_select_queried_course">选择课程查看详情</string>
     <string name="assistant_choose_target_title">请选择课程安排</string>
@@ -367,8 +369,8 @@
     <string name="about_message">晴课表 v%1$s\n\n专注于日常排课与查看，支持周视图、课程提醒、Excel 与文本文件导入，以及 JSON 数据导出。</string>
     <string name="reminder_status_loading">正在检查提醒状态…</string>
     <string name="reminder_status_off">课程提醒已暂停；开启后按每门课程的设置恢复。</string>
-    <string name="reminder_status_notification_blocked">系统通知或课程通知渠道已关闭，点击设置。</string>
-    <string name="reminder_status_inexact">未允许精确提醒，休眠时可能延迟，点击授权。</string>
+    <string name="reminder_status_notification_blocked">系统通知或课程通知渠道已关闭，请开启通知权限。</string>
+    <string name="reminder_status_inexact">精确提醒未开启，休眠时提醒可能延迟。</string>
     <string name="reminder_status_ready">通知与精确提醒均已允许。</string>
     <string name="reminder_course_count">本学期 %1$d 条课程记录，%2$d 条已开启提醒。</string>
     <string name="reminder_next_time">下次提醒：%1$s</string>
@@ -383,6 +385,7 @@
     <string name="reminder_choose_default">请先选择一个提前提醒时间。</string>
     <string name="reminder_applied">已更新 %1$d 条课程的提醒设置。</string>
     <string name="reminder_settings_title">提醒权限</string>
+    <string name="reminder_permissions_action">管理提醒权限</string>
     <string name="reminder_notification_settings">系统通知设置</string>
     <string name="reminder_exact_settings">精确闹钟设置</string>
     <string name="reminder_settings_unavailable">无法打开该设置，请在系统应用设置中检查权限。</string>

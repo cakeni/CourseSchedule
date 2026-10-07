@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android" android:drawable="@drawable/nav_assistant_parts">
+    <target android:name="spark" android:animation="@animator/nav_assistant_spark" />
+</animated-vector>

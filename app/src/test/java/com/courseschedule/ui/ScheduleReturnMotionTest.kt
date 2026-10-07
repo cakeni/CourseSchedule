@@ -8,6 +8,7 @@ class ScheduleReturnMotionTest {
         assertTrue(ScheduleReturnMotion.accepts("SETTINGS"))
         assertTrue(ScheduleReturnMotion.accepts("IMPORT"))
         assertTrue(ScheduleReturnMotion.accepts("TODO"))
+        assertTrue(ScheduleReturnMotion.accepts("ASSISTANT"))
         listOf(null, "", "HOME", "RESUME", "REFRESH", "WEEK", "DETAIL").forEach {
             assertFalse(ScheduleReturnMotion.accepts(it))
         }

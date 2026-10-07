@@ -1,0 +1,22 @@
+{
+  "versionName": "1.0.68",
+  "versionCode": 69,
+  "baseCommit": "041c6af4629a375a14595c62951fc91961f9d460",
+  "apk": "qing-course-1.0.68.apk",
+  "apkSha256": "6e2ce991f780f18485aa4a5ba02d22e040fa214fa6448ec195d5b5ecd1ca60aa",
+  "apkSizeBytes": 25153398,
+  "sourceFilesVerified": 399,
+  "unitTests": {
+    "tests": 255,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1
+  },
+  "unitTestsPassed": 254,
+  "nativeTestsPassed": 10,
+  "lintErrors": 0,
+  "lintWarnings": 285,
+  "navigationFrames": 177,
+  "maximumCapsuleDriftDp": 0.1904762,
+  "gearFeedbackStoppedBeforeThemeSnapshot": true
+}
